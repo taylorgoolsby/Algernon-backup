@@ -1,117 +1,79 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useState } from 'react';
+import { SafeAreaView, StyleSheet, View, Text, TextInput, Button } from 'react-native';
+import { NativeModules } from 'react-native';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const { FaissBridge } = NativeModules;
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const App = () => {
+  const [vector, setVector] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  const handleAddVector = () => {
+    const vectorArray = vector.split(',').map(Number);
+    FaissBridge.addVectors([vectorArray])
+      .then(() => {
+        alert('Vector added successfully!');
+      })
+      .catch((error) => {
+        console.error('Error adding vector:', error);
+        alert('Failed to add vector.');
+      });
+  };
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  const handleSearchVector = () => {
+    const queryVector = vector.split(',').map(Number);
+    FaissBridge.searchVectors(queryVector, 5) // Let's say we want the top 5 results
+      .then((results) => {
+        setSearchResults(results);
+        console.log('Search results:', results);
+      })
+      .catch((error) => {
+        console.error('Error searching for vector:', error);
+        alert('Failed to search for vector.');
+      });
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          onChangeText={setVector}
+          value={vector}
+          placeholder="Enter a vector (e.g., 1.0,2.0,3.0)"
+          keyboardType="default"
+        />
+        <Button title="Add Vector" onPress={handleAddVector} />
+        <Button title="Search" onPress={handleSearchVector} />
+      </View>
+      <View style={styles.resultsContainer}>
+        <Text>Search Results:</Text>
+        {searchResults.map((result, index) => (
+          <Text key={index}>{JSON.stringify(result)}</Text>
+        ))}
+      </View>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  inputContainer: {
+    margin: 20,
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
+    width: 200,
   },
-  highlight: {
-    fontWeight: '700',
+  resultsContainer: {
+    marginTop: 20,
   },
 });
 
