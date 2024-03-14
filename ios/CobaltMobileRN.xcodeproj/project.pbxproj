@@ -14,7 +14,28 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		7699B88040F8A987B510C191 /* libPods-CobaltMobileRN-CobaltMobileRNTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-CobaltMobileRN-CobaltMobileRNTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		8CACCE4F2BA29DD2004643C2 /* Evaluate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE472BA29DD2004643C2 /* Evaluate.swift */; };
+		8CACCE502BA29DD2004643C2 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE482BA29DD2004643C2 /* Configuration.swift */; };
+		8CACCE512BA29DD2004643C2 /* Load.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE4A2BA29DD2004643C2 /* Load.swift */; };
+		8CACCE522BA29DD2004643C2 /* Tokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE4B2BA29DD2004643C2 /* Tokenizer.swift */; };
+		8CACCE532BA29DD2004643C2 /* LLMModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE4C2BA29DD2004643C2 /* LLMModel.swift */; };
+		8CACCE542BA29DD2004643C2 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE4D2BA29DD2004643C2 /* Models.swift */; };
+		8CACCE552BA29DD2004643C2 /* Phi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE4E2BA29DD2004643C2 /* Phi.swift */; };
+		8CACCE582BA2BB58004643C2 /* Transformers in Frameworks */ = {isa = PBXBuildFile; productRef = 8CACCE572BA2BB58004643C2 /* Transformers */; };
+		8CACCE5A2BA2BC32004643C2 /* Llama.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE592BA2BC32004643C2 /* Llama.swift */; };
+		8CACCE5E2BA2BC50004643C2 /* Gemma.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE5B2BA2BC50004643C2 /* Gemma.swift */; };
+		8CACCE5F2BA2BC50004643C2 /* Starcoder2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE5C2BA2BC50004643C2 /* Starcoder2.swift */; };
+		8CACCE602BA2BC50004643C2 /* Qwen2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE5D2BA2BC50004643C2 /* Qwen2.swift */; };
 		8CFA35FD2BA18D80009546C7 /* FaissBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CFA35FC2BA18D80009546C7 /* FaissBridge.m */; };
+		8CFA36002BA1A408009546C7 /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA35FF2BA1A408009546C7 /* MLX */; };
+		8CFA36022BA1A408009546C7 /* MLXFFT in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA36012BA1A408009546C7 /* MLXFFT */; };
+		8CFA36042BA1A408009546C7 /* MLXLinalg in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA36032BA1A408009546C7 /* MLXLinalg */; };
+		8CFA36062BA1A408009546C7 /* MLXNN in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA36052BA1A408009546C7 /* MLXNN */; };
+		8CFA36082BA1A408009546C7 /* MLXOptimizers in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA36072BA1A408009546C7 /* MLXOptimizers */; settings = {ATTRIBUTES = (Required, ); }; };
+		8CFA360A2BA1A408009546C7 /* MLXRandom in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA36092BA1A408009546C7 /* MLXRandom */; };
+		8CFA36232BA291D4009546C7 /* LLMNativeModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CFA36222BA291D4009546C7 /* LLMNativeModule.swift */; };
+		8CFA36252BA29209009546C7 /* LLMNativeModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CFA36242BA29209009546C7 /* LLMNativeModule.m */; };
+		8CFA36282BA299C9009546C7 /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA36272BA299C9009546C7 /* AsyncAlgorithms */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,8 +65,23 @@
 		5DCACB8F33CDC322A6C60F78 /* libPods-CobaltMobileRN.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-CobaltMobileRN.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = CobaltMobileRN/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-CobaltMobileRN-CobaltMobileRNTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CobaltMobileRN-CobaltMobileRNTests.release.xcconfig"; path = "Target Support Files/Pods-CobaltMobileRN-CobaltMobileRNTests/Pods-CobaltMobileRN-CobaltMobileRNTests.release.xcconfig"; sourceTree = "<group>"; };
+		8CACCE472BA29DD2004643C2 /* Evaluate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Evaluate.swift; sourceTree = "<group>"; };
+		8CACCE482BA29DD2004643C2 /* Configuration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
+		8CACCE4A2BA29DD2004643C2 /* Load.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Load.swift; sourceTree = "<group>"; };
+		8CACCE4B2BA29DD2004643C2 /* Tokenizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tokenizer.swift; sourceTree = "<group>"; };
+		8CACCE4C2BA29DD2004643C2 /* LLMModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LLMModel.swift; sourceTree = "<group>"; };
+		8CACCE4D2BA29DD2004643C2 /* Models.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		8CACCE4E2BA29DD2004643C2 /* Phi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Phi.swift; sourceTree = "<group>"; };
+		8CACCE592BA2BC32004643C2 /* Llama.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Llama.swift; sourceTree = "<group>"; };
+		8CACCE5B2BA2BC50004643C2 /* Gemma.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Gemma.swift; sourceTree = "<group>"; };
+		8CACCE5C2BA2BC50004643C2 /* Starcoder2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Starcoder2.swift; sourceTree = "<group>"; };
+		8CACCE5D2BA2BC50004643C2 /* Qwen2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Qwen2.swift; sourceTree = "<group>"; };
+		8CACCE612BA2C3EF004643C2 /* CobaltMobileRNDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = CobaltMobileRNDebug.entitlements; path = CobaltMobileRN/CobaltMobileRNDebug.entitlements; sourceTree = "<group>"; };
 		8CFA35FB2BA18D80009546C7 /* FaissBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FaissBridge.h; sourceTree = "<group>"; };
 		8CFA35FC2BA18D80009546C7 /* FaissBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FaissBridge.m; sourceTree = "<group>"; };
+		8CFA36172BA286B2009546C7 /* CobaltMobileRN-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CobaltMobileRN-Bridging-Header.h"; sourceTree = "<group>"; };
+		8CFA36222BA291D4009546C7 /* LLMNativeModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMNativeModule.swift; sourceTree = "<group>"; };
+		8CFA36242BA29209009546C7 /* LLMNativeModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LLMNativeModule.m; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -62,7 +98,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8CFA36082BA1A408009546C7 /* MLXOptimizers in Frameworks */,
+				8CFA36282BA299C9009546C7 /* AsyncAlgorithms in Frameworks */,
+				8CFA36002BA1A408009546C7 /* MLX in Frameworks */,
+				8CFA36042BA1A408009546C7 /* MLXLinalg in Frameworks */,
 				0C80B921A6F3F58F76C31292 /* libPods-CobaltMobileRN.a in Frameworks */,
+				8CFA36062BA1A408009546C7 /* MLXNN in Frameworks */,
+				8CACCE582BA2BB58004643C2 /* Transformers in Frameworks */,
+				8CFA36022BA1A408009546C7 /* MLXFFT in Frameworks */,
+				8CFA360A2BA1A408009546C7 /* MLXRandom in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,6 +133,9 @@
 		13B07FAE1A68108700A75B9A /* CobaltMobileRN */ = {
 			isa = PBXGroup;
 			children = (
+				8CACCE612BA2C3EF004643C2 /* CobaltMobileRNDebug.entitlements */,
+				8CFA36452BA29D57009546C7 /* LLM */,
+				8CFA36172BA286B2009546C7 /* CobaltMobileRN-Bridging-Header.h */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -97,6 +144,8 @@
 				13B07FB71A68108700A75B9A /* main.m */,
 				8CFA35FB2BA18D80009546C7 /* FaissBridge.h */,
 				8CFA35FC2BA18D80009546C7 /* FaissBridge.m */,
+				8CFA36222BA291D4009546C7 /* LLMNativeModule.swift */,
+				8CFA36242BA29209009546C7 /* LLMNativeModule.m */,
 			);
 			name = CobaltMobileRN;
 			sourceTree = "<group>";
@@ -140,6 +189,24 @@
 				00E356EE1AD99517003FC87E /* CobaltMobileRNTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		8CFA36452BA29D57009546C7 /* LLM */ = {
+			isa = PBXGroup;
+			children = (
+				8CACCE482BA29DD2004643C2 /* Configuration.swift */,
+				8CACCE472BA29DD2004643C2 /* Evaluate.swift */,
+				8CACCE592BA2BC32004643C2 /* Llama.swift */,
+				8CACCE4C2BA29DD2004643C2 /* LLMModel.swift */,
+				8CACCE5B2BA2BC50004643C2 /* Gemma.swift */,
+				8CACCE5D2BA2BC50004643C2 /* Qwen2.swift */,
+				8CACCE5C2BA2BC50004643C2 /* Starcoder2.swift */,
+				8CACCE4A2BA29DD2004643C2 /* Load.swift */,
+				8CACCE4D2BA29DD2004643C2 /* Models.swift */,
+				8CACCE4E2BA29DD2004643C2 /* Phi.swift */,
+				8CACCE4B2BA29DD2004643C2 /* Tokenizer.swift */,
+			);
+			name = LLM;
 			sourceTree = "<group>";
 		};
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
@@ -194,6 +261,16 @@
 			dependencies = (
 			);
 			name = CobaltMobileRN;
+			packageProductDependencies = (
+				8CFA35FF2BA1A408009546C7 /* MLX */,
+				8CFA36012BA1A408009546C7 /* MLXFFT */,
+				8CFA36032BA1A408009546C7 /* MLXLinalg */,
+				8CFA36052BA1A408009546C7 /* MLXNN */,
+				8CFA36072BA1A408009546C7 /* MLXOptimizers */,
+				8CFA36092BA1A408009546C7 /* MLXRandom */,
+				8CFA36272BA299C9009546C7 /* AsyncAlgorithms */,
+				8CACCE572BA2BB58004643C2 /* Transformers */,
+			);
 			productName = CobaltMobileRN;
 			productReference = 13B07F961A680F5B00A75B9A /* CobaltMobileRN.app */;
 			productType = "com.apple.product-type.application";
@@ -211,7 +288,7 @@
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
 					13B07F861A680F5B00A75B9A = {
-						LastSwiftMigration = 1120;
+						LastSwiftMigration = 1500;
 					};
 				};
 			};
@@ -224,6 +301,11 @@
 				Base,
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
+			packageReferences = (
+				8CFA35FE2BA1A408009546C7 /* XCRemoteSwiftPackageReference "mlx-swift" */,
+				8CFA36262BA299C9009546C7 /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
+				8CACCE562BA2BB58004643C2 /* XCRemoteSwiftPackageReference "swift-transformers" */,
+			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -397,9 +479,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8CACCE542BA29DD2004643C2 /* Models.swift in Sources */,
+				8CFA36232BA291D4009546C7 /* LLMNativeModule.swift in Sources */,
+				8CACCE532BA29DD2004643C2 /* LLMModel.swift in Sources */,
+				8CACCE602BA2BC50004643C2 /* Qwen2.swift in Sources */,
+				8CACCE5E2BA2BC50004643C2 /* Gemma.swift in Sources */,
 				8CFA35FD2BA18D80009546C7 /* FaissBridge.m in Sources */,
+				8CACCE502BA29DD2004643C2 /* Configuration.swift in Sources */,
+				8CACCE4F2BA29DD2004643C2 /* Evaluate.swift in Sources */,
+				8CFA36252BA29209009546C7 /* LLMNativeModule.m in Sources */,
+				8CACCE512BA29DD2004643C2 /* Load.swift in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
+				8CACCE552BA29DD2004643C2 /* Phi.swift in Sources */,
+				8CACCE5F2BA2BC50004643C2 /* Starcoder2.swift in Sources */,
+				8CACCE522BA29DD2004643C2 /* Tokenizer.swift in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+				8CACCE5A2BA2BC32004643C2 /* Llama.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -418,6 +513,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5B7EB9410499542E8C5724F5 /* Pods-CobaltMobileRN-CobaltMobileRNTests.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -445,6 +541,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 89C6BE57DB24E9ADA2F236DE /* Pods-CobaltMobileRN-CobaltMobileRNTests.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				INFOPLIST_FILE = CobaltMobileRNTests/Info.plist;
@@ -471,10 +568,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = CobaltMobileRN/CobaltMobileRNDebug.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = TY6EV5VRJ3;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = CobaltMobileRN/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -487,6 +586,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = CobaltMobileRN;
+				SWIFT_OBJC_BRIDGING_HEADER = "CobaltMobileRN-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -502,6 +602,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = TY6EV5VRJ3;
 				INFOPLIST_FILE = CobaltMobileRN/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -514,6 +615,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = CobaltMobileRN;
+				SWIFT_OBJC_BRIDGING_HEADER = "CobaltMobileRN-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -595,6 +697,7 @@
 				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "CobaltMobileRN-Bridging-Header.h";
 				USE_HERMES = true;
 			};
 			name = Debug;
@@ -667,6 +770,7 @@
 				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "CobaltMobileRN-Bridging-Header.h";
 				USE_HERMES = true;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -703,6 +807,76 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8CACCE562BA2BB58004643C2 /* XCRemoteSwiftPackageReference "swift-transformers" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/huggingface/swift-transformers";
+			requirement = {
+				kind = exactVersion;
+				version = 0.1.2;
+			};
+		};
+		8CFA35FE2BA1A408009546C7 /* XCRemoteSwiftPackageReference "mlx-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ml-explore/mlx-swift";
+			requirement = {
+				kind = revision;
+				revision = 948000ceaa27c343f4dd5ce40f727f221bf45c6e;
+			};
+		};
+		8CFA36262BA299C9009546C7 /* XCRemoteSwiftPackageReference "swift-async-algorithms" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-async-algorithms.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8CACCE572BA2BB58004643C2 /* Transformers */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8CACCE562BA2BB58004643C2 /* XCRemoteSwiftPackageReference "swift-transformers" */;
+			productName = Transformers;
+		};
+		8CFA35FF2BA1A408009546C7 /* MLX */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8CFA35FE2BA1A408009546C7 /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLX;
+		};
+		8CFA36012BA1A408009546C7 /* MLXFFT */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8CFA35FE2BA1A408009546C7 /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXFFT;
+		};
+		8CFA36032BA1A408009546C7 /* MLXLinalg */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8CFA35FE2BA1A408009546C7 /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXLinalg;
+		};
+		8CFA36052BA1A408009546C7 /* MLXNN */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8CFA35FE2BA1A408009546C7 /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXNN;
+		};
+		8CFA36072BA1A408009546C7 /* MLXOptimizers */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8CFA35FE2BA1A408009546C7 /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXOptimizers;
+		};
+		8CFA36092BA1A408009546C7 /* MLXRandom */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8CFA35FE2BA1A408009546C7 /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXRandom;
+		};
+		8CFA36272BA299C9009546C7 /* AsyncAlgorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8CFA36262BA299C9009546C7 /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
+			productName = AsyncAlgorithms;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 83CBB9F71A601CBA00E9B192 /* Project object */;
 }

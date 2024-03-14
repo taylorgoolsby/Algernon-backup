@@ -1,48 +1,66 @@
-import React, { useEffect } from 'react';
-import { View, Text } from 'react-native';
-import SQLite from 'react-native-sqlite-storage';
+// App.tsx
 
-SQLite.DEBUG(true);
-SQLite.enablePromise(true);
-
-const database_name = "Test.db";
-const database_version = "1.0";
-const database_displayname = "SQLite Test Database";
-const database_size = 200000;
-
-let db;
+import React, { useState } from 'react';
+import {
+  SafeAreaView,
+  StyleSheet,
+  TextInput,
+  Text,
+  Button,
+  View,
+  NativeModules
+} from 'react-native';
 
 const App = () => {
-  useEffect(() => {
-    initializeDB();
-  }, []);
+  const [text, setText] = useState('');
+  const [response, setResponse] = useState('');
 
-  const initializeDB = async () => {
+  const generateResponse = async () => {
     try {
-      db = await SQLite.openDatabase(
-        database_name,
-        database_version,
-        database_displayname,
-        database_size
-      );
-      await db.executeSql('CREATE TABLE IF NOT EXISTS Users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)');
-      await db.executeSql('INSERT INTO Users (name) VALUES (?)', ['John Doe']);
-      const results = await db.executeSql('SELECT * FROM Users');
-      const rows = results[0].rows;
-      for (let i = 0; i < rows.length; i++) {
-        const user = rows.item(i);
-        console.log(`User: ${user.name}`);
-      }
+      const LLMNativeModule = NativeModules.LLMNativeModule;
+      const generatedResponse = await LLMNativeModule.generateResponse(text);
+      setResponse(generatedResponse);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
   return (
-    <View>
-      <Text>Check your console for database operations results.</Text>
-    </View>
+    <SafeAreaView style={styles.container}>
+      <TextInput
+        style={styles.input}
+        onChangeText={setText}
+        value={text}
+        placeholder="Type here..."
+      />
+      <Button title="Generate" onPress={generateResponse} />
+      <View style={styles.responseContainer}>
+        <Text style={styles.responseText}>{response}</Text>
+      </View>
+    </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    marginHorizontal: 16,
+  },
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
+  },
+  responseContainer: {
+    marginTop: 20,
+    backgroundColor: 'aliceblue',
+    padding: 10,
+  },
+  responseText: {
+    fontSize: 16,
+  },
+});
 
 export default App;
