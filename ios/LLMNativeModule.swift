@@ -18,20 +18,20 @@ class LLMNativeModule: NSObject, RCTBridgeModule {
   
     @objc(generateResponse:resolver:rejecter:)
     func generateResponse(fromText text: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
-        #if DEBUG
+
         // In debug build, immediately resolve with a debug message
         resolve("MLX is not available in debug mode")
-        #else
+        
         // Use a Task to bridge async/await with the promise-based callback
-        Task {
-            do {
-                let response = try await runModelAsync(fromText: text)
-                resolve(response)
-            } catch {
-                reject("ModelError", "Failed to generate response: \(error.localizedDescription)", error)
-            }
-        }
-        #endif
+//        Task {
+//            do {
+//                let response = try await runModelAsync(fromText: text)
+//                resolve(response)
+//            } catch {
+//                reject("ModelError", "Failed to generate response: \(error.localizedDescription)", error)
+//            }
+//        }
+        
     }
   
     let modelConfiguration = ModelConfiguration.phi4bit

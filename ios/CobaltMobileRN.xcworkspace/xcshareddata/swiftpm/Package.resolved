@@ -1,11 +1,27 @@
 {
   "pins" : [
     {
+      "identity" : "faiss-mobile",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/DeveloperMindset-com/faiss-mobile",
+      "state" : {
+        "revision" : "bc775df1e598fca39f1c3588e3814e66e27430fc"
+      }
+    },
+    {
       "identity" : "mlx-swift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ml-explore/mlx-swift",
       "state" : {
         "revision" : "948000ceaa27c343f4dd5ce40f727f221bf45c6e"
+      }
+    },
+    {
+      "identity" : "openmp-mobile",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/DeveloperMindset-com/openmp-mobile",
+      "state" : {
+        "revision" : "06ebe6ac77da8e50557bfe5a5bca5a8acc7678b1"
       }
     },
     {

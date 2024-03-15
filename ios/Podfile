@@ -39,7 +39,7 @@ target 'CobaltMobileRN' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
-  pod 'FAISS_C', :git => 'https://github.com/taylorgoolsby/faiss-mobile.git'
+#   pod 'FAISS_C', :git => 'https://github.com/taylorgoolsby/faiss-mobile.git'
 
   target 'CobaltMobileRNTests' do
     inherit! :complete

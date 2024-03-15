@@ -2,7 +2,6 @@ PODS:
   - boost (1.83.0)
   - CocoaAsyncSocket (7.6.5)
   - DoubleConversion (1.1.6)
-  - FAISS_C (1.7.4)
   - FBLazyVector (0.73.6)
   - FBReactNativeSpec (0.73.6):
     - RCT-Folly (= 2022.05.16.00)
@@ -1120,7 +1119,6 @@ PODS:
 DEPENDENCIES:
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
-  - FAISS_C (from `https://github.com/taylorgoolsby/faiss-mobile.git`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - FBReactNativeSpec (from `../node_modules/react-native/React/FBReactNativeSpec`)
   - Flipper (= 0.201.0)
@@ -1215,8 +1213,6 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/boost.podspec"
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
-  FAISS_C:
-    :git: https://github.com/taylorgoolsby/faiss-mobile.git
   FBLazyVector:
     :path: "../node_modules/react-native/Libraries/FBLazyVector"
   FBReactNativeSpec:
@@ -1313,16 +1309,10 @@ EXTERNAL SOURCES:
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
-CHECKOUT OPTIONS:
-  FAISS_C:
-    :commit: 91e411d175f4411defe7b644195bf62a2ded2e00
-    :git: https://github.com/taylorgoolsby/faiss-mobile.git
-
 SPEC CHECKSUMS:
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
   DoubleConversion: fea03f2699887d960129cc54bba7e52542b6f953
-  FAISS_C: c0bafc2771b171c6ba6143d77c84aa126ae23df8
   FBLazyVector: f64d1e2ea739b4d8f7e4740cde18089cd97fe864
   FBReactNativeSpec: 9f2b8b243131565335437dba74923a8d3015e780
   Flipper: c7a0093234c4bdd456e363f2f19b2e4b27652d44
@@ -1383,6 +1373,6 @@ SPEC CHECKSUMS:
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   Yoga: 805bf71192903b20fc14babe48080582fee65a80
 
-PODFILE CHECKSUM: a4f6b72c60ae6e4a5cafe93e1dbb86fed620932a
+PODFILE CHECKSUM: e4a86d5d6ca5077c2ab4f1ef08618315c2849f8f
 
 COCOAPODS: 1.15.2

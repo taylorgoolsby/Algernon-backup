@@ -36,6 +36,9 @@
 		8CFA36232BA291D4009546C7 /* LLMNativeModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CFA36222BA291D4009546C7 /* LLMNativeModule.swift */; };
 		8CFA36252BA29209009546C7 /* LLMNativeModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CFA36242BA29209009546C7 /* LLMNativeModule.m */; };
 		8CFA36282BA299C9009546C7 /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA36272BA299C9009546C7 /* AsyncAlgorithms */; };
+		8CFD0A1D2BA3E32C0080EBE1 /* OpenMP in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFD0A1C2BA3E32C0080EBE1 /* OpenMP */; };
+		8CFD0A222BA3E6340080EBE1 /* FAISS in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFD0A212BA3E6340080EBE1 /* FAISS */; };
+		8CFD0A242BA3E6340080EBE1 /* FAISS_C in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFD0A232BA3E6340080EBE1 /* FAISS_C */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -77,6 +80,7 @@
 		8CACCE5C2BA2BC50004643C2 /* Starcoder2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Starcoder2.swift; sourceTree = "<group>"; };
 		8CACCE5D2BA2BC50004643C2 /* Qwen2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Qwen2.swift; sourceTree = "<group>"; };
 		8CACCE612BA2C3EF004643C2 /* CobaltMobileRNDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = CobaltMobileRNDebug.entitlements; path = CobaltMobileRN/CobaltMobileRNDebug.entitlements; sourceTree = "<group>"; };
+		8CDF7ACA2BA3C1E700C5F5FE /* CobaltMobileRNRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = CobaltMobileRNRelease.entitlements; path = CobaltMobileRN/CobaltMobileRNRelease.entitlements; sourceTree = "<group>"; };
 		8CFA35FB2BA18D80009546C7 /* FaissBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FaissBridge.h; sourceTree = "<group>"; };
 		8CFA35FC2BA18D80009546C7 /* FaissBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FaissBridge.m; sourceTree = "<group>"; };
 		8CFA36172BA286B2009546C7 /* CobaltMobileRN-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CobaltMobileRN-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -98,7 +102,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8CFD0A222BA3E6340080EBE1 /* FAISS in Frameworks */,
 				8CFA36082BA1A408009546C7 /* MLXOptimizers in Frameworks */,
+				8CFD0A1D2BA3E32C0080EBE1 /* OpenMP in Frameworks */,
+				8CFD0A242BA3E6340080EBE1 /* FAISS_C in Frameworks */,
 				8CFA36282BA299C9009546C7 /* AsyncAlgorithms in Frameworks */,
 				8CFA36002BA1A408009546C7 /* MLX in Frameworks */,
 				8CFA36042BA1A408009546C7 /* MLXLinalg in Frameworks */,
@@ -133,6 +140,7 @@
 		13B07FAE1A68108700A75B9A /* CobaltMobileRN */ = {
 			isa = PBXGroup;
 			children = (
+				8CDF7ACA2BA3C1E700C5F5FE /* CobaltMobileRNRelease.entitlements */,
 				8CACCE612BA2C3EF004643C2 /* CobaltMobileRNDebug.entitlements */,
 				8CFA36452BA29D57009546C7 /* LLM */,
 				8CFA36172BA286B2009546C7 /* CobaltMobileRN-Bridging-Header.h */,
@@ -270,6 +278,9 @@
 				8CFA36092BA1A408009546C7 /* MLXRandom */,
 				8CFA36272BA299C9009546C7 /* AsyncAlgorithms */,
 				8CACCE572BA2BB58004643C2 /* Transformers */,
+				8CFD0A1C2BA3E32C0080EBE1 /* OpenMP */,
+				8CFD0A212BA3E6340080EBE1 /* FAISS */,
+				8CFD0A232BA3E6340080EBE1 /* FAISS_C */,
 			);
 			productName = CobaltMobileRN;
 			productReference = 13B07F961A680F5B00A75B9A /* CobaltMobileRN.app */;
@@ -305,6 +316,8 @@
 				8CFA35FE2BA1A408009546C7 /* XCRemoteSwiftPackageReference "mlx-swift" */,
 				8CFA36262BA299C9009546C7 /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
 				8CACCE562BA2BB58004643C2 /* XCRemoteSwiftPackageReference "swift-transformers" */,
+				8CFD0A1B2BA3E32C0080EBE1 /* XCRemoteSwiftPackageReference "openmp-mobile" */,
+				8CFD0A202BA3E6340080EBE1 /* XCRemoteSwiftPackageReference "faiss-mobile" */,
 			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
@@ -573,6 +586,8 @@
 				DEVELOPMENT_TEAM = TY6EV5VRJ3;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = CobaltMobileRN/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Cobalt AI";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -584,7 +599,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = to.tgoolsby.cobalt;
 				PRODUCT_NAME = CobaltMobileRN;
 				SWIFT_OBJC_BRIDGING_HEADER = "CobaltMobileRN-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -599,9 +614,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = CobaltMobileRN/CobaltMobileRNRelease.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = TY6EV5VRJ3;
 				INFOPLIST_FILE = CobaltMobileRN/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Cobalt AI";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -613,7 +631,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = to.tgoolsby.cobalt;
 				PRODUCT_NAME = CobaltMobileRN;
 				SWIFT_OBJC_BRIDGING_HEADER = "CobaltMobileRN-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -833,6 +851,22 @@
 				version = 1.0.0;
 			};
 		};
+		8CFD0A1B2BA3E32C0080EBE1 /* XCRemoteSwiftPackageReference "openmp-mobile" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/DeveloperMindset-com/openmp-mobile";
+			requirement = {
+				kind = revision;
+				revision = 06ebe6ac77da8e50557bfe5a5bca5a8acc7678b1;
+			};
+		};
+		8CFD0A202BA3E6340080EBE1 /* XCRemoteSwiftPackageReference "faiss-mobile" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/DeveloperMindset-com/faiss-mobile";
+			requirement = {
+				kind = revision;
+				revision = bc775df1e598fca39f1c3588e3814e66e27430fc;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -875,6 +909,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8CFA36262BA299C9009546C7 /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
 			productName = AsyncAlgorithms;
+		};
+		8CFD0A1C2BA3E32C0080EBE1 /* OpenMP */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8CFD0A1B2BA3E32C0080EBE1 /* XCRemoteSwiftPackageReference "openmp-mobile" */;
+			productName = OpenMP;
+		};
+		8CFD0A212BA3E6340080EBE1 /* FAISS */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8CFD0A202BA3E6340080EBE1 /* XCRemoteSwiftPackageReference "faiss-mobile" */;
+			productName = FAISS;
+		};
+		8CFD0A232BA3E6340080EBE1 /* FAISS_C */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8CFD0A202BA3E6340080EBE1 /* XCRemoteSwiftPackageReference "faiss-mobile" */;
+			productName = FAISS_C;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
