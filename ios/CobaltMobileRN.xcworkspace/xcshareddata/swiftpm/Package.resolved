@@ -1,4 +1,5 @@
 {
+  "originHash" : "022ccc2925cb677edd3f4dddd2f15aeb78e2847be98d0d3deb9f032659d977a4",
   "pins" : [
     {
       "identity" : "faiss-mobile",
@@ -70,5 +71,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

@@ -1,55 +1,42 @@
 import React, {useState} from 'react';
-import {SafeAreaView, StyleSheet, View, Text, TouchableOpacity, NativeModules} from 'react-native';
+import {SafeAreaView, StyleSheet, TextInput, Button, Text, View} from 'react-native';
+import {NativeModules} from 'react-native';
 
-const {FaissBridge} = NativeModules;
+const {TextFeatureExtractor} = NativeModules;
 
 const App = () => {
-  const [searchResults, setSearchResults] = useState([]);
+  const [text, setText] = useState('');
+  const [feature, setFeature] = useState<number | null>(null);
 
-  const addVector = async () => {
+  const handleExtractFeatures = async () => {
     try {
-      // Example vector. Replace with your data or user input as necessary.
-      const vector = [0.1, 0.2, 0.3, Math.random()];
-      const response = await FaissBridge.addVector(vector);
-      console.log('Add Vector Response:', response);
-      alert('Vector added successfully');
+      const result = await TextFeatureExtractor.extractFeatures(text);
+      console.log("typeof result", typeof result);
+      console.log("result.length", result.length);
+      for (const i of result) {
+        console.log(i);
+      }
+      // console.log('Feature extracted:', result);
+      setFeature(result[0]); // Assuming result is an array of numbers
     } catch (error) {
-      console.error('Error adding vector:', error);
-      alert('Failed to add vector');
-    }
-  };
-
-  const searchVectors = async () => {
-    try {
-      // Example query vector. Replace with your data or user input as necessary.
-      const queryVector = [0.1, 0.2, 0.3, 0.4];
-      // Number of results you want to get back.
-      const k = 5;
-      const results = await FaissBridge.searchVectors(queryVector, k);
-      console.log('Search Results:', results);
-      setSearchResults(results);
-    } catch (error) {
-      console.error('Error searching vectors:', error);
-      alert('Failed to search vectors');
+      console.error('Failed to extract features:', error);
+      setFeature(null);
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={addVector} style={styles.button}>
-          <Text style={styles.buttonText}>Add Vector</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={searchVectors} style={styles.button}>
-          <Text style={styles.buttonText}>Search Vectors</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.resultsContainer}>
-        {searchResults.map((result, index) => (
-          <Text key={index} style={styles.resultText}>
-            Label: {result.label}, Distance: {result.distance}
-          </Text>
-        ))}
+      <TextInput
+        style={styles.input}
+        onChangeText={setText}
+        value={text}
+        placeholder="Enter some text"
+      />
+      <Button title="Extract Features" onPress={handleExtractFeatures} />
+      <View style={styles.resultContainer}>
+        {feature !== null && (
+          <Text style={styles.resultText}>First Embedding: {feature}</Text>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -60,25 +47,20 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 20,
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    marginBottom: 20,
-  },
-  button: {
-    backgroundColor: '#007bff',
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
     padding: 10,
-    margin: 10,
-    borderRadius: 5,
+    width: '100%',
   },
-  buttonText: {
-    color: '#ffffff',
-  },
-  resultsContainer: {
+  resultContainer: {
     marginTop: 20,
   },
   resultText: {
-    fontSize: 16,
+    fontSize: 18,
   },
 });
 
