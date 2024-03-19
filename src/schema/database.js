@@ -1,8 +1,9 @@
 // @flow
 
 import SQLite from 'react-native-sqlite-storage'
-import createTables from "./createTables.js";
-import VersionInterface from "./Version/VersionInterface.js";
+import createTables from './createTables.js'
+import VersionInterface from './Version/VersionInterface.js'
+import Config from '../Config.js'
 
 SQLite.enablePromise(true)
 
@@ -10,11 +11,18 @@ const databaseName = 'Cobalt.db'
 
 let db = null
 
+const RESET_DATABASE = Config.stage === 'debug' && false
+
 export async function query(queryObject: {
   sql: Array<string>,
   values: Array<string>,
-}) {
+}): any {
   try {
+    if (!db) {
+      console.error('Database not initialized')
+      return
+    }
+
     // dynamically import mysql, which is not available in production builds:
     // It is only used for debugging purposes
     // const mysql = await import('mysql')
@@ -38,6 +46,23 @@ export async function query(queryObject: {
 export function initializeDatabase() {
   Promise.resolve().then(async () => {
     try {
+      // if (RESET_DATABASE) {
+      //   console.log('Deleting database.')
+      //   await new Promise(async (resolve, reject) => {
+      //     await SQLite.deleteDatabase(
+      //       {name: databaseName, location: 'Documents'},
+      //       () => {
+      //         console.log('Database deleted.')
+      //         resolve()
+      //       },
+      //       error => {
+      //         console.error(error)
+      //         reject(error)
+      //       },
+      //     )
+      //   })
+      // }
+
       await new Promise(async (resolve, reject) => {
         db = await SQLite.openDatabase(
           {name: databaseName, location: 'Documents'},
@@ -52,7 +77,10 @@ export function initializeDatabase() {
         )
       })
 
-      const createTableStatements = createTables.split(';').filter(a => !!a).map(statement => statement.trim() + ';')
+      const createTableStatements = createTables
+        .split(';')
+        .filter(a => !!a)
+        .map(statement => statement.trim() + ';')
       for (const statement of createTableStatements) {
         await query({sql: statement, values: []})
       }
@@ -73,7 +101,7 @@ async function migrate() {
 
   await VersionInterface.insertCurrentVersion()
   const version = await VersionInterface.getCurrent()
-  console.log("version", version);
+  console.log('version', version)
   // if (version?.isMigrated) {
   //   console.log('Migration not needed.')
   //   return

@@ -13,6 +13,7 @@ export type MessageRoleType = $Keys<typeof MessageRole>
 
 export type MessageSQL = {|
   messageId: number,
+  windowId: number,
   role: MessageRoleType,
   text: string,
   completed: boolean,
@@ -34,6 +35,7 @@ export type MessageSQL = {|
 export const typeDefs: any = gql`
   type Message {
     messageId: Int @sql(primary: true, auto: true)
+    windowId: Int @sql(type: "INT", default: "0")
     role: String @sql(type: "TEXT")
     text: String @sql(type: "TEXT")
     completed: Boolean @sql(type: "INT", default: "0")

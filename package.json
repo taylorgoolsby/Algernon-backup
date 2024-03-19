@@ -11,12 +11,18 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-navigation/native": "^6.1.17",
+    "@react-navigation/native-stack": "^6.9.26",
+    "@taylorgoolsby/sql-template-tag": "5.2.0",
+    "axios": "^1.6.8",
     "graphql-tag": "^2.12.6",
     "react": "18.2.0",
     "react-native": "0.73.6",
     "react-native-device-info": "^10.13.1",
-    "react-native-sqlite-storage": "^6.0.1",
-    "@taylorgoolsby/sql-template-tag": "5.2.0"
+    "react-native-fs": "^2.20.0",
+    "react-native-safe-area-context": "^4.9.0",
+    "react-native-screens": "^3.29.0",
+    "react-native-sqlite-storage": "^6.0.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.23.9",
@@ -38,6 +44,7 @@
     "graphql-to-sql": "^4.1.10",
     "graphql-type-json": "0.3.2",
     "jest": "^29.6.3",
+    "metro-react-native-babel-preset": "^0.77.0",
     "mysql": "^2.18.1",
     "prettier": "2.8.8",
     "react-test-renderer": "18.2.0",

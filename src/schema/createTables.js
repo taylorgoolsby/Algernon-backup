@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS \`Completion\` (
 
 CREATE TABLE IF NOT EXISTS \`Message\` (
   \`messageId\` INTEGER PRIMARY KEY AUTOINCREMENT,
+  \`windowId\` INTEGER NOT NULL DEFAULT 0,
   \`role\` TEXT NOT NULL,
   \`text\` TEXT NOT NULL,
   \`completed\` INTEGER NOT NULL DEFAULT 0,

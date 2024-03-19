@@ -38,7 +38,7 @@ export default class VersionInterface {
   static async insertCurrentVersion(): Promise<void> {
     const version = getVersion()
     const sql = sqltag`
-      SELECT * FROM \`Version\`
+      SELECT * FROM Version
       WHERE version = ${version}
     `
 
