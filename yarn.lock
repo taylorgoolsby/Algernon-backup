@@ -1957,6 +1957,11 @@
   dependencies:
     "@sinonjs/commons" "^3.0.0"
 
+"@taylorgoolsby/sql-template-tag@5.2.0":
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/@taylorgoolsby/sql-template-tag/-/sql-template-tag-5.2.0.tgz#11c6aa26ca3cf18f3bdf4bb6b00233693759cf01"
+  integrity sha512-5/D4Ey471I7qorYcHE84tUIQ8lJgY5GKr2tstBScBwqqZMO5kCLufc/VWutriSsqiW6XoeK++mi05ptdJnTeBA==
+
 "@types/babel__core@^7.1.14":
   version "7.20.5"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.20.5.tgz#3df15f27ba85319caa07ba08d0721889bb39c017"
@@ -2935,11 +2940,6 @@ decamelize@^1.2.0:
   resolved "https://registry.yarnpkg.com/decamelize/-/decamelize-1.2.0.tgz#f6534d15148269b20352e7bee26f501f9a191290"
   integrity sha512-z2S+W9X73hAUUki+N+9Za2lBlun89zigOyGrsax+KUQ6wKW4ZoWpEYBkGhQjwAjjDCkWxhY0VKEhk8wzY7F5cA==
 
-decorator-cache-getter@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/decorator-cache-getter/-/decorator-cache-getter-1.0.0.tgz#ef2549229dfb8301f4f231a2457b7503567f48c4"
-  integrity sha512-yB49c5qi0govRjpe18vutEkkKzosIt2XggYSs1Qyev1TJYTh2WmLgDp0dV6VJ/6yNBRlKG+qMG80Vy4Bg0mLJw==
-
 dedent@^1.0.0:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/dedent/-/dedent-1.5.1.tgz#4f3fc94c8b711e9bb2800d185cd6ad20f2a90aff"
@@ -3792,14 +3792,19 @@ graphql-tag@^2.12.6:
   dependencies:
     tslib "^2.1.0"
 
-graphql-to-sql@^4.0.5:
-  version "4.0.5"
-  resolved "https://registry.yarnpkg.com/graphql-to-sql/-/graphql-to-sql-4.0.5.tgz#1705f394ec2f25942456612719855d88ba44a40f"
-  integrity sha512-hj0pPgmO5JBXI1pwRkwoyTDDX/J/zlvgNfW8ctvu8M6nvVislNYiEIk5MtYlZk4L3YKsLn8KPOUL8Dn1eDoydg==
+graphql-to-sql@^4.1.10:
+  version "4.1.10"
+  resolved "https://registry.yarnpkg.com/graphql-to-sql/-/graphql-to-sql-4.1.10.tgz#4a92e95dcabcf312c31984f4a4bd70a77b302549"
+  integrity sha512-e9AtuiC1EnNxzC3dB9fwodHiL0bbE7XrbEeuQ9wtKZCfZz1YRmg6I2jofVBM9zn6dOaexw1SZGHxipchGkGL8Q==
   dependencies:
     "@graphql-tools/schema" "^10.0.0"
     "@graphql-tools/utils" "^10.0.3"
     fs-extra "^7.0.0"
+
+graphql-type-json@0.3.2:
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/graphql-type-json/-/graphql-type-json-0.3.2.tgz#f53a851dbfe07bd1c8157d24150064baab41e115"
+  integrity sha512-J+vjof74oMlCWXSvt0DOf2APEdZOCdubEvGDUAlqH//VBYcOYsGgRW7Xzorr44LvkjiuvecWc8fChxuZZbChtg==
 
 graphql@^16.7.1:
   version "16.8.1"
@@ -6229,13 +6234,6 @@ sprintf-js@~1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==
-
-sql-template-tag@3.3.0:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/sql-template-tag/-/sql-template-tag-3.3.0.tgz#4ce737be7fd2bcd8f41b785b50238b753655da6e"
-  integrity sha512-NcDiNt1m1pOpXTGDp339kRPHeKTdWj9qOPLItvllcw2mgInG3+B1Qy0jXAfA685whpVGyY/Nho6v2Ob/tafhwQ==
-  dependencies:
-    decorator-cache-getter "^1.0.0"
 
 sqlstring@2.3.1:
   version "2.3.1"

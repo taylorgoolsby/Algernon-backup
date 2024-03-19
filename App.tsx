@@ -1,12 +1,25 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {SafeAreaView, StyleSheet, TextInput, Button, Text, View} from 'react-native';
 import {NativeModules} from 'react-native';
+import {initializeDatabase} from "./src/schema/database";
 
 const {TextFeatureExtractor} = NativeModules;
 
 const App = () => {
   const [text, setText] = useState('');
   const [feature, setFeature] = useState<number | null>(null);
+
+  const isInit = useRef(false);
+  useEffect(() => {
+    try {
+      if (!isInit.current) {
+        isInit.current = true;
+        initializeDatabase()
+      }
+    } catch (error) {
+      console.error('Failed to initialize:', error);
+    }
+  }, []);
 
   const handleExtractFeatures = async () => {
     try {
