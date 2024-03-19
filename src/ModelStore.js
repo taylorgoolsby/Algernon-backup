@@ -2,6 +2,7 @@
 
 import RNFS from 'react-native-fs'
 import type {ModelConfig} from './types/ModelConfig.js'
+import { makeObservable, observable } from "mobx";
 
 /*
 export type ModelConfig = {
@@ -24,12 +25,18 @@ export type EditableModelConfig = {
 
 const path = `${RNFS.DocumentDirectoryPath}/models.json`
 
-export default class ModelStore {
-  static models: Array<ModelConfig>
-  static editableModels: Array<EditableModelConfig>
-  static selectedModel: ?ModelConfig
+export class ModelStore {
+  models: Array<ModelConfig>
+  editableModels: Array<EditableModelConfig>
+  selectedModel: ?ModelConfig = null
 
-  static async save(models: Array<EditableModelConfig>): Promise<void> {
+  constructor() {
+    makeObservable(this, {
+      selectedModel: observable
+    });
+  }
+
+  async save(models: Array<EditableModelConfig>): Promise<void> {
     if (!models.length) {
       models.push({
         local: true,
@@ -55,7 +62,7 @@ export default class ModelStore {
     await RNFS.writeFile(path, JSON.stringify(modelsToSave), 'utf8')
 
     // Convert models from EditableModelConfig to ModelConfig:
-    ModelStore.models = modelsToSave.map((model: EditableModelConfig) => {
+    this.models = modelsToSave.map((model: EditableModelConfig) => {
       return {
         title: model.title,
         apiBase: model.apiBase,
@@ -69,7 +76,7 @@ export default class ModelStore {
     })
   }
 
-  static load(): void {
+  load(): void {
     Promise.resolve().then(async () => {
       let models: Array<EditableModelConfig> = []
 
@@ -95,7 +102,7 @@ export default class ModelStore {
       console.log('Models loaded', models)
 
       // Convert models from EditableModelConfig to ModelConfig:
-      ModelStore.models = models
+      this.models = models
         .filter(
           model =>
             !!model.local || !!model.title,
@@ -113,15 +120,21 @@ export default class ModelStore {
           }
         })
 
-      if (!ModelStore.selectedModel) {
-        ModelStore.selectedModel = ModelStore.models[0]
+      // console.log("this.models", this.models);
+      // console.log("this.selectedModel", this.selectedModel);
+      if (!this.selectedModel) {
+        // console.log('setting default model')
+        this.selectedModel = this.models[0]
       }
 
-      ModelStore.editableModels = models
+      this.editableModels = models
     })
   }
 
-  static selectModel(model: ModelConfig) {
-    ModelStore.selectedModel = model
+  selectModel(model: ModelConfig) {
+    this.selectedModel = model
   }
 }
+
+const modelStore: ModelStore = new ModelStore();
+export default modelStore;

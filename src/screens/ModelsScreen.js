@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import {View, Text, TextInput, Button, ScrollView, StyleSheet} from 'react-native';
-import ModelStore from '../ModelStore';
+import modelStore from '../ModelStore';
 import type {EditableModelConfig} from '../ModelStore';
 
 const defaultModel: EditableModelConfig = {
@@ -12,13 +12,13 @@ const defaultModel: EditableModelConfig = {
   completionOptions: [],
 };
 
-const SettingsScreen: any = () => {
-  const [models, setModels] = useState<Array<EditableModelConfig>>(ModelStore.editableModels);
+const ModelsScreen: any = () => {
+  const [models, setModels] = useState<Array<EditableModelConfig>>(modelStore.editableModels);
 
   const saveModels = () => {
     Promise.resolve().then(async () => {
       try {
-        await ModelStore.save(models);
+        await modelStore.save(models);
         console.log('Models saved successfully');
       } catch (error) {
         console.error('Failed to save models:', error);
@@ -183,4 +183,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SettingsScreen;
+export default ModelsScreen;
