@@ -5,6 +5,7 @@ import type { UpdateMessageOutput } from "../types/UpdateMessageOutput.js";
 import type { ModelConfig } from "../types/ModelConfig.js";
 import MessageInterface from "../schema/Message/MessageInterface.js";
 import Responder from "./Responder.js";
+import { MessageRole } from "../schema/Message/MessageSchema.mjs";
 
 export default class ChatIteration {
   static iterate(
@@ -17,6 +18,8 @@ export default class ChatIteration {
   ) {
     Promise.resolve().then(async () => {
       try {
+        await MessageInterface.insert(windowId, MessageRole.USER, userPrompt, true);
+
         const allMessages = await MessageInterface.getAll(windowId);
 
         const shortTermSummary = ''

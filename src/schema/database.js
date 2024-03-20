@@ -13,8 +13,28 @@ let db = null
 
 const RESET_DATABASE = Config.stage === 'debug' && false
 
+function flattenSql(queryObject: {
+  strings: Array<string>,
+  values: Array<string>,
+}) {
+  // The values of queryObject.sql and queryObject.values are arrays that you would be received by a template tag function.
+  // This function flattens them into a single string.
+
+  if (!queryObject.strings) {
+    return queryObject.sql
+  }
+  let flattened = ''
+  for (let i = 0; i < queryObject.strings.length; i++) {
+    flattened += queryObject.strings[i]
+    if (queryObject.values[i]) {
+      flattened += queryObject.values[i]
+    }
+  }
+  return flattened.trim()
+}
+
 export async function query(queryObject: {
-  sql: Array<string>,
+  strings: Array<string>,
   values: Array<string>,
 }): any {
   try {
@@ -23,14 +43,7 @@ export async function query(queryObject: {
       return
     }
 
-    // dynamically import mysql, which is not available in production builds:
-    // It is only used for debugging purposes
-    // const mysql = await import('mysql')
-    // console.log('mysql', mysql)
-    // if (mysql?.format) {
-    //   console.debug(mysql.format(queryObject.sql, queryObject.values))
-    // }
-    console.log('queryObject', queryObject)
+    console.log(flattenSql(queryObject))
 
     const [results] = await db.executeSql(queryObject.sql, queryObject.values)
     if (results.rows) {
@@ -40,6 +53,7 @@ export async function query(queryObject: {
     }
   } catch (error) {
     console.error('Error executing query:', error)
+    throw error
   }
 }
 

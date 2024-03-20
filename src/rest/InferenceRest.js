@@ -5,6 +5,8 @@ import parseAxiosError from '../utils/parseAxiosError.js'
 import type {GPTMessage} from "../types/GPTMessage.js";
 import type {ChatCompletionsResponse} from "../types/ChatCompletion.js";
 import type {ModelConfig} from "../types/ModelConfig.js";
+import EventSource from "react-native-sse";
+import "react-native-url-polyfill/auto";
 
 // ordering matters here
 // default model is the first one.
@@ -91,126 +93,116 @@ export default class InferenceRest {
       throw new Error('apiBase is required')
     }
 
-    // const responseFormat = canUseJSON(model)
-    //   ? {
-    //       type: options?.responseFormat ?? 'json_object',
-    //     }
-    //   : {
-    //       type: options?.responseFormat || 'text',
-    //     }
-
-    // console.debug('GPT', messages[messages.length - 1])
-
-    let buffer = ''
-
-    let dataLog = []
-
-    // console.debug('start openai relay')
-
     let headers = {}
     if (apiKey) {
       headers = {
+        "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       }
     }
 
     // todo: As long as completionOptions is configured by the end user,
     //  it should be safe to pass them through without checking what they are.
-    const data: any = model.completionOptions ?? {}
+    const data: any = {...model.completionOptions} ?? {}
     data.messages = messages
     data.stream = true
 
-    makeRequestWithRetry(
-      () =>
-        axios({
-          method: 'POST',
-          url: `${apiBase}/v1/chat/completions`,
-          headers,
-          data,
-          responseType: 'stream',
-          timeout: 10000,
-        })
-          .then((response) => {
-            response.data.on('data', (chunk) => {
-              const data = chunk.toString()
+    const url = `${apiBase}/v1/chat/completions`
 
-              if (data === undefined) return
-
-              dataLog.push(data)
-
-              buffer += data
-
-              const items = buffer.split('\n\n')
-
-              for (let i = 0; i < items.length; i++) {
-                let item = items[i]
-
-                // item might end with 0, 1, or 2 new lines.
-                // So the next item might start with 2, 1, or 0 new lines.
-                // Remove any newlines at the beginning:
-                item = item.replace(/^\n+/, '')
-
-                if (item === '') continue
-
-                if (/^data: \[DONE\]/.test(item)) {
-                  buffer = items.slice(i + 1).join('\n\n')
-                  return
-                }
-
-                let parsedPayload
-                try {
-                  parsedPayload = JSON.parse(item.replace(/^data: /, ''))
-                } catch (err) {
-                  buffer = items.slice(i).join('\n\n')
-                  return
-                }
-
-                try {
-                  onData(parsedPayload)
-                } catch (err) {
-                  console.error(err)
-                }
-              }
-              // All items in the array have been processed, so clear the buffer.
-              // Equivalent to items.slice(items.length).join('\n\n')
-              buffer = ''
-            })
-            response.data.on('end', () => {
-              // console.log('closed third party')
-              if (buffer) {
-                console.debug(dataLog)
-                console.debug(buffer)
-                console.error(new Error('buffer is not empty'))
-              }
-            })
-          })
-          .catch((err) => {
-            // parseAxiosError will throw when a connection cannot be established.
-            const data = parseAxiosError(err)
-            data.on('data', (chunk) => {
-              // This will sometimes return incomplete JSON error objects.
-              // The connection might also close before the rest of the JSON comes in.
-              // So we print the error here, but it is useless outside of this function,
-              // so onError is called with no args.
-              const errorChunk = chunk.toString()
-              try {
-                const parsed = JSON.parse(errorChunk)
-                if (onError && parsed?.error?.message)
-                  onError(new Error(parsed?.error?.message))
-                else if (onError) onError()
-              } catch (err) {
-                console.error(errorChunk)
-                if (onError) onError()
-              }
-            })
-            // data.on('end', () => {
-            // console.log('closed third party')
-            // })
-          }),
-      3,
-    ).catch((err) => {
-      console.error(err)
+    const es = new EventSource(url, {
+      headers,
+      method: "POST",
+      // body: JSON.stringify(data),
+      body: JSON.stringify({
+        model: 'gpt-3.5-turbo',
+        messages: [
+          {
+            role: "system",
+            content: "You are a helpful assistant.",
+          },
+          {
+            role: "user",
+            content: "What is the meaning of life?",
+          },
+        ],
+        stream: true,
+      }),
+      pollingInterval: 25000,
     })
+
+
+    let buffer = "";
+    let dataLog: any = []
+    const listener = (event: any) => {
+      const data = event.data
+
+      if (data === undefined) return
+
+      dataLog.push(data)
+
+      buffer += data
+
+      const items = buffer.split('\n\n')
+
+      for (let i = 0; i < items.length; i++) {
+        let item = items[i]
+
+        // item might end with 0, 1, or 2 new lines.
+        // So the next item might start with 2, 1, or 0 new lines.
+        // Remove any newlines at the beginning:
+        item = item.replace(/^\n+/, '')
+
+        if (item === '') continue
+
+        if (/^data: \[DONE\]/.test(item)) {
+          buffer = items.slice(i + 1).join('\n\n')
+          return
+        }
+
+        let parsedPayload
+        try {
+          parsedPayload = JSON.parse(item.replace(/^data: /, ''))
+        } catch (err) {
+          buffer = items.slice(i).join('\n\n')
+          return
+        }
+
+        try {
+          onData(parsedPayload)
+        } catch (err) {
+          console.error(err)
+        }
+      }
+      // All items in the array have been processed, so clear the buffer.
+      // Equivalent to items.slice(items.length).join('\n\n')
+      buffer = ''
+    };
+
+    const closeListener = (event: any) => {
+      if (event.type === "error") {
+        console.error("Connection error:", event.message);
+        es.close();
+        onError(new Error(event.message))
+      } else if (event.type === "exception") {
+        console.error("Error:", event.message, event.error);
+        onError(event.error)
+        es.close();
+      } else if (event.type === 'close') {
+        console.log('closed third party')
+      }
+      if (buffer) {
+        console.debug(dataLog)
+        console.debug(buffer)
+        console.error(new Error('buffer is not empty'))
+        onError(new Error('buffer is not empty'))
+      }
+    }
+
+    // Add listener
+    es.addEventListener("open", () => console.log("Open SSE connection."));
+    es.addEventListener("data", listener);
+    es.addEventListener("error", closeListener);
+    es.addEventListener("close", closeListener);
   }
 
   static async chatCompletion(
