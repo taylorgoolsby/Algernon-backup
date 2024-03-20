@@ -20,6 +20,9 @@
 		8C33BC3C2BA430B60023A2D9 /* Transformers in Frameworks */ = {isa = PBXBuildFile; productRef = 8C33BC3B2BA430B60023A2D9 /* Transformers */; };
 		8C33BC3E2BA43DEC0023A2D9 /* BertTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C33BC3D2BA43DEC0023A2D9 /* BertTokenizer.swift */; };
 		8C33BC402BA563BE0023A2D9 /* all-MiniLM-L6-v2-coreml-float32.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 8C33BC3F2BA563BE0023A2D9 /* all-MiniLM-L6-v2-coreml-float32.mlpackage */; };
+		8C9AAF892BAB279300FF60EF /* Tiktoken in Frameworks */ = {isa = PBXBuildFile; productRef = 8C9AAF882BAB279300FF60EF /* Tiktoken */; };
+		8C9AAF8D2BAB2B4100FF60EF /* NativeTokenizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C9AAF8C2BAB2B4100FF60EF /* NativeTokenizer.m */; };
+		8C9AAF8F2BAB2C7300FF60EF /* NativeTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C9AAF8E2BAB2C7300FF60EF /* NativeTokenizer.swift */; };
 		8CACCE4F2BA29DD2004643C2 /* Evaluate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE472BA29DD2004643C2 /* Evaluate.swift */; };
 		8CACCE502BA29DD2004643C2 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE482BA29DD2004643C2 /* Configuration.swift */; };
 		8CACCE512BA29DD2004643C2 /* Load.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE4A2BA29DD2004643C2 /* Load.swift */; };
@@ -78,6 +81,8 @@
 		8C33BC382BA42DD40023A2D9 /* MiniLM-vocab.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "MiniLM-vocab.txt"; sourceTree = "<group>"; };
 		8C33BC3D2BA43DEC0023A2D9 /* BertTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BertTokenizer.swift; sourceTree = "<group>"; };
 		8C33BC3F2BA563BE0023A2D9 /* all-MiniLM-L6-v2-coreml-float32.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = "all-MiniLM-L6-v2-coreml-float32.mlpackage"; sourceTree = "<group>"; };
+		8C9AAF8C2BAB2B4100FF60EF /* NativeTokenizer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NativeTokenizer.m; sourceTree = "<group>"; };
+		8C9AAF8E2BAB2C7300FF60EF /* NativeTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeTokenizer.swift; sourceTree = "<group>"; };
 		8CACCE472BA29DD2004643C2 /* Evaluate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Evaluate.swift; sourceTree = "<group>"; };
 		8CACCE482BA29DD2004643C2 /* Configuration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		8CACCE4A2BA29DD2004643C2 /* Load.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Load.swift; sourceTree = "<group>"; };
@@ -119,6 +124,7 @@
 				8CFA36282BA299C9009546C7 /* AsyncAlgorithms in Frameworks */,
 				8CFA36002BA1A408009546C7 /* MLX in Frameworks */,
 				8C33BC3C2BA430B60023A2D9 /* Transformers in Frameworks */,
+				8C9AAF892BAB279300FF60EF /* Tiktoken in Frameworks */,
 				8CFA36042BA1A408009546C7 /* MLXLinalg in Frameworks */,
 				0C80B921A6F3F58F76C31292 /* libPods-CobaltMobileRN.a in Frameworks */,
 				8CFA36062BA1A408009546C7 /* MLXNN in Frameworks */,
@@ -167,6 +173,8 @@
 				8CFA36242BA29209009546C7 /* LLMNativeModule.m */,
 				8C33BC322BA418EC0023A2D9 /* TextFeatureExtractor.swift */,
 				8C33BC342BA419EA0023A2D9 /* TextFeatureExtractor.m */,
+				8C9AAF8C2BAB2B4100FF60EF /* NativeTokenizer.m */,
+				8C9AAF8E2BAB2C7300FF60EF /* NativeTokenizer.swift */,
 			);
 			name = CobaltMobileRN;
 			sourceTree = "<group>";
@@ -304,6 +312,7 @@
 				8CFD0A212BA3E6340080EBE1 /* FAISS */,
 				8CFD0A232BA3E6340080EBE1 /* FAISS_C */,
 				8C33BC3B2BA430B60023A2D9 /* Transformers */,
+				8C9AAF882BAB279300FF60EF /* Tiktoken */,
 			);
 			productName = CobaltMobileRN;
 			productReference = 13B07F961A680F5B00A75B9A /* CobaltMobileRN.app */;
@@ -341,6 +350,7 @@
 				8CFD0A1B2BA3E32C0080EBE1 /* XCRemoteSwiftPackageReference "openmp-mobile" */,
 				8CFD0A202BA3E6340080EBE1 /* XCRemoteSwiftPackageReference "faiss-mobile" */,
 				8C33BC3A2BA430B60023A2D9 /* XCRemoteSwiftPackageReference "swift-transformers" */,
+				8C9AAF872BAB279300FF60EF /* XCRemoteSwiftPackageReference "Tiktoken" */,
 			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
@@ -526,9 +536,11 @@
 				8CACCE502BA29DD2004643C2 /* Configuration.swift in Sources */,
 				8CACCE4F2BA29DD2004643C2 /* Evaluate.swift in Sources */,
 				8CFA36252BA29209009546C7 /* LLMNativeModule.m in Sources */,
+				8C9AAF8F2BAB2C7300FF60EF /* NativeTokenizer.swift in Sources */,
 				8C33BC332BA418EC0023A2D9 /* TextFeatureExtractor.swift in Sources */,
 				8CACCE512BA29DD2004643C2 /* Load.swift in Sources */,
 				8C33BC352BA419EA0023A2D9 /* TextFeatureExtractor.m in Sources */,
+				8C9AAF8D2BAB2B4100FF60EF /* NativeTokenizer.m in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				8CACCE552BA29DD2004643C2 /* Phi.swift in Sources */,
 				8CACCE5F2BA2BC50004643C2 /* Starcoder2.swift in Sources */,
@@ -855,6 +867,14 @@
 				version = 0.1.2;
 			};
 		};
+		8C9AAF872BAB279300FF60EF /* XCRemoteSwiftPackageReference "Tiktoken" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/aespinilla/Tiktoken";
+			requirement = {
+				kind = revision;
+				revision = 4ad6460448278f7a28f1e4ee2723500369f20acb;
+			};
+		};
 		8CFA35FE2BA1A408009546C7 /* XCRemoteSwiftPackageReference "mlx-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ml-explore/mlx-swift";
@@ -894,6 +914,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8C33BC3A2BA430B60023A2D9 /* XCRemoteSwiftPackageReference "swift-transformers" */;
 			productName = Transformers;
+		};
+		8C9AAF882BAB279300FF60EF /* Tiktoken */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8C9AAF872BAB279300FF60EF /* XCRemoteSwiftPackageReference "Tiktoken" */;
+			productName = Tiktoken;
 		};
 		8CFA35FF2BA1A408009546C7 /* MLX */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -1,6 +1,6 @@
 // @flow
 
-import sqltag, { join } from '@taylorgoolsby/sql-template-tag'
+import sqltag, { join, raw } from '@taylorgoolsby/sql-template-tag'
 import database from '../database.js'
 import type {
   MessageRoleType,
@@ -37,14 +37,15 @@ export default class MessageInterface {
   //   return rows
   // }
 
-  static async getAll(windowId: number): Promise<Array<MessageSQL>> {
+  static async getAll(windowId: number, order?: ?string): Promise<Array<MessageSQL>> {
     const sql = sqltag`
       SELECT * 
       FROM Message
       WHERE windowId = ${windowId}
-      ORDER BY messageId ASC;
+      ORDER BY messageId ${raw(order ?? 'ASC')};
     `
     const rows = await database.query(sql)
+    console.log("rows", rows);
     return rows
   }
 

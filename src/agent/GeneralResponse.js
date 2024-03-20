@@ -1,85 +1,81 @@
-//      
+// @flow
 
-                                                         
-                                                           
-                                                                           
-                                                                           
+import type { GPTMessage } from "../types/GPTMessage.js";
+import type { ModelConfig } from "../types/ModelConfig.js";
+import type { AppendMessageOutput } from "../types/AppendMessageOutput.js";
+import type { UpdateMessageOutput } from "../types/UpdateMessageOutput.js";
 import MessageInterface from "../schema/Message/MessageInterface.js";
 import { MessageRole } from "../schema/Message/MessageSchema.mjs";
 import InferenceRest from "../rest/InferenceRest.js";
-                                                                          
-                                                                      
+import type { ChatCompletionsResponse } from "../types/ChatCompletion.js";
+import type { MessageSQL } from "../schema/Message/MessageSchema.mjs";
 import CompletionInterface from "../schema/Completion/CompletionInterface.js";
 import { CompletionType } from "../schema/Completion/CompletionSchema.mjs";
 
-export default class Responder {
+export default class GeneralResponse {
   /*
   Generates a streamed response from an LLM.
   * */
   static async beginStreaming(
-    windowId        ,
-    model             ,
-    shortTermSummary        ,
-    longTermSummary        ,
-    userPrompt        ,
-    onAppendMessage                                      ,
-    onUpdateMessage                                      ,
+    windowId: number,
+    model: ModelConfig,
+    shortTermSummary: string,
+    longTermSummary: string,
+    userPrompt: string,
+    onAppendMessage: (output: AppendMessageOutput) => any,
+    onUpdateMessage: (output: UpdateMessageOutput) => any,
   ) {
-    const context                    = [
-//       {
-//         role: 'system',
-//         content: `Hello! I'm your personal digital assistant, here to help you with a range of tasks. My design allows me to remember our previous interactions and learn from them, ensuring I'm always ready to assist you with your journaling, knowledge base management, brainstorming, and more. Just start chatting, and I'll do my best to help!
-//
-// Capabilities
-//
-//     Journaling: I can help you keep track of your daily activities, thoughts, and reflections, offering a secure space for personal growth.
-//     Knowledge Base Management: I can help you organize information, retrieve past entries, and keep your knowledge base up-to-date and easily accessible.
-//     Brainstorming: Whether you're looking for creative ideas or problem-solving, I'm here to facilitate your thought process and offer suggestions.
-//
-// Few-Shot Examples for New Users
-//
-//     What are you capable of?
-//         I'm equipped to assist you with various tasks such as keeping a journal, managing information, brainstorming ideas, and more. Just let me know what you need!
-//
-//     Can you remind me of my appointments?
-//         Sure! I can keep track of your appointments and remind you as they approach. Simply tell me the details of your meeting, and I'll take care of the rest.
-//
-//     How do you manage privacy?
-//         Your privacy is paramount. I'm designed to work locally on your device, ensuring that all your data stays private and secure.
-//
-//     I need to brainstorm ideas for a project. Can you help?
-//         Absolutely! Let's start by discussing the project's goals and any initial ideas you might have. I'll help you expand on them and explore new possibilities.
-//
-//     Help me organize my notes on 19th-century art.
-//         Of course! Let's start by categorizing your notes. We can organize them by art movement, notable artists, or specific artworks. Just guide me on how you'd like to proceed.
-//
-// Personality Traits
-//
-//     Helpful: I aim to be supportive and provide assistance tailored to your needs.
-//     Inquisitive: I ask questions to better understand your requests and deliver precise outcomes.
-//     Friendly: I engage in a warm and friendly manner, making our interactions pleasant.
-//     Respectful: I respect your privacy and time, providing efficient and discreet service.`,
-//       },
-//       longTermSummary
-//         ? {
-//           role: 'assistant',
-//           content: longTermSummary,
-//         }
-//         : null,
-//       shortTermSummary
-//         ? {
-//           role: 'assistant',
-//           content: shortTermSummary,
-//         }
-//         : null,
+    const context: Array<GPTMessage> = [
+      {
+        role: 'system',
+        content: `Hello! I'm your personal digital assistant, here to help you with a range of tasks. My design allows me to remember our previous interactions and learn from them, ensuring I'm always ready to assist you with your journaling, knowledge base management, brainstorming, and more. Just start chatting, and I'll do my best to help!
+
+Capabilities
+
+    Journaling: I can help you keep track of your daily activities, thoughts, and reflections, offering a secure space for personal growth.
+    Knowledge Base Management: I can help you organize information, retrieve past entries, and keep your knowledge base up-to-date and easily accessible.
+    Brainstorming: Whether you're looking for creative ideas or problem-solving, I'm here to facilitate your thought process and offer suggestions.
+
+Few-Shot Examples for New Users
+
+    What are you capable of?
+        I'm equipped to assist you with various tasks such as keeping a journal, managing information, brainstorming ideas, and more. Just let me know what you need!
+
+    Can you remind me of my appointments?
+        Sure! I can keep track of your appointments and remind you as they approach. Simply tell me the details of your meeting, and I'll take care of the rest.
+
+    How do you manage privacy?
+        Your privacy is paramount. I'm designed to work locally on your device, ensuring that all your data stays private and secure.
+
+    I need to brainstorm ideas for a project. Can you help?
+        Absolutely! Let's start by discussing the project's goals and any initial ideas you might have. I'll help you expand on them and explore new possibilities.
+
+    Help me organize my notes on 19th-century art.
+        Of course! Let's start by categorizing your notes. We can organize them by art movement, notable artists, or specific artworks. Just guide me on how you'd like to proceed.
+
+Personality Traits
+
+    Helpful: I aim to be supportive and provide assistance tailored to your needs.
+    Inquisitive: I ask questions to better understand your requests and deliver precise outcomes.
+    Friendly: I engage in a warm and friendly manner, making our interactions pleasant.
+    Respectful: I respect your privacy and time, providing efficient and discreet service.`,
+      },
+      longTermSummary
+        ? {
+          role: 'assistant',
+          content: longTermSummary,
+        }
+        : null,
+      shortTermSummary
+        ? {
+          role: 'assistant',
+          content: shortTermSummary,
+        }
+        : null,
       {
         role: 'user',
         content: userPrompt,
       },
-      // {
-      //   role: 'user',
-      //   content: `${shortTermSummary ? `${shortTermSummary}\n\n` : ''}${lastMessage.data.text}`,
-      // },
     ]
       .filter(Boolean)
 
@@ -92,14 +88,14 @@ export default class Responder {
     )
 
     // Similarly the response is sent to the client as an empty message to start.
-    const output                      = {
+    const output: AppendMessageOutput = {
       windowId,
       message: emptyResponse,
     }
     onAppendMessage(output)
 
     // Then streaming begins and incoming tokens are relayed back to the client.
-    const response = await Responder.stream(
+    const response = await GeneralResponse.stream(
       windowId,
       model,
       context,
@@ -112,12 +108,12 @@ export default class Responder {
   }
 
   static stream(
-    windowId        ,
-    model             ,
-    context                   ,
-    response            ,
-    onUpdateMessage                                      ,
-  )                  {
+    windowId: number,
+    model: ModelConfig,
+    context: Array<GPTMessage>,
+    response: MessageSQL,
+    onUpdateMessage: (output: UpdateMessageOutput) => any,
+  ): Promise<string> {
     return new Promise(async (resolve, reject) => {
       let buffer = ''
       let previousAutocompletion = null
@@ -147,7 +143,7 @@ export default class Responder {
       InferenceRest.relayChatCompletionStream(
         model,
         context,
-        (res                         ) => {
+        (res: ChatCompletionsResponse) => {
           if (stop) {
             return
           }
@@ -223,13 +219,13 @@ export default class Responder {
 
           // send:
           response.text = autocompletion
-          const output                      = {
+          const output: UpdateMessageOutput = {
             windowId,
             message: response,
           }
           onUpdateMessage(output)
         },
-        (error         ) => {
+        (error?: ?Error) => {
           if (error) {
             reject(error)
           } else {

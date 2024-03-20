@@ -7,7 +7,7 @@ import {
   Text,
   TextInput,
   Button,
-  ScrollView,
+  FlatList,
   TouchableOpacity,
   TouchableWithoutFeedback,
   SafeAreaView,
@@ -21,7 +21,7 @@ import { MessageRole } from "../schema/Message/MessageSchema.mjs";
 import chatStore from "../stores/ChatStore.js";
 
 const ChatScreen: any = observer(({navigation}) => {
-  const messages = chatStore.messages
+  const messages = [...chatStore.messages]
   const [input, setInput] = useState('')
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -30,10 +30,13 @@ const ChatScreen: any = observer(({navigation}) => {
   React.useEffect(() => {
     if (chatStore.loaded && initialLoad.current) {
       initialLoad.current = false
-      scrollToBottom()
+      // scrollToBottom()
     }
   }, [chatStore.loaded])
-  console.log("chatStore.loaded", chatStore.loaded);
+
+  React.useEffect(() => {
+    chatStore.onRenderDone()
+  }, [messages])
 
   const handleModelSelect = (model: ModelConfig) => {
     preferencesStore.selectModel(model)
@@ -51,11 +54,9 @@ const ChatScreen: any = observer(({navigation}) => {
       input,
       (output) => {
         chatStore.appendMessage(output)
-        scrollToBottom()
       },
       (output) => {
         chatStore.updateMessage(output)
-        scrollToBottom()
       },
       error => {
         console.error(error)
@@ -74,7 +75,9 @@ const ChatScreen: any = observer(({navigation}) => {
   const scrollViewRef = React.useRef(null);
   const scrollToBottom = () => {
     {/*$FlowFixMe*/}
-    scrollViewRef.current.scrollToEnd({animated: true})
+    // setTimeout(() => {
+    //   scrollViewRef.current?.scrollToEnd({animated: true})
+    // })
   }
 
   return (
@@ -114,22 +117,29 @@ const ChatScreen: any = observer(({navigation}) => {
           )}
 
           {/*$FlowFixMe*/}
-          <ScrollView
+          <FlatList
             style={styles.chatContainer}
             ref={scrollViewRef}
-          >
-            {messages.map((message, index) => (
-              <View
-                key={index}
-                style={
-                  message.role === MessageRole.USER
-                    ? styles.userMessage
-                    : styles.aiMessage
-                }>
-                <Text style={styles.messageText}>{message.text}</Text>
-              </View>
-            ))}
-          </ScrollView>
+            inverted
+            data={messages}
+            keyExtractor={message => message.messageId}
+            renderItem={(item) => {
+              const message = item.item
+              return (
+                <BlurView
+                  style={
+                    message.role === MessageRole.USER
+                      ? styles.userMessage
+                      : styles.aiMessage
+                  }
+                  blurType="regular" // or "dark", "xlight", etc., depending on your design needs
+                  blurAmount={10} // Adjust the blur amount to get the desired effect
+                >
+                  <Text style={styles.messageText}>{message.text}</Text>
+                </BlurView>
+              )
+            }}
+          />
           <BlurView
             style={styles.inputContainer}
             blurType="regular" // or "dark", "xlight", etc., depending on your design needs
@@ -202,6 +212,7 @@ const styles = StyleSheet.create({
   },
   chatContainer: {
     flex: 1,
+    marginBottom: 15,
   },
   settingsButton: {
     // position: 'absolute',
@@ -259,20 +270,26 @@ const styles = StyleSheet.create({
   },
   userMessage: {
     alignSelf: 'flex-end',
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    // backgroundColor: 'rgba(255, 255, 255, 0.5)',
     borderRadius: 20,
+    minWidth: 40,
     margin: 5,
     padding: 10,
+    paddingLeft: 15,
+    paddingRight: 15,
   },
   aiMessage: {
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    // backgroundColor: 'rgba(255, 255, 255, 0.5)',
     borderRadius: 20,
+    minWidth: 40,
     margin: 5,
     padding: 10,
+    paddingLeft: 15,
+    paddingRight: 15,
   },
   messageText: {
-    color: '#000',
+    color: '#fff',
   },
 })
 

@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS \`Message\` (
 
 CREATE TABLE IF NOT EXISTS \`ShortTermMemory\` (
   \`shortTermMemoryId\` INTEGER PRIMARY KEY AUTOINCREMENT,
+  \`windowId\` INTEGER NOT NULL DEFAULT 0,
   \`model\` TEXT NOT NULL,
   \`inputs\` TEXT NOT NULL,
   \`summary\` TEXT NOT NULL,

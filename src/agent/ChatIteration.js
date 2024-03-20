@@ -4,8 +4,9 @@ import type { AppendMessageOutput } from "../types/AppendMessageOutput.js";
 import type { UpdateMessageOutput } from "../types/UpdateMessageOutput.js";
 import type { ModelConfig } from "../types/ModelConfig.js";
 import MessageInterface from "../schema/Message/MessageInterface.js";
-import Responder from "./Responder.js";
+import GeneralResponse from "./GeneralResponse.js";
 import { MessageRole } from "../schema/Message/MessageSchema.mjs";
+import ShortTermSummarization from "./ShortTermSummarization.js";
 
 export default class ChatIteration {
   static iterate(
@@ -27,10 +28,15 @@ export default class ChatIteration {
 
         const allMessages = await MessageInterface.getAll(windowId);
 
-        const shortTermSummary = ''
+        // const shortTermSummary = ''
+        const shortTermSummary = await ShortTermSummarization.performCompletion(
+          windowId,
+          model,
+          allMessages,
+        )
         const longTermSummary = ''
 
-        await Responder.beginStreaming(
+        await GeneralResponse.beginStreaming(
           windowId,
           model,
           shortTermSummary,

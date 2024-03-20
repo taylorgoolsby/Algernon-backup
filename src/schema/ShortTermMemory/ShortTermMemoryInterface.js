@@ -3,12 +3,13 @@
 import sqltag, { join } from '@taylorgoolsby/sql-template-tag'
 import database from '../database.js'
 import type { GPTMessage } from "../../types/GPTMessage.js";
+import type { ModelConfig } from "../../types/ModelConfig.js";
 
 export default class ShortTermMemoryInterface {
-  static async getLast(agencyConversationId: string): Promise<?string> {
+  static async getLast(windowId: number): Promise<?string> {
     const query = sqltag`
       SELECT * FROM ShortTermMemory
-      WHERE agencyConversationId = UNHEX(${agencyConversationId})
+      WHERE windowId = ${windowId}
       ORDER BY shortTermMemoryId DESC
       LIMIT 1;
     `
@@ -19,20 +20,20 @@ export default class ShortTermMemoryInterface {
   }
 
   static async insert(
-    agencyConversationId: string,
-    model: string,
+    windowId: number,
+    model: ModelConfig,
     inputs: Array<GPTMessage>,
     summary: string,
   ): Promise<number> {
     const query = sqltag`
       INSERT INTO ShortTermMemory (
-        agencyConversationId,
+        windowId,
         model,
         inputs,
         summary
       ) VALUES (
-        UNHEX(${agencyConversationId}),
-        ${model},
+        ${windowId},
+        ${JSON.stringify(model)},
         ${JSON.stringify(inputs)},
         ${summary}
       );

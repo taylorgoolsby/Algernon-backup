@@ -1,5 +1,5 @@
 {
-  "originHash" : "022ccc2925cb677edd3f4dddd2f15aeb78e2847be98d0d3deb9f032659d977a4",
+  "originHash" : "2ad69473b1ce1723ee8f374055c5f1aace8a597b7e0deaed959c73ed7672ec76",
   "pins" : [
     {
       "identity" : "faiss-mobile",
@@ -68,6 +68,14 @@
       "state" : {
         "revision" : "564442fba36b0b694d730a62d0593e5f54043b55",
         "version" : "0.1.2"
+      }
+    },
+    {
+      "identity" : "tiktoken",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/aespinilla/Tiktoken",
+      "state" : {
+        "revision" : "4ad6460448278f7a28f1e4ee2723500369f20acb"
       }
     }
   ],

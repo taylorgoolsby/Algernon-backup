@@ -214,7 +214,7 @@ export default class InferenceRest {
 
     // todo: As long as completionOptions is configured by the end user,
     //  it should be safe to pass them through without checking what they are.
-    const data: any = model.completionOptions ?? {}
+    const data: any = {...model.completionOptions} ?? {}
     data.messages = messages
     data.stream = false
 

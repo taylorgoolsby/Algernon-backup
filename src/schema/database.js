@@ -40,12 +40,10 @@ export async function query(queryObject: {
       return
     }
 
-    console.log(flattenSql(queryObject))
+    // console.log(flattenSql(queryObject))
 
     const [results] = await db.executeSql(queryObject.sql, queryObject.values)
-    if (results.insertId) {
-      return results
-    } else if (results.rows) {
+    if (queryObject.sql.includes('SELECT')) {
       return results.rows.raw()
     } else {
       return results
