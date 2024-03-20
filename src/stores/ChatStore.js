@@ -4,14 +4,23 @@ import {makeObservable, observable} from 'mobx'
 import type { MessageSQL } from "../schema/Message/MessageSchema.mjs";
 import type { AppendMessageOutput } from "../types/AppendMessageOutput.js";
 import type { UpdateMessageOutput } from "../types/UpdateMessageOutput.js";
+import MessageInterface from "../schema/Message/MessageInterface.js";
 
 export class ChatStore {
+  loaded: boolean = false
+  windowId: number = 0
   messages: Array<MessageSQL> = []
 
   constructor() {
     makeObservable(this, {
+      loaded: observable,
       messages: observable,
     })
+  }
+
+  async load() {
+    this.messages = await MessageInterface.getAll(this.windowId)
+    this.loaded = true
   }
 
   appendMessage: (AppendMessageOutput) => void = (output: AppendMessageOutput) => {

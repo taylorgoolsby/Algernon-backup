@@ -23,8 +23,17 @@ import chatStore from "../stores/ChatStore.js";
 const ChatScreen: any = observer(({navigation}) => {
   const messages = chatStore.messages
   const [input, setInput] = useState('')
-
   const [isExpanded, setIsExpanded] = useState(false)
+
+  // scrollToBottom when message updates the first time (initial load):
+  const initialLoad = React.useRef(true)
+  React.useEffect(() => {
+    if (chatStore.loaded && initialLoad.current) {
+      initialLoad.current = false
+      scrollToBottom()
+    }
+  }, [chatStore.loaded])
+  console.log("chatStore.loaded", chatStore.loaded);
 
   const handleModelSelect = (model: ModelConfig) => {
     preferencesStore.selectModel(model)
@@ -37,11 +46,17 @@ const ChatScreen: any = observer(({navigation}) => {
       return
     }
     ChatIteration.iterate(
-      0,
+      chatStore.windowId,
       preferencesStore.selectedModel,
       input,
-      chatStore.appendMessage,
-      chatStore.updateMessage,
+      (output) => {
+        chatStore.appendMessage(output)
+        scrollToBottom()
+      },
+      (output) => {
+        chatStore.updateMessage(output)
+        scrollToBottom()
+      },
       error => {
         console.error(error)
       },
@@ -56,7 +71,11 @@ const ChatScreen: any = observer(({navigation}) => {
     inputRef.current.focus()
   }
 
-  // console.log("messages", messages);
+  const scrollViewRef = React.useRef(null);
+  const scrollToBottom = () => {
+    {/*$FlowFixMe*/}
+    scrollViewRef.current.scrollToEnd({animated: true})
+  }
 
   return (
     <View style={styles.container}>
@@ -94,7 +113,11 @@ const ChatScreen: any = observer(({navigation}) => {
             )
           )}
 
-          <ScrollView style={styles.chatContainer}>
+          {/*$FlowFixMe*/}
+          <ScrollView
+            style={styles.chatContainer}
+            ref={scrollViewRef}
+          >
             {messages.map((message, index) => (
               <View
                 key={index}

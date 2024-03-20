@@ -9,13 +9,15 @@ import {initializeDatabase} from '../schema/initializeDatabase'
 import modelStore from '../stores/PreferencesStore.js'
 import {configure} from 'mobx'
 import redact from '../utils/redact'
+import chatStore from "../stores/ChatStore.js";
 
 configure({
   enforceActions: 'never',
 })
 initializeDatabase()
-  .then(() => {
-    modelStore.load()
+  .then(async () => {
+    await modelStore.load()
+    await chatStore.load()
   })
   .catch(error => {
     console.error(error)

@@ -83,60 +83,58 @@ export class PreferencesStore {
     })
   }
 
-  load(): void {
-    Promise.resolve().then(async () => {
-      let preferences
+  async load(): Promise<void> {
+    let preferences
 
-      try {
-        const preferencesJson = await RNFS.readFile(path, 'utf8')
-        console.log('Preferences loaded', preferencesJson)
-        preferences = JSON.parse(preferencesJson)
-      } catch (err) {
-        console.error(err)
-        preferences = {
-          editableModels: [],
-          selectedModel: null,
+    try {
+      const preferencesJson = await RNFS.readFile(path, 'utf8')
+      console.log('Preferences loaded', preferencesJson)
+      preferences = JSON.parse(preferencesJson)
+    } catch (err) {
+      console.error(err)
+      preferences = {
+        editableModels: [],
+        selectedModel: null,
+      }
+    }
+
+    // $FlowFixMe
+    this.editableModels = preferences.editableModels ?? []
+
+    if (!this.editableModels.length) {
+      this.editableModels = [
+        {
+          local: true,
+          title: 'Built-In Phi-2',
+          apiBase: '',
+          apiKey: '',
+          completionOptions: [],
+        },
+      ]
+    }
+
+    // Convert models from EditableModelConfig to ModelConfig:
+    this.models = this.editableModels
+      .filter(model => !!model.local || !!model.title)
+      .map((model: EditableModelConfig) => {
+        return {
+          title: model.title,
+          apiBase: model.apiBase,
+          apiKey: model.apiKey,
+          completionOptions: model.completionOptions.reduce((acc, option) => {
+            // $FlowFixMe
+            acc[option.name] = option.value
+            return acc
+          }, {}),
         }
-      }
+      })
 
-      // $FlowFixMe
-      this.editableModels = preferences.editableModels ?? []
-
-      if (!this.editableModels.length) {
-        this.editableModels = [
-          {
-            local: true,
-            title: 'Built-In Phi-2',
-            apiBase: '',
-            apiKey: '',
-            completionOptions: [],
-          },
-        ]
-      }
-
-      // Convert models from EditableModelConfig to ModelConfig:
-      this.models = this.editableModels
-        .filter(model => !!model.local || !!model.title)
-        .map((model: EditableModelConfig) => {
-          return {
-            title: model.title,
-            apiBase: model.apiBase,
-            apiKey: model.apiKey,
-            completionOptions: model.completionOptions.reduce((acc, option) => {
-              // $FlowFixMe
-              acc[option.name] = option.value
-              return acc
-            }, {}),
-          }
-        })
-
-      // console.log("this.models", this.models);
-      // console.log("this.selectedModel", this.selectedModel);
-      if (!this.selectedModel) {
-        // console.log('setting default model')
-        this.selectedModel = preferences.selectedModel || this.models[0]
-      }
-    })
+    // console.log("this.models", this.models);
+    // console.log("this.selectedModel", this.selectedModel);
+    if (!this.selectedModel) {
+      // console.log('setting default model')
+      this.selectedModel = preferences.selectedModel || this.models[0]
+    }
   }
 
   selectModel(model: ModelConfig) {
