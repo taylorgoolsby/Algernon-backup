@@ -142,6 +142,7 @@ export default class InferenceRest {
 
         if (/^data: \[DONE\]/.test(item)) {
           buffer = items.slice(i + 1).join('\n\n')
+          es.close();
           return
         }
 
