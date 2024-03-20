@@ -1,7 +1,7 @@
-//      
+// @flow
 
 import RNFS from 'react-native-fs'
-                                                       
+import type {ModelConfig} from '../types/ModelConfig.js'
 import {makeObservable, observable} from 'mobx'
 
 /*
@@ -15,20 +15,20 @@ export type ModelConfig = {
 *
 */
 
-                                   
-                   
-                
-                  
-                 
-                                                          
- 
+export type EditableModelConfig = {
+  local?: ?boolean,
+  title: string,
+  apiBase: string,
+  apiKey: string,
+  completionOptions: Array<{name: string, value: string}>,
+}
 
 const path = `${RNFS.DocumentDirectoryPath}/preferences.json`
 
 export class PreferencesStore {
-  models                     = []
-  editableModels                             = []
-  selectedModel               = null
+  models: Array<ModelConfig> = []
+  editableModels: Array<EditableModelConfig> = []
+  selectedModel: ?ModelConfig = null
 
   constructor() {
     makeObservable(this, {
@@ -36,7 +36,7 @@ export class PreferencesStore {
     })
   }
 
-  async save(models                            )                {
+  async save(models: Array<EditableModelConfig>): Promise<void> {
     if (!models.length) {
       models.push({
         local: true,
@@ -69,7 +69,7 @@ export class PreferencesStore {
 
     // Convert models from EditableModelConfig to ModelConfig:
     this.editableModels = modelsToSave
-    this.models = modelsToSave.map((model                     ) => {
+    this.models = modelsToSave.map((model: EditableModelConfig) => {
       return {
         title: model.title,
         apiBase: model.apiBase,
@@ -83,7 +83,7 @@ export class PreferencesStore {
     })
   }
 
-  load()       {
+  load(): void {
     Promise.resolve().then(async () => {
       let preferences
 
@@ -99,6 +99,7 @@ export class PreferencesStore {
         }
       }
 
+      // $FlowFixMe
       this.editableModels = preferences.editableModels ?? []
 
       if (!this.editableModels.length) {
@@ -116,7 +117,7 @@ export class PreferencesStore {
       // Convert models from EditableModelConfig to ModelConfig:
       this.models = this.editableModels
         .filter(model => !!model.local || !!model.title)
-        .map((model                     ) => {
+        .map((model: EditableModelConfig) => {
           return {
             title: model.title,
             apiBase: model.apiBase,
@@ -138,7 +139,7 @@ export class PreferencesStore {
     })
   }
 
-  selectModel(model             ) {
+  selectModel(model: ModelConfig) {
     this.selectedModel = model
     this.save(this.editableModels).catch(err => {
       console.error(err)
@@ -146,5 +147,5 @@ export class PreferencesStore {
   }
 }
 
-const preferencesStore                   = new PreferencesStore()
+const preferencesStore: PreferencesStore = new PreferencesStore()
 export default preferencesStore

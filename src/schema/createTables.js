@@ -12,7 +12,6 @@ CREATE TABLE IF NOT EXISTS \`Completion\` (
   \`completionId\` INTEGER PRIMARY KEY AUTOINCREMENT,
   \`type\` TEXT NOT NULL,
   \`model\` TEXT NOT NULL,
-  \`completionOptions\` TEXT NOT NULL,
   \`inputs\` TEXT NOT NULL,
   \`output\` TEXT NOT NULL,
   \`dateCreated\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP

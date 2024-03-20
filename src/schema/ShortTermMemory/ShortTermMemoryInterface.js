@@ -1,14 +1,13 @@
 // @flow
 
-import { sqltag, join } from 'common/sql-template-tag'
-import Config from 'common/src/Config.js'
-import database from '../../mysql/database.js'
-import type { GPTMessage } from '../../rest/InferenceRest.js'
+import sqltag, { join } from '@taylorgoolsby/sql-template-tag'
+import database from '../database.js'
+import type { GPTMessage } from "../../types/GPTMessage.js";
 
 export default class ShortTermMemoryInterface {
   static async getLast(agencyConversationId: string): Promise<?string> {
     const query = sqltag`
-      SELECT * FROM ${Config.dbPrefix}_ShortTermMemory
+      SELECT * FROM ShortTermMemory
       WHERE agencyConversationId = UNHEX(${agencyConversationId})
       ORDER BY shortTermMemoryId DESC
       LIMIT 1;
@@ -26,7 +25,7 @@ export default class ShortTermMemoryInterface {
     summary: string,
   ): Promise<number> {
     const query = sqltag`
-      INSERT INTO ${Config.dbPrefix}_ShortTermMemory (
+      INSERT INTO ShortTermMemory (
         agencyConversationId,
         model,
         inputs,

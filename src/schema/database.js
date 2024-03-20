@@ -9,7 +9,7 @@ export function setDB(instance: any) {
 }
 
 function flattenSql(queryObject: {
-  strings: Array<string>,
+  sql: Array<string>,
   values: Array<string>,
 }) {
   // The values of queryObject.sql and queryObject.values are arrays that you would be received by a template tag function.
@@ -31,7 +31,7 @@ function flattenSql(queryObject: {
 }
 
 export async function query(queryObject: {
-  strings: Array<string>,
+  sql: Array<string>,
   values: Array<string>,
 }): any {
   try {

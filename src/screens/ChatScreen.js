@@ -15,11 +15,13 @@ import {
 import ChatIteration from '../agent/ChatIteration.js'
 import {observer} from 'mobx-react'
 import type {ModelConfig} from '../types/ModelConfig.js'
-import preferencesStore from '../PreferencesStore.js'
+import preferencesStore from '../stores/PreferencesStore.js'
 import {BlurView} from '@react-native-community/blur'
+import { MessageRole } from "../schema/Message/MessageSchema.mjs";
+import chatStore from "../stores/ChatStore.js";
 
 const ChatScreen: any = observer(({navigation}) => {
-  const [messages, setMessages] = useState<any>([])
+  const messages = chatStore.messages
   const [input, setInput] = useState('')
 
   const [isExpanded, setIsExpanded] = useState(false)
@@ -34,61 +36,48 @@ const ChatScreen: any = observer(({navigation}) => {
       console.error('No model selected')
       return
     }
-
-    const response = ''
     ChatIteration.iterate(
       0,
       preferencesStore.selectedModel,
       input,
-      output => {
-        // console.log('output', output)
-      },
-      output => {
-        // console.log('output', output)
-      },
+      chatStore.appendMessage,
+      chatStore.updateMessage,
       error => {
         console.error(error)
       },
     )
-
-    // Store the response in the Message table
-    // ...
-
-    // Update the local state
-    setMessages([
-      ...messages,
-      {text: input, sender: 'user'},
-      {text: response, sender: 'ai'},
-    ])
     setInput('')
   }
 
   // Ref for the TextInput to call focus
   const inputRef = React.useRef(null)
   const focusInput = () => {
+    {/*$FlowFixMe*/}
     inputRef.current.focus()
   }
+
+  // console.log("messages", messages);
 
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeView}>
         <View style={styles.safeView}>
-          {!isExpanded ? (
+          {(
             !!preferencesStore.selectedModel?.title ? (
-                <TouchableOpacity
-                  style={styles.settingsButton}
-                  onPress={() => setIsExpanded(!isExpanded)}
+              <TouchableOpacity
+                style={styles.settingsButton}
+                onPress={() => setIsExpanded(!isExpanded)}
+              >
+                <BlurView
+                  style={styles.settingsButtonBlurView}
+                  blurType="regular" // or "dark", "xlight", etc., depending on your design needs
+                  blurAmount={10} // Adjust the blur amount to get the desired effect
                 >
-                  <BlurView
-                    style={styles.settingsButtonBlurView}
-                    blurType="regular" // or "dark", "xlight", etc., depending on your design needs
-                    blurAmount={10} // Adjust the blur amount to get the desired effect
-                  >
-                    <Text style={styles.settingsButtonText}>
-                      {preferencesStore.selectedModel.title}
-                    </Text>
-                  </BlurView>
-                </TouchableOpacity>
+                  <Text style={styles.settingsButtonText}>
+                    {preferencesStore.selectedModel.title}
+                  </Text>
+                </BlurView>
+              </TouchableOpacity>
             ) : (
               <TouchableOpacity
                 style={styles.settingsButton}
@@ -103,14 +92,14 @@ const ChatScreen: any = observer(({navigation}) => {
                 </BlurView>
               </TouchableOpacity>
             )
-          ) : null}
+          )}
 
           <ScrollView style={styles.chatContainer}>
             {messages.map((message, index) => (
               <View
                 key={index}
                 style={
-                  message.sender === 'user'
+                  message.role === MessageRole.USER
                     ? styles.userMessage
                     : styles.aiMessage
                 }>
@@ -125,6 +114,7 @@ const ChatScreen: any = observer(({navigation}) => {
           >
             <TouchableWithoutFeedback onPress={focusInput}>
               <View style={styles.inputWrapContainer}>
+                {/*$FlowFixMe*/}
                 <TextInput
                   ref={inputRef}
                   style={styles.input}
@@ -134,6 +124,7 @@ const ChatScreen: any = observer(({navigation}) => {
                   placeholder="Type a message"
                   placeholderTextColor="#aaa"
                 />
+                {/*$FlowFixMe*/}
                 <Button
                   style={styles.sendButton}
                   title="Send"
@@ -190,9 +181,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   settingsButton: {
-    position: 'absolute',
-    top: 15,
-    left: 15,
+    // position: 'absolute',
+    // top: 15,
+    // left: 15,
+    marginBottom: 15,
+    borderRadius: 10,
     // backgroundColor: 'lightgrey',
     zIndex: 1, // Make sure the button is clickable over other elements
   },
@@ -206,7 +199,7 @@ const styles = StyleSheet.create({
   },
   blurContainer: {
     position: 'absolute',
-    top: 15, // Adjust based on your layout
+    top: 15 + 40, // Adjust based on your layout
     left: 15,
     right: 15,
     borderRadius: 10,

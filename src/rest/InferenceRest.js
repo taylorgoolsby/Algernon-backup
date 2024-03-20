@@ -84,7 +84,7 @@ export default class InferenceRest {
     model: ModelConfig,
     messages: Array<GPTMessage>,
     onData: (data: ChatCompletionsResponse) => any,
-    onError?: (err?: ?Error) => any,
+    onError: (err: Error) => any,
   ): void {
     const apiBase = model.apiBase
     const apiKey = model.apiKey
@@ -112,21 +112,7 @@ export default class InferenceRest {
     const es = new EventSource(url, {
       headers,
       method: "POST",
-      // body: JSON.stringify(data),
-      body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        messages: [
-          {
-            role: "system",
-            content: "You are a helpful assistant.",
-          },
-          {
-            role: "user",
-            content: "What is the meaning of life?",
-          },
-        ],
-        stream: true,
-      }),
+      body: JSON.stringify(data),
       pollingInterval: 25000,
     })
 

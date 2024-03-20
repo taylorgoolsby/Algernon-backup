@@ -9,6 +9,8 @@ import { MessageRole } from "../schema/Message/MessageSchema.mjs";
 import InferenceRest from "../rest/InferenceRest.js";
 import type { ChatCompletionsResponse } from "../types/ChatCompletion.js";
 import type { MessageSQL } from "../schema/Message/MessageSchema.mjs";
+import CompletionInterface from "../schema/Completion/CompletionInterface.js";
+import { CompletionType } from "../schema/Completion/CompletionSchema.mjs";
 
 export default class Responder {
   /*
@@ -79,8 +81,7 @@ export default class Responder {
       //   content: `${shortTermSummary ? `${shortTermSummary}\n\n` : ''}${lastMessage.data.text}`,
       // },
     ]
-      // $FlowFixMe
-      .filter((a) => !!a)
+      .filter(Boolean)
 
     // The response is already added to the database before streaming starts as an empty message.
     const emptyResponse = await MessageInterface.insert(
@@ -98,13 +99,16 @@ export default class Responder {
     onAppendMessage(output)
 
     // Then streaming begins and incoming tokens are relayed back to the client.
-    await Responder.stream(
+    const response = await Responder.stream(
       windowId,
       model,
       context,
       emptyResponse,
       onUpdateMessage,
     )
+
+    // All completions are saved to DB:
+    await CompletionInterface.insert(CompletionType.GENERAL, model, context, {role: 'assistant', content: response})
   }
 
   static stream(
@@ -148,6 +152,8 @@ export default class Responder {
             return
           }
           startTimeout()
+
+          // console.log("res.choices[0]", res.choices[0]);
 
           // Check the finish_reason:
           const finishReason = res.choices[0]?.finish_reason
@@ -193,8 +199,6 @@ export default class Responder {
             // console.debug('Autocompletion matched delta, no change.')
             return
           }
-
-
 
           if (finishReason === 'stop') {
             // todo: If stop reached but autocompletion.text is empty still,

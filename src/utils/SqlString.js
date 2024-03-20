@@ -1,5 +1,3 @@
-// @flow
-
 var ID_GLOBAL_REGEXP    = /`/g;
 var QUAL_GLOBAL_REGEXP  = /\./g;
 var CHARS_GLOBAL_REGEXP = /[\0\b\t\n\r\x1a\"\'\\]/g; // eslint-disable-line no-control-regex

@@ -1,24 +1,22 @@
 // @flow
 
-import { sqltag, join } from 'common/sql-template-tag'
-import Config from 'common/src/Config.js'
-import database from '../../mysql/database.js'
-import type {GPTMessage} from "../../rest/InferenceRest.js";
+import sqltag, { join } from '@taylorgoolsby/sql-template-tag'
+import database from '../database.js'
 import type {CompletionTypeEnum} from "./CompletionSchema.mjs";
+import type { GPTMessage } from "../../types/GPTMessage.js";
+import type { ModelConfig } from "../../types/ModelConfig.js";
 
 export default class CompletionInterface {
-  static async insert(agencyConversationId: string, type: CompletionTypeEnum, model: string, inputs: Array<GPTMessage>, output: GPTMessage): Promise<number> {
+  static async insert(type: CompletionTypeEnum, model: ModelConfig, inputs: Array<GPTMessage>, output: GPTMessage): Promise<number> {
     const query = sqltag`
-      INSERT INTO ${Config.dbPrefix}_Completion (
-        agencyConversationId,
+      INSERT INTO Completion (
         type,
         model,
         inputs,
         output
       ) VALUES (
-        UNHEX(${agencyConversationId}),
         ${type},
-        ${model},
+        ${JSON.stringify(model)},
         ${JSON.stringify(inputs)},
         ${JSON.stringify(output)}
       );

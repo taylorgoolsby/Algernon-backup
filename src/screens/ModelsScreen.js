@@ -10,8 +10,8 @@ import {
   SafeAreaView,
   StyleSheet,
 } from 'react-native'
-import preferencesStore from '../PreferencesStore.js'
-import type {EditableModelConfig} from '../PreferencesStore.js'
+import preferencesStore from '../stores/PreferencesStore.js'
+import type {EditableModelConfig} from '../stores/PreferencesStore.js'
 
 const defaultModel: EditableModelConfig = {
   title: '',

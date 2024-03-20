@@ -12,13 +12,18 @@ export default class ChatIteration {
     windowId: number,
     model: ModelConfig,
     userPrompt: string,
-    onMessageFromAgent: (output: AppendMessageOutput) => any,
+    onAppendMessage: (output: AppendMessageOutput) => any,
     onUpdateMessage: (output: UpdateMessageOutput) => any,
     onError: (error: Error) => any,
   ) {
     Promise.resolve().then(async () => {
       try {
-        await MessageInterface.insert(windowId, MessageRole.USER, userPrompt, true);
+        const userMessage = await MessageInterface.insert(windowId, MessageRole.USER, userPrompt, true);
+
+        onAppendMessage({
+          windowId,
+          message: userMessage,
+        })
 
         const allMessages = await MessageInterface.getAll(windowId);
 
@@ -31,7 +36,7 @@ export default class ChatIteration {
           shortTermSummary,
           longTermSummary,
           userPrompt,
-          onMessageFromAgent,
+          onAppendMessage,
           onUpdateMessage,
         );
       } catch (err) {

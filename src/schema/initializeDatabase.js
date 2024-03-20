@@ -12,22 +12,22 @@ const RESET_DATABASE = Config.stage === 'debug' && false
 
 export async function initializeDatabase() {
   try {
-    // if (RESET_DATABASE) {
-    //   console.log('Deleting database.')
-    //   await new Promise(async (resolve, reject) => {
-    //     await SQLite.deleteDatabase(
-    //       {name: databaseName, location: 'Documents'},
-    //       () => {
-    //         console.log('Database deleted.')
-    //         resolve()
-    //       },
-    //       error => {
-    //         console.error(error)
-    //         reject(error)
-    //       },
-    //     )
-    //   })
-    // }
+    if (RESET_DATABASE) {
+      console.log('Deleting database.')
+      await new Promise(async (resolve, reject) => {
+        await SQLite.deleteDatabase(
+          {name: databaseName, location: 'Documents'},
+          () => {
+            console.log('Database deleted.')
+            resolve()
+          },
+          error => {
+            console.error(error)
+            reject(error)
+          },
+        )
+      })
+    }
 
     await new Promise(async (resolve, reject) => {
       const instance = await SQLite.openDatabase(

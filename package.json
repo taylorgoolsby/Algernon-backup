@@ -5,6 +5,7 @@
   "scripts": {
     "build": "rm -rf lib && flow-remove-types src/ -d lib/ && node scripts/generate-sql.mjs",
     "android": "react-native run-android",
+    "sim": "react-native run-ios --simulator=\"iPhone 15\"",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "npm run build && react-native start",
