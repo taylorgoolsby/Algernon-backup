@@ -13,7 +13,7 @@ import {
 import ChatIteration from '../agent/ChatIteration.js'
 import {observer} from 'mobx-react'
 import type {ModelConfig} from '../types/ModelConfig.js'
-import modelStore from '../ModelStore.js'
+import preferencesStore from '../PreferencesStore.js'
 import {BlurView} from '@react-native-community/blur'
 
 const ChatScreen: any = observer(({navigation}) => {
@@ -23,12 +23,12 @@ const ChatScreen: any = observer(({navigation}) => {
   const [isExpanded, setIsExpanded] = useState(false)
 
   const handleModelSelect = (model: ModelConfig) => {
-    modelStore.selectModel(model)
+    preferencesStore.selectModel(model)
     setIsExpanded(false) // Collapse the list after selection
   }
 
   const sendMessage = async () => {
-    if (!modelStore.selectedModel) {
+    if (!preferencesStore.selectedModel) {
       console.error('No model selected')
       return
     }
@@ -36,7 +36,7 @@ const ChatScreen: any = observer(({navigation}) => {
     const response = ''
     ChatIteration.iterate(
       0,
-      modelStore.selectedModel,
+      preferencesStore.selectedModel,
       input,
       output => {
         console.log('output', output)
@@ -61,22 +61,22 @@ const ChatScreen: any = observer(({navigation}) => {
     setInput('')
   }
 
-  console.log('modelStore.selectedModel', modelStore.selectedModel)
-  console.log("modelStore.selectedModel.apiKey", modelStore.selectedModel?.apiKey);
+  console.log('preferencesStore.selectedModel', preferencesStore.selectedModel)
+  console.log("preferencesStore.selectedModel.apiKey", preferencesStore.selectedModel?.apiKey);
 
   return (
     <View style={styles.container}>
-      {!!modelStore.selectedModel?.title ? (
+      {!!preferencesStore.selectedModel?.title ? (
         <TouchableOpacity
           onPress={() => setIsExpanded(!isExpanded)}
           style={styles.settingsButton}>
           <Text style={styles.settingsButtonText}>
-            {modelStore.selectedModel.title}
+            {preferencesStore.selectedModel.title}
           </Text>
         </TouchableOpacity>
       ) : (
         <TouchableOpacity
-          onPress={() => navigation.navigate('Settings')}
+          onPress={() => navigation.navigate('Models')}
           style={styles.settingsButton}>
           <Text style={styles.settingsButtonText}>Configure Models</Text>
         </TouchableOpacity>
@@ -116,7 +116,7 @@ const ChatScreen: any = observer(({navigation}) => {
           blurAmount={10} // Adjust the blur amount to get the desired effect
         >
           <ScrollView style={styles.listContainer}>
-            {modelStore.models.map((model, index) => (
+            {preferencesStore.models.map((model, index) => (
               <Button
                 key={index}
                 title={model.title}

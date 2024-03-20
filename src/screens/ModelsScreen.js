@@ -2,8 +2,8 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import {View, Text, TextInput, Button, ScrollView, StyleSheet} from 'react-native';
-import modelStore from '../ModelStore';
-import type {EditableModelConfig} from '../ModelStore';
+import preferencesStore from '../PreferencesStore.js';
+import type {EditableModelConfig} from '../PreferencesStore.js';
 
 const defaultModel: EditableModelConfig = {
   title: '',
@@ -13,12 +13,12 @@ const defaultModel: EditableModelConfig = {
 };
 
 const ModelsScreen: any = () => {
-  const [models, setModels] = useState<Array<EditableModelConfig>>(modelStore.editableModels);
+  const [models, setModels] = useState<Array<EditableModelConfig>>(preferencesStore.editableModels);
 
   const saveModels = () => {
     Promise.resolve().then(async () => {
       try {
-        await modelStore.save(models);
+        await preferencesStore.save(models);
         console.log('Models saved successfully');
       } catch (error) {
         console.error('Failed to save models:', error);

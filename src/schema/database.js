@@ -57,57 +57,55 @@ export async function query(queryObject: {
   }
 }
 
-export function initializeDatabase() {
-  Promise.resolve().then(async () => {
-    try {
-      // if (RESET_DATABASE) {
-      //   console.log('Deleting database.')
-      //   await new Promise(async (resolve, reject) => {
-      //     await SQLite.deleteDatabase(
-      //       {name: databaseName, location: 'Documents'},
-      //       () => {
-      //         console.log('Database deleted.')
-      //         resolve()
-      //       },
-      //       error => {
-      //         console.error(error)
-      //         reject(error)
-      //       },
-      //     )
-      //   })
-      // }
+export async function initializeDatabase() {
+  try {
+    // if (RESET_DATABASE) {
+    //   console.log('Deleting database.')
+    //   await new Promise(async (resolve, reject) => {
+    //     await SQLite.deleteDatabase(
+    //       {name: databaseName, location: 'Documents'},
+    //       () => {
+    //         console.log('Database deleted.')
+    //         resolve()
+    //       },
+    //       error => {
+    //         console.error(error)
+    //         reject(error)
+    //       },
+    //     )
+    //   })
+    // }
 
-      await new Promise(async (resolve, reject) => {
-        db = await SQLite.openDatabase(
-          {name: databaseName, location: 'Documents'},
-          () => {
-            console.log('Database opened successfully.')
-            resolve()
-          },
-          error => {
-            console.error('Error opening database:', error)
-            reject(error)
-          },
-        )
-      })
+    await new Promise(async (resolve, reject) => {
+      db = await SQLite.openDatabase(
+        {name: databaseName, location: 'Documents'},
+        () => {
+          console.log('Database opened successfully.')
+          resolve()
+        },
+        error => {
+          console.error('Error opening database:', error)
+          reject(error)
+        },
+      )
+    })
 
-      const createTableStatements = createTables
-        .split(';')
-        .filter(a => !!a)
-        .map(statement => statement.trim() + ';')
-      for (const statement of createTableStatements) {
-        await query({sql: statement, values: []})
-      }
-      console.log('Tables created successfully.')
-
-      await migrate()
-
-      // Handle DB migrations here
-      console.log('Database initialized')
-    } catch (error) {
-      console.error('Database initialization failed:', error)
+    const createTableStatements = createTables
+      .split(';')
+      .filter(a => !!a)
+      .map(statement => statement.trim() + ';')
+    for (const statement of createTableStatements) {
+      await query({sql: statement, values: []})
     }
-  })
+    console.log('Tables created successfully.')
+
+    await migrate()
+
+    // Handle DB migrations here
+    console.log('Database initialized')
+  } catch (error) {
+    console.error('Database initialization failed:', error)
+  }
 }
 
 async function migrate() {

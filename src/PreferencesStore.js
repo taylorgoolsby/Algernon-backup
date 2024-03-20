@@ -2,7 +2,7 @@
 
 import RNFS from 'react-native-fs'
 import type {ModelConfig} from './types/ModelConfig.js'
-import { makeObservable, observable } from "mobx";
+import {makeObservable, observable} from 'mobx'
 
 /*
 export type ModelConfig = {
@@ -23,17 +23,17 @@ export type EditableModelConfig = {
   completionOptions: Array<{name: string, value: string}>,
 }
 
-const path = `${RNFS.DocumentDirectoryPath}/models.json`
+const path = `${RNFS.DocumentDirectoryPath}/preferences.json`
 
-export class ModelStore {
-  models: Array<ModelConfig>
-  editableModels: Array<EditableModelConfig>
+export class PreferencesStore {
+  models: Array<ModelConfig> = []
+  editableModels: Array<EditableModelConfig> = []
   selectedModel: ?ModelConfig = null
 
   constructor() {
     makeObservable(this, {
-      selectedModel: observable
-    });
+      selectedModel: observable,
+    })
   }
 
   async save(models: Array<EditableModelConfig>): Promise<void> {
@@ -47,21 +47,28 @@ export class ModelStore {
       })
     }
 
-    console.log("saving models", models);
+    const modelsToSave = models
+      .filter(model => !!model.local || !!model.title)
+      .map(model => {
+        return {
+          ...model,
+          completionOptions: model.completionOptions.filter(
+            option => !!option.name,
+          ),
+        }
+      })
 
-    const modelsToSave = models.filter(
-      model =>
-        !!model.local || !!model.title,
-    ).map((model) => {
-      return {
-        ...model,
-        completionOptions: model.completionOptions.filter(option => (!!option.name))
-      }
-    })
+    const preferences = {
+      editableModels: modelsToSave,
+      selectedModel: this.selectedModel,
+    }
 
-    await RNFS.writeFile(path, JSON.stringify(modelsToSave), 'utf8')
+    console.log('saving preferences', JSON.stringify(preferences))
+
+    await RNFS.writeFile(path, JSON.stringify(preferences), 'utf8')
 
     // Convert models from EditableModelConfig to ModelConfig:
+    this.editableModels = modelsToSave
     this.models = modelsToSave.map((model: EditableModelConfig) => {
       return {
         title: model.title,
@@ -78,17 +85,24 @@ export class ModelStore {
 
   load(): void {
     Promise.resolve().then(async () => {
-      let models: Array<EditableModelConfig> = []
+      let preferences
 
       try {
-        const modelsJson = await RNFS.readFile(path, 'utf8')
-        models = JSON.parse(modelsJson)
+        const preferencesJson = await RNFS.readFile(path, 'utf8')
+        console.log('Preferences loaded', preferencesJson)
+        preferences = JSON.parse(preferencesJson)
       } catch (err) {
         console.error(err)
+        preferences = {
+          editableModels: [],
+          selectedModel: null,
+        }
       }
 
-      if (!models.length) {
-        models = [
+      this.editableModels = preferences.editableModels ?? []
+
+      if (!this.editableModels.length) {
+        this.editableModels = [
           {
             local: true,
             title: 'Built-In Phi-2',
@@ -99,14 +113,9 @@ export class ModelStore {
         ]
       }
 
-      console.log('Models loaded', models)
-
       // Convert models from EditableModelConfig to ModelConfig:
-      this.models = models
-        .filter(
-          model =>
-            !!model.local || !!model.title,
-        )
+      this.models = this.editableModels
+        .filter(model => !!model.local || !!model.title)
         .map((model: EditableModelConfig) => {
           return {
             title: model.title,
@@ -124,17 +133,18 @@ export class ModelStore {
       // console.log("this.selectedModel", this.selectedModel);
       if (!this.selectedModel) {
         // console.log('setting default model')
-        this.selectedModel = this.models[0]
+        this.selectedModel = preferences.selectedModel || this.models[0]
       }
-
-      this.editableModels = models
     })
   }
 
   selectModel(model: ModelConfig) {
     this.selectedModel = model
+    this.save(this.editableModels).catch(err => {
+      console.error(err)
+    })
   }
 }
 
-const modelStore: ModelStore = new ModelStore();
-export default modelStore;
+const preferencesStore: PreferencesStore = new PreferencesStore()
+export default preferencesStore
