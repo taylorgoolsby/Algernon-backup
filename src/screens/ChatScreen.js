@@ -61,9 +61,6 @@ const ChatScreen: any = observer(({navigation}) => {
     setInput('')
   }
 
-  console.log('preferencesStore.selectedModel', preferencesStore.selectedModel)
-  console.log("preferencesStore.selectedModel.apiKey", preferencesStore.selectedModel?.apiKey);
-
   return (
     <View style={styles.container}>
       {!!preferencesStore.selectedModel?.title ? (
