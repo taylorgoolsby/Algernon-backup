@@ -1,5 +1,7 @@
 // @flow
 
+import { format } from "../utils/SqlString.js";
+
 let db = null
 
 export function setDB(instance: any) {
@@ -13,17 +15,19 @@ function flattenSql(queryObject: {
   // The values of queryObject.sql and queryObject.values are arrays that you would be received by a template tag function.
   // This function flattens them into a single string.
 
-  if (!queryObject.strings) {
-    return queryObject.sql
-  }
-  let flattened = ''
-  for (let i = 0; i < queryObject.strings.length; i++) {
-    flattened += queryObject.strings[i]
-    if (queryObject.values[i]) {
-      flattened += queryObject.values[i]
-    }
-  }
-  return flattened.trim()
+  return format(queryObject.sql, queryObject.values)
+
+  // if (!queryObject.strings) {
+  //   return queryObject.sql
+  // }
+  // let flattened = ''
+  // for (let i = 0; i < queryObject.strings.length; i++) {
+  //   flattened += queryObject.strings[i]
+  //   if (queryObject.values[i]) {
+  //     flattened += queryObject.values[i]
+  //   }
+  // }
+  // return flattened.trim()
 }
 
 export async function query(queryObject: {
@@ -39,7 +43,9 @@ export async function query(queryObject: {
     console.log(flattenSql(queryObject))
 
     const [results] = await db.executeSql(queryObject.sql, queryObject.values)
-    if (results.rows) {
+    if (results.insertId) {
+      return results
+    } else if (results.rows) {
       return results.rows.raw()
     } else {
       return results

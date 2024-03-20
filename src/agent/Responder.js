@@ -206,7 +206,8 @@ export default class Responder {
               .then(async () => {
                 // console.debug('saving complete message: ', finalText)
                 await MessageInterface.completeData(
-                  response.messageId
+                  response.messageId,
+                  autocompletion
                 )
                 resolve(autocompletion)
               })

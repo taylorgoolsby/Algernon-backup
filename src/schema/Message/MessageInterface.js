@@ -120,10 +120,12 @@ export default class MessageInterface {
 
   static async completeData(
     messageId: number,
+    text: string,
   ): Promise<any> {
     const query = sqltag`
       UPDATE Message SET
         completed = 1,
+        text = ${text},
         dateUpdated = CURRENT_TIMESTAMP
       WHERE messageId = ${messageId};
     `
