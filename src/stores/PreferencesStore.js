@@ -118,6 +118,7 @@ export class PreferencesStore {
       .filter(model => !!model.local || !!model.title)
       .map((model: EditableModelConfig) => {
         return {
+          local: model.local,
           title: model.title,
           apiBase: model.apiBase,
           apiKey: model.apiKey,

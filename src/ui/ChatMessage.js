@@ -4,8 +4,17 @@ import React, {useState} from 'react'
 import {View, Text, StyleSheet} from 'react-native'
 import type {MessageSQL} from '../schema/Message/MessageSchema.mjs'
 import {MessageRole} from '../schema/Message/MessageSchema.mjs'
+import Spinner from './Spinner.js'
 
-const ChatMessage = ({first, message, footerHeight}: {first: boolean, message: MessageSQL, footerHeight: number}): any => {
+const ChatMessage = ({
+  first,
+  message,
+  footerHeight,
+}: {
+  first: boolean,
+  message: MessageSQL,
+  footerHeight: number,
+}): any => {
   const [isSingleLine, setIsSingleLine] = useState(true)
 
   const handleLayout = (event: any) => {
@@ -27,15 +36,19 @@ const ChatMessage = ({first, message, footerHeight}: {first: boolean, message: M
         messageStyle,
         first ? {marginBottom: footerHeight + 12} : {},
       ]}>
-      <Text
-        style={
-          message.role === MessageRole.USER
-            ? styles.userMessageText
-            : styles.aiMessageText
-        }
-        onLayout={handleLayout}>
-        {message.text}
-      </Text>
+      {!!message.text ? (
+        <Text
+          style={
+            message.role === MessageRole.USER
+              ? styles.userMessageText
+              : styles.aiMessageText
+          }
+          onLayout={handleLayout}>
+          {message.text}
+        </Text>
+      ) : (
+        <Spinner />
+      )}
     </View>
   )
 }

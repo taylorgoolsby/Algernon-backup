@@ -17,7 +17,7 @@ import {
   Modal,
   Platform,
 } from 'react-native'
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/Ionicons'
 import ChatMessage from './ChatMessage.js'
 import ChatIteration from '../agent/ChatIteration.js'
 import {observer} from 'mobx-react'
@@ -25,15 +25,18 @@ import type {ModelConfig} from '../types/ModelConfig.js'
 import preferencesStore from '../stores/PreferencesStore.js'
 import {BlurView} from '@react-native-community/blur'
 import chatStore from '../stores/ChatStore.js'
+import Spinner from "./Spinner.js";
 
-const AnimatedIcon = Animated.createAnimatedComponent(Icon);
+const AnimatedIcon = Animated.createAnimatedComponent(Icon)
 
 const ChatScreen: any = observer(({navigation}) => {
   const messages = [...chatStore.messages]
   const [input, setInput] = useState('')
   const [isExpanded, setIsExpanded] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
-  const canPost = !!input.trim() && messages[0].completed
+  // const canPost = !!input.trim() && messages[0].completed
+  const canPost = !!input.trim()
 
   // scrollToBottom when message updates the first time (initial load):
   const initialLoad = useRef(true)
@@ -59,6 +62,10 @@ const ChatScreen: any = observer(({navigation}) => {
       return
     }
     if (!canPost) return
+    if (preferencesStore.selectedModel.local) {
+      setErrorMessage('Local models are not supported yet.')
+      return
+    }
     ChatIteration.iterate(
       chatStore.windowId,
       preferencesStore.selectedModel,
@@ -71,6 +78,7 @@ const ChatScreen: any = observer(({navigation}) => {
       },
       error => {
         console.error(error)
+        setErrorMessage(error.message)
       },
     )
     setInput('')
@@ -181,7 +189,13 @@ const ChatScreen: any = observer(({navigation}) => {
           keyExtractor={message => message.messageId}
           renderItem={item => {
             const message = item.item
-            return <ChatMessage first={item.index === 0} message={message} footerHeight={footerHeight}/>
+            return (
+              <ChatMessage
+                first={item.index === 0}
+                message={message}
+                footerHeight={footerHeight}
+              />
+            )
           }}
         />
       </KeyboardAvoidingView>
@@ -215,9 +229,8 @@ const ChatScreen: any = observer(({navigation}) => {
         // presentationStyle={"formSheet"}
         visible={isExpanded}
         onRequestClose={() => {
-          setIsExpanded(false);
-        }}
-      >
+          setIsExpanded(false)
+        }}>
         <BlurView style={{flex: 1}}>
           <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
             <ScrollView style={styles.settingsList}>
@@ -242,6 +255,31 @@ const ChatScreen: any = observer(({navigation}) => {
         </BlurView>
       </Modal>
 
+      <Modal
+        animationType="fade"
+        transparent={true}
+        // presentationStyle={"formSheet"}
+        visible={!!errorMessage}
+        onRequestClose={() => {
+          setErrorMessage('')
+        }}>
+        <TouchableWithoutFeedback
+          onPress={() => {
+            setErrorMessage('')
+          }}>
+          <View style={{flex: 1}}>
+            <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
+              <BlurView
+                style={styles.errorBox}
+                blurType="dark" blurAmount={70}
+              >
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              </BlurView>
+            </SafeAreaView>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
       {/*{isExpanded && (*/}
       {/*  <View style={styles.settingsModal}>*/}
       {/*    <BlurView style={styles.settingsContainer} blurType="regular">*/}
@@ -259,8 +297,7 @@ const ChatScreen: any = observer(({navigation}) => {
           style={styles.footerBlur}
           // blurType="dark"
           blurAmount={70}
-          onLayout={onLayoutFooter}
-        >
+          onLayout={onLayoutFooter}>
           <SafeAreaView style={styles.safeArea}>
             <TouchableWithoutFeedback onPress={focusInput}>
               <View style={styles.inputBar}>
@@ -281,15 +318,19 @@ const ChatScreen: any = observer(({navigation}) => {
                 {/*  onPress={sendMessage}*/}
                 {/*  color={'#fff'}*/}
                 {/*/>*/}
-                <AnimatedIcon
-                  name={"arrow-up-circle"}
-                  size={30} color={
-                    colorAnimation.interpolate({
+                <TouchableOpacity onPress={sendMessage}>
+                  <AnimatedIcon
+                    name={'arrow-up-circle'}
+                    size={30}
+                    color={colorAnimation.interpolate({
                       inputRange: [0, 1],
-                      outputRange: ['rgba(255, 255, 255, 0.5)', 'rgba(255, 255, 255, 0.97)']
-                    })
-                  }
-                />
+                      outputRange: [
+                        'rgba(255, 255, 255, 0.5)',
+                        'rgba(255, 255, 255, 0.97)',
+                      ],
+                    })}
+                  />
+                </TouchableOpacity>
               </View>
             </TouchableWithoutFeedback>
           </SafeAreaView>
@@ -403,6 +444,20 @@ const styles = StyleSheet.create({
     height: 50,
     padding: 0,
   },
+  errorBox: {
+    paddingTop: 10,
+    paddingBottom: 10,
+    paddingLeft: 25,
+    paddingRight: 25,
+    marginLeft: 40,
+    marginRight: 40,
+    borderRadius: 24,
+  },
+  errorText: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: 'rgba(255, 255, 255, 0.97)'
+  }
 })
 
 export default ChatScreen
