@@ -133,46 +133,46 @@ const ChatScreen: any = observer(({navigation}) => {
     }
   }, [canPost])
 
-  const moveAnimation = useRef(new Animated.Value(0)).current
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(moveAnimation, {
-          toValue: 100, // Move up
-          duration: 5000, // Duration of one half of the sine wave
-          easing: t => {
-            return Math.sin(t * Math.PI * 2)
-          },
-          useNativeDriver: true,
-        }),
-        // Animated.timing(moveAnimation, {
-        //   toValue: 0, // Move back to original position
-        //   duration: 1000, // Duration of the other half
-        //   easing: Easing.circle,
-        //   useNativeDriver: true,
-        // }),
-      ]),
-    ).start()
-  }, [moveAnimation])
+  // const moveAnimation = useRef(new Animated.Value(0)).current
+  // useEffect(() => {
+  //   Animated.loop(
+  //     Animated.sequence([
+  //       Animated.timing(moveAnimation, {
+  //         toValue: 100, // Move up
+  //         duration: 5000, // Duration of one half of the sine wave
+  //         easing: t => {
+  //           return Math.sin(t * Math.PI * 2)
+  //         },
+  //         useNativeDriver: true,
+  //       }),
+  //       // Animated.timing(moveAnimation, {
+  //       //   toValue: 0, // Move back to original position
+  //       //   duration: 1000, // Duration of the other half
+  //       //   easing: Easing.circle,
+  //       //   useNativeDriver: true,
+  //       // }),
+  //     ]),
+  //   ).start()
+  // }, [moveAnimation])
 
   return (
     <View style={styles.container}>
       <View style={styles.background}>
-        <Animated.View
-          style={[
-            styles.backgroundOrb,
-            {
-              transform: [
-                {
-                  translateY: moveAnimation.interpolate({
-                    inputRange: [0, 100],
-                    outputRange: [0, -100], // Adjust these values for the amplitude of the sine wave
-                  }),
-                },
-              ],
-            },
-          ]}
-        />
+        {/*<Animated.View*/}
+        {/*  style={[*/}
+        {/*    styles.backgroundOrb,*/}
+        {/*    {*/}
+        {/*      transform: [*/}
+        {/*        {*/}
+        {/*          translateY: moveAnimation.interpolate({*/}
+        {/*            inputRange: [0, 100],*/}
+        {/*            outputRange: [0, -100], // Adjust these values for the amplitude of the sine wave*/}
+        {/*          }),*/}
+        {/*        },*/}
+        {/*      ],*/}
+        {/*    },*/}
+        {/*  ]}*/}
+        {/*/>*/}
         <BlurView
           style={styles.backgroundBlurView}
           blurType="ultraThinMaterialDark" // or "dark", "xlight", etc., depending on your design needs
@@ -319,7 +319,7 @@ const ChatScreen: any = observer(({navigation}) => {
                   multiline
                   value={input}
                   onChangeText={setInput}
-                  placeholder="Type a message"
+                  placeholder="Message"
                   placeholderTextColor="#aaa"
                 />
                 {/*$FlowFixMe*/}
@@ -368,14 +368,15 @@ const styles = StyleSheet.create({
   },
   backgroundOrb: {
     position: 'absolute',
-    top: 0,
+    top: 100,
     bottom: 0,
-    left: 50,
+    left: 100,
     right: 0,
-    height: 20,
-    width: 20,
-    borderRadius: 10,
-    backgroundColor: 'red',
+    height: 200,
+    width: 200,
+    borderRadius: 100,
+    // backgroundColor: '#010599',
+    backgroundColor: '#009',
   },
   backgroundBlurView: {
     flex: 1,
@@ -450,6 +451,7 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.97)',
     backgroundColor: 'transparent',
     paddingTop: 0,
+    marginRight: 10,
   },
   sendButton: {
     height: 50,
