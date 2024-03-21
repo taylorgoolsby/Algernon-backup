@@ -12,6 +12,22 @@
 RCT_EXPORT_MODULE();
 
 // Method to get the total number of vectors in the index
+RCT_EXPORT_METHOD(init:(NSInteger)k
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    if (!index) {
+        // If the index is not loaded or initialized, attempt to read from file
+        if (![self readIndexFromFile]) {
+            [self initializeAndTrainIndexWithDimension:(int)k];
+            [self writeIndexToFile];
+        }
+    }
+    
+    // Return the total number of vectors
+    resolve(@(YES));
+}
+
+// Method to get the total number of vectors in the index
 RCT_EXPORT_METHOD(ntotal:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
     if (!index) {
@@ -77,10 +93,14 @@ RCT_EXPORT_METHOD(searchVectors:(NSArray<NSNumber *> *)queryVector
                   numberOfResults:(NSInteger)k
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
-    // Ensure the index is loaded
-    if (!index && ![self readIndexFromFile]) {
-        reject(@"index_error", @"Index is not initialized or loaded", nil);
-        return;
+    // Ensure the index is loaded or initialized
+    if (!index) {
+        // Attempt to read the index from file first
+        if (![self readIndexFromFile]) {
+            // If reading fails, initialize a new index
+            [self initializeAndTrainIndexWithDimension:(int)queryVector.count];
+            [self writeIndexToFile];
+        }
     }
     
     // Convert NSArray to C array for the query vector

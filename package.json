@@ -31,6 +31,7 @@
     "react-native-sqlite-storage": "6.0.1",
     "react-native-sse": "github:taylorgoolsby/react-native-sse#fa62189ca131bde60952be4e686ca84dc63e5b1c",
     "react-native-url-polyfill": "2.0.0",
+    "react-native-vector-icons": "^10.0.3",
     "traverse": "0.6.8",
     "use-debounce": "^10.0.0"
   },

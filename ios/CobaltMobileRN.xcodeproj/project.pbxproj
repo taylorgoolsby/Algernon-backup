@@ -20,6 +20,7 @@
 		8C33BC3C2BA430B60023A2D9 /* Transformers in Frameworks */ = {isa = PBXBuildFile; productRef = 8C33BC3B2BA430B60023A2D9 /* Transformers */; };
 		8C33BC3E2BA43DEC0023A2D9 /* BertTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C33BC3D2BA43DEC0023A2D9 /* BertTokenizer.swift */; };
 		8C33BC402BA563BE0023A2D9 /* all-MiniLM-L6-v2-coreml-float32.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 8C33BC3F2BA563BE0023A2D9 /* all-MiniLM-L6-v2-coreml-float32.mlpackage */; };
+		8C99CED92BACA4E600400086 /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8C99CED82BACA4E600400086 /* Ionicons.ttf */; };
 		8C9AAF892BAB279300FF60EF /* Tiktoken in Frameworks */ = {isa = PBXBuildFile; productRef = 8C9AAF882BAB279300FF60EF /* Tiktoken */; };
 		8C9AAF8D2BAB2B4100FF60EF /* NativeTokenizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C9AAF8C2BAB2B4100FF60EF /* NativeTokenizer.m */; };
 		8C9AAF8F2BAB2C7300FF60EF /* NativeTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C9AAF8E2BAB2C7300FF60EF /* NativeTokenizer.swift */; };
@@ -81,6 +82,7 @@
 		8C33BC382BA42DD40023A2D9 /* MiniLM-vocab.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "MiniLM-vocab.txt"; sourceTree = "<group>"; };
 		8C33BC3D2BA43DEC0023A2D9 /* BertTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BertTokenizer.swift; sourceTree = "<group>"; };
 		8C33BC3F2BA563BE0023A2D9 /* all-MiniLM-L6-v2-coreml-float32.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = "all-MiniLM-L6-v2-coreml-float32.mlpackage"; sourceTree = "<group>"; };
+		8C99CED82BACA4E600400086 /* Ionicons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Ionicons.ttf; path = "../../node_modules/react-native-vector-icons/Fonts/Ionicons.ttf"; sourceTree = "<group>"; };
 		8C9AAF8C2BAB2B4100FF60EF /* NativeTokenizer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NativeTokenizer.m; sourceTree = "<group>"; };
 		8C9AAF8E2BAB2C7300FF60EF /* NativeTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeTokenizer.swift; sourceTree = "<group>"; };
 		8CACCE472BA29DD2004643C2 /* Evaluate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Evaluate.swift; sourceTree = "<group>"; };
@@ -156,6 +158,7 @@
 		13B07FAE1A68108700A75B9A /* CobaltMobileRN */ = {
 			isa = PBXGroup;
 			children = (
+				8C174FB12BACA2510085DF07 /* Fonts */,
 				8CFD0A252BA3EDF40080EBE1 /* Models */,
 				8CDF7ACA2BA3C1E700C5F5FE /* CobaltMobileRNRelease.entitlements */,
 				8CACCE612BA2C3EF004643C2 /* CobaltMobileRNDebug.entitlements */,
@@ -218,6 +221,14 @@
 				00E356EE1AD99517003FC87E /* CobaltMobileRNTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		8C174FB12BACA2510085DF07 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				8C99CED82BACA4E600400086 /* Ionicons.ttf */,
+			);
+			path = Fonts;
 			sourceTree = "<group>";
 		};
 		8CFA36452BA29D57009546C7 /* LLM */ = {
@@ -376,6 +387,7 @@
 			files = (
 				8C33BC392BA42DD40023A2D9 /* MiniLM-vocab.txt in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
+				8C99CED92BACA4E600400086 /* Ionicons.ttf in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

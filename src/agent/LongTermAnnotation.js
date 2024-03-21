@@ -8,6 +8,10 @@ import { NativeModules } from 'react-native';
 
 const { TextFeatureExtractor, FaissBridge } = NativeModules;
 
+FaissBridge.init(384).then(() => console.log('faiss initialized')).catch(error => {
+  console.error(error);
+})
+
 // const MODEL = 'Xenova/all-MiniLM-L6-v2'
 // const D = 384
 // const INDEX_PATH = 'index.faiss'
