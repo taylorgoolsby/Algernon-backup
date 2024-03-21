@@ -28,6 +28,20 @@ export default class ChatIteration {
         })
 
         const allMessages = await MessageInterface.getAll(windowId);
+        const lastMessage = allMessages[allMessages.length - 1]
+
+        // Show a blank message in the UI while waiting:
+        const emptyResponse = await MessageInterface.insert(
+          windowId,
+          MessageRole.ASSISTANT,
+          '',
+          false
+        )
+        const output: AppendMessageOutput = {
+          windowId,
+          message: emptyResponse,
+        }
+        onAppendMessage(output)
 
         // const shortTermSummary = ''
         const shortTermSummary = await ShortTermSummarization.performCompletion(
@@ -35,7 +49,7 @@ export default class ChatIteration {
           model,
           allMessages,
         )
-        const lastMessage = allMessages[allMessages.length - 1]
+
         LongTermAnnotation.backgroundAnnotate(model, lastMessage)
         // const longTermSummary = ''
         const longTermSummary = await LongTermAnnotation.searchAndSummarize(
@@ -47,6 +61,7 @@ export default class ChatIteration {
         await GeneralResponse.beginStreaming(
           windowId,
           model,
+          emptyResponse,
           shortTermSummary,
           longTermSummary,
           userPrompt,

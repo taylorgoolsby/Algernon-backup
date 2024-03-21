@@ -8,7 +8,7 @@ import Config from "../Config.js";
 
 SQLite.enablePromise(true)
 const databaseName = 'Cobalt.db'
-const RESET_DATABASE = Config.stage === 'debug' && false
+const RESET_DATABASE = false
 
 export async function initializeDatabase() {
   try {

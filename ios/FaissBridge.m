@@ -169,8 +169,17 @@ RCT_EXPORT_METHOD(searchVectors:(NSArray<NSNumber *> *)queryVector
     NSString *filePath = [self indexPath];
     const char *c_filePath = [filePath UTF8String];
     
+    // Check if the file exists before attempting to read it
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    BOOL fileExists = [fileManager fileExistsAtPath:filePath];
+    
+    if (!fileExists) {
+        NSLog(@"Index file does not exist");
+        return NO;
+    }
+    
     // Attempt to read the index from the file
-    FaissIndex *tempIndex = NULL; // Use appropriate index type
+    FaissIndex *tempIndex = NULL;
     if (faiss_read_index_fname(c_filePath, 0, &tempIndex) != 0) {
         NSLog(@"Failed to read index from file");
         return NO;
@@ -182,7 +191,7 @@ RCT_EXPORT_METHOD(searchVectors:(NSArray<NSNumber *> *)queryVector
     }
     
     // Update the index reference to the newly loaded index
-    index = (FaissIndexFlat*)tempIndex; // Cast as necessary for your specific index type
+    index = (FaissIndexFlat*)tempIndex;
     
     return YES;
 }

@@ -40,9 +40,9 @@ class BertTokenizer {
       
         var tokens: [String] = []
         for token in basicTokenizer.tokenize(text: text.lowercased()) {
-            print("basic token: \(token)")
+//            print("basic token: \(token)")
             for subToken in wordpieceTokenizer.tokenize(word: token) {
-                print("sub token: \(subToken)")
+//                print("sub token: \(subToken)")
                 tokens.append(subToken)
             }
         }

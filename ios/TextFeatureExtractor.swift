@@ -66,17 +66,17 @@ class TextFeatureExtractor: NSObject {
         }
       
         // Assuming hiddenStates.shape = [1, 512, 384]
-        let sequenceLength = hiddenStates.shape[1].intValue
-        let embeddingSize = hiddenStates.shape[2].intValue
+//        let sequenceLength = hiddenStates.shape[1].intValue
+//        let embeddingSize = hiddenStates.shape[2].intValue
         // Example: Print the first 10 embeddings for the first 5 tokens
-        for i in 0..<5 { // Tokens
-            print("Token \(i):")
-            for j in 0..<10 { // Embeddings for each token
-                let index = i * embeddingSize + j // Calculate the correct index
-                let value = hiddenStates[index].floatValue // Get the value at the calculated index
-                print("  Embedding \(j): \(value)")
-            }
-        }
+//        for i in 0..<5 { // Tokens
+//            print("Token \(i):")
+//            for j in 0..<10 { // Embeddings for each token
+//                let index = i * embeddingSize + j // Calculate the correct index
+//                let value = hiddenStates[index].floatValue // Get the value at the calculated index
+//                print("  Embedding \(j): \(value)")
+//            }
+//        }
 
         let features = meanPooling(hiddenStates: hiddenStates, attentionMask: attentionMaskMultiArray)
         let normalizedFeatures = normalizeVector(features)
@@ -86,27 +86,27 @@ class TextFeatureExtractor: NSObject {
     }
   
     // Assuming inputIdsMultiArray and attentionMaskMultiArray have been properly initialized and populated
-    func checkInputValues(inputIds: MLMultiArray, attentionMask: MLMultiArray) {
-        print("Checking input IDs:")
-        for i in 0..<10 {
-            let value = inputIds[i].intValue // Assuming these are integer values
-            print("Input ID at index \(i): \(value)")
-            // Optionally, add a condition to check for unexpected values
-            if value < 0 || value > vocab.count { // Example condition, adjust based on your model's expected input range
-                print("Warning: Unexpected value at index \(i): \(value)")
-            }
-        }
-        
-        print("Checking attention mask:")
-        for i in 0..<10 {
-            let value = attentionMask[i].intValue // Assuming these are integer values
-            print("Attention mask at index \(i): \(value)")
-            // Optionally, add a condition to check for unexpected values
-            if value != 0 && value != 1 { // Attention mask values are expected to be 0 or 1
-                print("Warning: Unexpected value at index \(i): \(value)")
-            }
-        }
-    }
+//    func checkInputValues(inputIds: MLMultiArray, attentionMask: MLMultiArray) {
+//        print("Checking input IDs:")
+//        for i in 0..<10 {
+//            let value = inputIds[i].intValue // Assuming these are integer values
+//            print("Input ID at index \(i): \(value)")
+//            // Optionally, add a condition to check for unexpected values
+//            if value < 0 || value > vocab.count { // Example condition, adjust based on your model's expected input range
+//                print("Warning: Unexpected value at index \(i): \(value)")
+//            }
+//        }
+//        
+//        print("Checking attention mask:")
+//        for i in 0..<10 {
+//            let value = attentionMask[i].intValue // Assuming these are integer values
+//            print("Attention mask at index \(i): \(value)")
+//            // Optionally, add a condition to check for unexpected values
+//            if value != 0 && value != 1 { // Attention mask values are expected to be 0 or 1
+//                print("Warning: Unexpected value at index \(i): \(value)")
+//            }
+//        }
+//    }
 
 
     private func meanPooling(hiddenStates: MLMultiArray, attentionMask: MLMultiArray) -> [Float] {

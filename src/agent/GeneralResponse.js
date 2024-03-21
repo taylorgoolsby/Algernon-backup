@@ -19,6 +19,7 @@ export default class GeneralResponse {
   static async beginStreaming(
     windowId: number,
     model: ModelConfig,
+    emptyResponse: MessageSQL,
     shortTermSummary: string,
     longTermSummary: string,
     userPrompt: string,
@@ -78,21 +79,6 @@ Personality Traits
       },
     ]
       .filter(Boolean)
-
-    // The response is already added to the database before streaming starts as an empty message.
-    const emptyResponse = await MessageInterface.insert(
-      windowId,
-      MessageRole.ASSISTANT,
-      '',
-      false
-    )
-
-    // Similarly the response is sent to the client as an empty message to start.
-    const output: AppendMessageOutput = {
-      windowId,
-      message: emptyResponse,
-    }
-    onAppendMessage(output)
 
     // Then streaming begins and incoming tokens are relayed back to the client.
     const response = await GeneralResponse.stream(

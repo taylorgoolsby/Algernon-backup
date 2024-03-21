@@ -125,7 +125,63 @@ Generated Annotations:
   "Spread of technologies, religions, and languages via the Silk Road."
 ]
 
-When producing annotations, ensure they are tailored to capture the essence of each significant detail or theme, providing a clear and comprehensive overview of the text's key elements suitable for journaling, brainstorming, or knowledge base management.`,
+When producing annotations, ensure they are tailored to capture the essence of each significant detail or theme, providing a clear and comprehensive overview of the text's key elements suitable for journaling, brainstorming, or knowledge base management.
+
+The following are exmaples for Short Input Text:
+
+Journaling Example for Short Input:
+
+Input Text:
+
+"Today, I went to the beach."
+
+Generated Annotations:
+
+["Beach visit - a day spent outdoors."]
+
+Brainstorming Example for Short Input:
+
+Input Text:
+
+"Thinking of painting my room blue to feel more relaxed."
+
+Generated Annotations:
+
+["Room renovation idea: Painting walls blue for a relaxing atmosphere."]
+
+Knowledge Base Management Example for Short Input:
+
+Input Text:
+
+"The Eiffel Tower was completed in 1889."
+
+Generated Annotations:
+
+["Eiffel Tower completion date: 1889."]
+
+Examples Demonstrating When Not to Annotate:
+
+Example of Non-Annotatable Short Response:
+
+Input Text:
+"yes"
+
+Generated Annotations:
+
+[]
+
+Explanation: This input is a simple affirmation that does not provide any substantial information or context to be annotated.
+
+Example of Non-Annotatable Acknowledgement:
+
+Input Text:
+"ok, got it"
+
+Generated Annotations:
+
+[]
+
+Explanation: Similar to the previous example, this input is an acknowledgement without any informative content, thus not warranting an annotation.`,
       },
       {
         role: 'user',
