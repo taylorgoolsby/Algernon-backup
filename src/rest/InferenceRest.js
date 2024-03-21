@@ -219,12 +219,16 @@ export default class InferenceRest {
     data.messages = messages
     data.stream = false
 
+    console.log('axios start')
+
     const res = await send(
       'POST',
       `${apiBase}/v1/chat/completions`,
       data,
       apiKey,
     )
+
+    console.log('axios end')
 
     if (res.error) {
       if (res.error instanceof Error) {

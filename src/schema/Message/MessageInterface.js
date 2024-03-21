@@ -45,7 +45,6 @@ export default class MessageInterface {
       ORDER BY messageId ${raw(order ?? 'ASC')};
     `
     const rows = await database.query(sql)
-    console.log("rows", rows);
     return rows
   }
 

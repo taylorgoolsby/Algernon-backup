@@ -146,28 +146,21 @@ Input 2:
 Output 2: "Planning a trip to Japan, visiting Tokyo and Kyoto. Unique activities include a tea ceremony in Tokyo and temple tours in Kyoto."
 `
 
-    let input = ''
-
     const nonSystemMessages = previousMessages.filter(
       (m) => m.role.toLowerCase() !== 'system',
     )
 
-    for (let i = nonSystemMessages.length - 1; i >= 0; i--) {
-      const m: MessageSQL = nonSystemMessages[i]
-      const nextInput = `${m.role.toLowerCase()}: ${m.text}\n\n` + input
-      const content = systemMessage + nextInput + `previous summary: ${previousSummary}`
-      const modelName = normalizeModelName(model)
-      const tokens = await NativeTokenizer.tokenizeString(modelName, content)
-      console.log("tokens", tokens);
-      if (SHORT_TERM_COMPLETION_TOKEN_LIMIT < tokens.length) {
-        console.log('short term tokens', tokens.length)
-        break
-      }
-      input = nextInput
-    }
+    const modelName = normalizeModelName(model)
+    const input = await NativeTokenizer.processMessages(
+      systemMessage,
+      nonSystemMessages,
+      previousSummary,
+      modelName,
+      SHORT_TERM_COMPLETION_TOKEN_LIMIT
+    );
 
     // Finally, the previous summary should be in the input string:
-    input += `previous summary: ${previousSummary}` // don't forget to update token counting
+    // input += `previous summary: ${previousSummary}` // don't forget to update token counting
 
     const context = [
       {
@@ -179,8 +172,6 @@ Output 2: "Planning a trip to Japan, visiting Tokyo and Kyoto. Unique activities
         content: input,
       },
     ]
-
-    // console.log('context', context)
 
     const response = await InferenceRest.chatCompletion(model, context)
     const nextSummary = response.choices[0]?.message?.content ?? ''

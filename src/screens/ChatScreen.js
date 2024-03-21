@@ -7,6 +7,7 @@ import {
   Text,
   TextInput,
   Button,
+  ScrollView,
   FlatList,
   TouchableOpacity,
   TouchableWithoutFeedback,
@@ -17,8 +18,8 @@ import {observer} from 'mobx-react'
 import type {ModelConfig} from '../types/ModelConfig.js'
 import preferencesStore from '../stores/PreferencesStore.js'
 import {BlurView} from '@react-native-community/blur'
-import { MessageRole } from "../schema/Message/MessageSchema.mjs";
-import chatStore from "../stores/ChatStore.js";
+import {MessageRole} from '../schema/Message/MessageSchema.mjs'
+import chatStore from '../stores/ChatStore.js'
 
 const ChatScreen: any = observer(({navigation}) => {
   const messages = [...chatStore.messages]
@@ -52,10 +53,10 @@ const ChatScreen: any = observer(({navigation}) => {
       chatStore.windowId,
       preferencesStore.selectedModel,
       input,
-      (output) => {
+      output => {
         chatStore.appendMessage(output)
       },
-      (output) => {
+      output => {
         chatStore.updateMessage(output)
       },
       error => {
@@ -68,13 +69,15 @@ const ChatScreen: any = observer(({navigation}) => {
   // Ref for the TextInput to call focus
   const inputRef = React.useRef(null)
   const focusInput = () => {
-    {/*$FlowFixMe*/}
+    // $FlowFixMe
     inputRef.current.focus()
   }
 
-  const scrollViewRef = React.useRef(null);
+  const scrollViewRef = React.useRef(null)
   const scrollToBottom = () => {
-    {/*$FlowFixMe*/}
+    {
+      /*$FlowFixMe*/
+    }
     // setTimeout(() => {
     //   scrollViewRef.current?.scrollToEnd({animated: true})
     // })
@@ -84,46 +87,43 @@ const ChatScreen: any = observer(({navigation}) => {
     <View style={styles.container}>
       <SafeAreaView style={styles.safeView}>
         <View style={styles.safeView}>
-          {(
-            !!preferencesStore.selectedModel?.title ? (
-              <TouchableOpacity
-                style={styles.settingsButton}
-                onPress={() => setIsExpanded(!isExpanded)}
+          {!!preferencesStore.selectedModel?.title ? (
+            <TouchableOpacity
+              style={styles.settingsButton}
+              onPress={() => setIsExpanded(!isExpanded)}>
+              <BlurView
+                style={styles.settingsButtonBlurView}
+                blurType="regular" // or "dark", "xlight", etc., depending on your design needs
+                blurAmount={10} // Adjust the blur amount to get the desired effect
               >
-                <BlurView
-                  style={styles.settingsButtonBlurView}
-                  blurType="regular" // or "dark", "xlight", etc., depending on your design needs
-                  blurAmount={10} // Adjust the blur amount to get the desired effect
-                >
-                  <Text style={styles.settingsButtonText}>
-                    {preferencesStore.selectedModel.title}
-                  </Text>
-                </BlurView>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                style={styles.settingsButton}
-                onPress={() => navigation.navigate('Models')}
+                <Text style={styles.settingsButtonText}>
+                  {preferencesStore.selectedModel.title}
+                </Text>
+              </BlurView>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.settingsButton}
+              onPress={() => navigation.navigate('Models')}>
+              <BlurView
+                style={styles.settingsButtonBlurView}
+                blurType="regular" // or "dark", "xlight", etc., depending on your design needs
+                blurAmount={10} // Adjust the blur amount to get the desired effect
               >
-                <BlurView
-                  style={styles.settingsButtonBlurView}
-                  blurType="regular" // or "dark", "xlight", etc., depending on your design needs
-                  blurAmount={10} // Adjust the blur amount to get the desired effect
-                >
-                  <Text style={styles.settingsButtonText}>Configure Models</Text>
-                </BlurView>
-              </TouchableOpacity>
-            )
+                <Text style={styles.settingsButtonText}>Configure Models</Text>
+              </BlurView>
+            </TouchableOpacity>
           )}
 
-          {/*$FlowFixMe*/}
           <FlatList
             style={styles.chatContainer}
+            // $FlowFixMe
             ref={scrollViewRef}
             inverted
             data={messages}
+            // $FlowFixMe
             keyExtractor={message => message.messageId}
-            renderItem={(item) => {
+            renderItem={item => {
               const message = item.item
               return (
                 <BlurView
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
   },
   settingsButtonText: {
     fontSize: 16,
-    color: '#fff'
+    color: '#fff',
   },
   blurContainer: {
     position: 'absolute',
