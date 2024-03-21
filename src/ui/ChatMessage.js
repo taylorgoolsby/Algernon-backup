@@ -7,13 +7,9 @@ import {MessageRole} from '../schema/Message/MessageSchema.mjs'
 import Spinner from './Spinner.js'
 
 const ChatMessage = ({
-  first,
   message,
-  footerHeight,
 }: {
-  first: boolean,
   message: MessageSQL,
-  footerHeight: number,
 }): any => {
   const [isSingleLine, setIsSingleLine] = useState(true)
 
@@ -34,7 +30,6 @@ const ChatMessage = ({
           ? styles.userMessage
           : styles.aiMessage,
         messageStyle,
-        first ? {marginBottom: footerHeight + 12} : {},
       ]}>
       {!!message.text ? (
         <Text

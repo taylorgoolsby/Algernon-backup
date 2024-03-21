@@ -25,7 +25,7 @@ import type {ModelConfig} from '../types/ModelConfig.js'
 import preferencesStore from '../stores/PreferencesStore.js'
 import {BlurView} from '@react-native-community/blur'
 import chatStore from '../stores/ChatStore.js'
-import Spinner from "./Spinner.js";
+import Spinner from './Spinner.js'
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon)
 
@@ -101,6 +101,12 @@ const ChatScreen: any = observer(({navigation}) => {
     // })
   }
 
+  const [headerHeight, setHeaderHeight] = useState(50)
+  const onLayoutHeader = (event: any) => {
+    const {height} = event.nativeEvent.layout
+    setHeaderHeight(height)
+  }
+
   const [footerHeight, setFooterHeight] = useState(50)
   const onLayoutFooter = (event: any) => {
     const {height} = event.nativeEvent.layout
@@ -174,36 +180,43 @@ const ChatScreen: any = observer(({navigation}) => {
         />
       </View>
 
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : null}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} //
-      >
-        <FlatList
-          style={styles.chatContainer}
-          // $FlowFixMe
-          ref={scrollViewRef}
-          inverted
-          data={messages}
-          // $FlowFixMe
-          keyExtractor={message => message.messageId}
-          renderItem={item => {
-            const message = item.item
-            return (
-              <ChatMessage
-                first={item.index === 0}
-                message={message}
-                footerHeight={footerHeight}
-              />
-            )
-          }}
-        />
-      </KeyboardAvoidingView>
+      {messages.length > 0 ? (
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === 'ios' ? 'height' : null}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} //
+        >
+          <FlatList
+            style={styles.chatContainer}
+            contentContainerStyle={{
+              paddingBottom: headerHeight,
+              paddingTop: footerHeight,
+            }}
+            scrollIndicatorInsets={{
+              top: footerHeight,
+              bottom: headerHeight,
+            }}
+            automaticallyAdjustsScrollIndicatorInsets={false}
+            // $FlowFixMe
+            ref={scrollViewRef}
+            inverted
+            data={messages}
+            // $FlowFixMe
+            keyExtractor={message => message.messageId}
+            renderItem={item => {
+              const message = item.item
+              return <ChatMessage message={message} />
+            }}
+          />
+        </KeyboardAvoidingView>
+      ) : null}
 
       <BlurView
         style={styles.header}
         // blurType="dark"
-        blurAmount={70}>
+        blurAmount={70} //
+        onLayout={onLayoutHeader} //
+      >
         <SafeAreaView style={styles.safeArea}>
           {!!preferencesStore.selectedModel?.title ? (
             <TouchableOpacity
@@ -269,10 +282,7 @@ const ChatScreen: any = observer(({navigation}) => {
           }}>
           <View style={{flex: 1}}>
             <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
-              <BlurView
-                style={styles.errorBox}
-                blurType="dark" blurAmount={70}
-              >
+              <BlurView style={styles.errorBox} blurType="dark" blurAmount={70}>
                 <Text style={styles.errorText}>{errorMessage}</Text>
               </BlurView>
             </SafeAreaView>
@@ -297,7 +307,8 @@ const ChatScreen: any = observer(({navigation}) => {
           style={styles.footerBlur}
           // blurType="dark"
           blurAmount={70}
-          onLayout={onLayoutFooter}>
+          onLayout={onLayoutFooter} //
+        >
           <SafeAreaView style={styles.safeArea}>
             <TouchableWithoutFeedback onPress={focusInput}>
               <View style={styles.inputBar}>
@@ -456,8 +467,8 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 16,
     lineHeight: 24,
-    color: 'rgba(255, 255, 255, 0.97)'
-  }
+    color: 'rgba(255, 255, 255, 0.97)',
+  },
 })
 
 export default ChatScreen
