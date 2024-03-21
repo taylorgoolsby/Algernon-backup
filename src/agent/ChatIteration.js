@@ -7,6 +7,7 @@ import MessageInterface from "../schema/Message/MessageInterface.js";
 import GeneralResponse from "./GeneralResponse.js";
 import { MessageRole } from "../schema/Message/MessageSchema.mjs";
 import ShortTermSummarization from "./ShortTermSummarization.js";
+import LongTermAnnotation from "./LongTermAnnotation.js";
 
 export default class ChatIteration {
   static iterate(
@@ -34,7 +35,14 @@ export default class ChatIteration {
           model,
           allMessages,
         )
-        const longTermSummary = ''
+        const lastMessage = allMessages[allMessages.length - 1]
+        LongTermAnnotation.backgroundAnnotate(model, lastMessage)
+        // const longTermSummary = ''
+        const longTermSummary = await LongTermAnnotation.searchAndSummarize(
+          model,
+          shortTermSummary,
+          lastMessage,
+        )
 
         await GeneralResponse.beginStreaming(
           windowId,

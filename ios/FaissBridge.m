@@ -11,6 +11,24 @@
 // To expose this module to React Native
 RCT_EXPORT_MODULE();
 
+// Method to get the total number of vectors in the index
+RCT_EXPORT_METHOD(ntotal:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    if (!index) {
+        // If the index is not loaded or initialized, attempt to read from file
+        if (![self readIndexFromFile]) {
+            reject(@"index_error", @"Index is not initialized or loaded", nil);
+            return;
+        }
+    }
+
+    // Get the total number of vectors in the index
+    int ntotal = (int)faiss_Index_ntotal((FaissIndex *)index);
+    
+    // Return the total number of vectors
+    resolve(@(ntotal));
+}
+
 // Method to add a vector to the index
 RCT_EXPORT_METHOD(addVector:(NSArray<NSNumber *> *)vector
                   resolver:(RCTPromiseResolveBlock)resolve
@@ -33,6 +51,8 @@ RCT_EXPORT_METHOD(addVector:(NSArray<NSNumber *> *)vector
     for (NSUInteger i = 0; i < vector.count; ++i) {
         c_vector[i] = [vector[i] floatValue];
     }
+  
+    int ntotal = (int)faiss_Index_ntotal((FaissIndex *)index);
     
     // Add the vector to the index
     if (faiss_Index_add((FaissIndex *)index, 1, c_vector) != 0) {
@@ -49,7 +69,7 @@ RCT_EXPORT_METHOD(addVector:(NSArray<NSNumber *> *)vector
     }
     
     // Return success
-    resolve(@(YES));
+    resolve(@(ntotal));
 }
 
 // Method to search the index for the k nearest vectors
@@ -87,11 +107,14 @@ RCT_EXPORT_METHOD(searchVectors:(NSArray<NSNumber *> *)queryVector
     // Perform the search
     faiss_Index_search((FaissIndex *)index, 1, c_query, k, distances, labels);
     
-    // Convert search results to NSArray
-    NSMutableArray *results = [NSMutableArray arrayWithCapacity:k];
+    // Convert search results to NSArray for distances and labels
+    NSMutableArray *distanceArray = [NSMutableArray arrayWithCapacity:k];
+    NSMutableArray *labelArray = [NSMutableArray arrayWithCapacity:k];
     for (NSUInteger i = 0; i < k; ++i) {
-        [results addObject:@{@"label": @(labels[i]), @"distance": @(distances[i])}];
+        [distanceArray addObject:@(distances[i])];
+        [labelArray addObject:@(labels[i])];
     }
+    NSDictionary *resultDict = @{@"distances": distanceArray, @"labels": labelArray};
     
     // Clean up
     free(c_query);
@@ -99,7 +122,7 @@ RCT_EXPORT_METHOD(searchVectors:(NSArray<NSNumber *> *)queryVector
     free(distances);
     
     // Return the search results
-    resolve(results);
+    resolve(resultDict);
 }
 
 // Initialize the index with the given dimension

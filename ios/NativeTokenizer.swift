@@ -26,7 +26,7 @@ class NativeTokenizer: NSObject {
                 
                 // Iterate over nonSystemMessages in reverse order
                 for index in stride(from: nonSystemMessages.count - 1, through: 0, by: -1) {
-                    print("index: \(index)")
+//                    print("index: \(index)")
                     guard let messageDict = nonSystemMessages[index] as? [String: Any],
                         let role = messageDict["role"] as? String,
                         let text = messageDict["text"] as? String else {

@@ -1,21 +1,19 @@
 // @flow
 
-import faiss from 'faiss-node'
-const { Index, MetricType } = faiss
-import fs from 'fs'
-import { pipeline } from '@xenova/transformers'
-import type { MessageSQL } from '../schema/Message/MessageSchema.js'
+import type { MessageSQL } from '../schema/Message/MessageSchema.mjs'
 import AnnotationInterface from '../schema/Annotation/AnnotationInterface.js'
 import InferenceRest from '../rest/InferenceRest.js'
-import type { ModelConfig, UserSQL } from '../schema/User/UserSchema.js'
-import MessageInterface from '../schema/Message/MessageInterface.js'
+import type {ModelConfig} from "../types/ModelConfig.js";
+import { NativeModules } from 'react-native';
 
-const MODEL = 'Xenova/all-MiniLM-L6-v2'
-const D = 384
-const INDEX_PATH = 'index.faiss'
+const { TextFeatureExtractor, FaissBridge } = NativeModules;
+
+// const MODEL = 'Xenova/all-MiniLM-L6-v2'
+// const D = 384
+// const INDEX_PATH = 'index.faiss'
 const DISTANCE_THRESHOLD = 0.25
-let pipe: any
-let index: any
+// let pipe: any
+// let index: any
 
 export default class LongTermAnnotation {
   /*
@@ -29,39 +27,36 @@ export default class LongTermAnnotation {
   7. Both the retrieved annotations and the original message can be used generate the long term summary.
   * */
   static backgroundAnnotate(
-    user: UserSQL,
     model: ModelConfig,
     message: MessageSQL,
   ): void {
     Promise.resolve().then(async () => {
       try {
-        const text = message.data.text
+        const text = message.text
         console.log('annotating', text)
 
-        if (!pipe) {
-          pipe = await pipeline('feature-extraction', MODEL)
-        }
-
         const annotations = await LongTermAnnotation.getAnnotations(
-          user,
           model,
           text,
         )
+        console.log("annotations", annotations);
 
         for (const annotationText of annotations) {
-          const embedding = await pipe(annotationText, {
-            pooling: 'mean',
-            normalize: true,
-          })
-          const vector = Array.from(embedding.data)
-          const annotationId = await LongTermAnnotation.insert(vector)
-          // console.log('annotationId', annotationId)
+          const embedding: Array<number> = await TextFeatureExtractor.extractFeatures(annotationText)
+          console.log("embedding", typeof embedding[0]);
+          // const embedding = await pipe(annotationText, {
+          //   pooling: 'mean',
+          //   normalize: true,
+          // })
+          // const vector = Array.from(embedding.data)
+          const annotationId = await LongTermAnnotation.insert(embedding)
+          console.log('annotationId', annotationId)
 
           await AnnotationInterface.insert(
             annotationId,
             message.messageId,
             annotationText,
-            vector,
+            embedding,
           )
         }
       } catch (err) {
@@ -71,10 +66,10 @@ export default class LongTermAnnotation {
   }
 
   static async getAnnotations(
-    user: UserSQL,
     model: ModelConfig,
     text: string,
   ): Promise<Array<string>> {
+    // todo: fine-tune the model to produce annotations.
     const context = [
       {
         role: 'system',
@@ -82,7 +77,7 @@ export default class LongTermAnnotation {
 
 Your annotations should serve various purposes, including journaling (to capture personal experiences and insights), brainstorming (to generate ideas and themes for creative or analytical thinking), and knowledge base management (to organize and categorize information systematically).
 
-If the text does not contain any content worth annotating, you should return an empty array. Please ensure your annotations capture a broad range of insights from the text, making them valuable for the intended purposes.
+There should always be at least one annotation. Please ensure your annotations capture a broad range of insights from the text, making them valuable for the intended purposes.
 
 Examples:
 
@@ -141,9 +136,10 @@ When producing annotations, ensure they are tailored to capture the essence of e
     // Make a completion call with retry in case the JSON is not parseable:
     let annotations: Array<string> = []
     for (let i = 0; i < 3; i++) {
-      const res = await InferenceRest.chatCompletion(user, model, context)
+      // todo: Use prompt formatting to encourage JSON output.
+      const res = await InferenceRest.chatCompletion(model, context)
       const rawJSON = res.choices[0]?.message?.content ?? ''
-      console.log('rawJSON', rawJSON)
+      console.log('rawJSON for annotating', rawJSON)
       try {
         annotations = JSON.parse(rawJSON)
         break
@@ -160,84 +156,83 @@ When producing annotations, ensure they are tailored to capture the essence of e
   Returns the label of the embedding.
   * */
   static async insert(vector: Array<number>): Promise<number> {
-    let k = 1
+    // let k = 1
+    //
+    // if (!index) {
+    //   if (fs.existsSync(INDEX_PATH)) {
+    //     index = Index.read(INDEX_PATH)
+    //   } else {
+    //     // index = Index.fromFactory(D, `"IVF${k},Flat"`, MetricType.METRIC_INNER_PRODUCT);
+    //     index = Index.fromFactory(
+    //       D,
+    //       `IVF${k},Flat`,
+    //       MetricType.METRIC_INNER_PRODUCT,
+    //     )
+    //     index.train(vector)
+    //   }
+    // }
 
-    if (!index) {
-      if (fs.existsSync(INDEX_PATH)) {
-        index = Index.read(INDEX_PATH)
-      } else {
-        // index = Index.fromFactory(D, `"IVF${k},Flat"`, MetricType.METRIC_INNER_PRODUCT);
-        index = Index.fromFactory(
-          D,
-          `IVF${k},Flat`,
-          MetricType.METRIC_INNER_PRODUCT,
-        )
-        index.train(vector)
-      }
-    }
-
-    const label = index.ntotal()
-    index.add(vector)
-    index.write(INDEX_PATH)
+    const label = FaissBridge.addVector(vector)
     return label
   }
 
   static async search(
     topic: string,
   ): Promise<{| distances: Array<number>, labels: Array<number> |}> {
-    if (!pipe) {
-      pipe = await pipeline('feature-extraction', MODEL)
-    }
+    // if (!pipe) {
+    //   pipe = await pipeline('feature-extraction', MODEL)
+    // }
 
-    const embedding = await pipe(topic, { pooling: 'mean', normalize: true })
-    const vector = Array.from(embedding.data)
+    const embedding = await TextFeatureExtractor.extractFeatures(topic)
 
-    if (!index) {
-      if (fs.existsSync(INDEX_PATH)) {
-        index = Index.read(INDEX_PATH)
-      } else {
-        throw new Error('Index not found')
-      }
-    }
+    // const embedding = await pipe(topic, { pooling: 'mean', normalize: true })
+    // const vector = Array.from(embedding.data)
 
-    const k = Math.min(10, index.ntotal())
-    const res = index.search(vector, k)
-    console.log('vector search res', res)
+    // if (!index) {
+    //   if (fs.existsSync(INDEX_PATH)) {
+    //     index = Index.read(INDEX_PATH)
+    //   } else {
+    //     throw new Error('Index not found')
+    //   }
+    // }
+    const ntotal = await FaissBridge.ntotal()
+    const k = Math.min(10, ntotal)
+    const res = await FaissBridge.searchVectors(embedding, k)
     return res
   }
 
   static async detectTopic(
-    user: UserSQL,
     model: ModelConfig,
     shortTermSummary: string,
     lastMessage: MessageSQL,
   ): Promise<string> {
-    return shortTermSummary + '\n\n' + lastMessage.data.text
+    return shortTermSummary + '\n\n' + lastMessage.text
   }
 
   static async searchAndSummarize(
-    user: UserSQL,
     model: ModelConfig,
     shortTermSummary: string,
     lastMessage: MessageSQL,
   ): Promise<string> {
     const topic = await LongTermAnnotation.detectTopic(
-      user,
       model,
       shortTermSummary,
       lastMessage,
     )
 
     const vectorRes = await LongTermAnnotation.search(topic)
+    console.log('vector search res', vectorRes)
 
     // Filter out labels which are below the distance threshold:
     const annotationIds = vectorRes.labels.filter(
       (label, i) => vectorRes.distances[i] > DISTANCE_THRESHOLD,
     )
 
+    console.log("annotationIds", annotationIds);
+
     const annotations = await AnnotationInterface.retrieve(annotationIds)
 
-    console.log('annotations', annotations)
+    console.log("annotations", annotations);
 
     // todo: timezone
 
@@ -291,7 +286,7 @@ This summary should serve as a reflective, insightful, and concise synthesis of 
     // Make a completion call to get the long term summary:
     let summary = ''
     for (let i = 0; i < 3; i++) {
-      const res = await InferenceRest.chatCompletion(user, model, context)
+      const res = await InferenceRest.chatCompletion(model, context)
       summary = res.choices[0]?.message?.content ?? ''
       if (summary) {
         break
