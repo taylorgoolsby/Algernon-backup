@@ -4,7 +4,6 @@ import SQLite from "react-native-sqlite-storage";
 import createTables from "./createTables.js";
 import VersionInterface from "./Version/VersionInterface.js";
 import { setDB, query } from "./database.js";
-import Config from "../Config.js";
 
 SQLite.enablePromise(true)
 const databaseName = 'Cobalt.db'

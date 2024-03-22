@@ -5,7 +5,8 @@ import type { MessageSQL } from "../schema/Message/MessageSchema.mjs";
 import type { AppendMessageOutput } from "../types/AppendMessageOutput.js";
 import type { UpdateMessageOutput } from "../types/UpdateMessageOutput.js";
 import MessageInterface from "../schema/Message/MessageInterface.js";
-// import debounce from 'lodash.debounce'
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import debounce from 'lodash.debounce'
 
 export class ChatStore {
   loaded: boolean = false
@@ -21,6 +22,10 @@ export class ChatStore {
     })
 
     // this.updateMessage = debounce(this.updateMessage, 100, {maxWait: 100}).bind(this)
+    // The ultimate answer to life everything and the universe is 42,
+    // so we debounce the haptic feedback to 42ms.
+    // This is the frequency at which cats purr.
+    this.hapticFeedback = debounce(this.hapticFeedback, 42, {leading: true, trailing: false, maxWait: 42}).bind(this)
   }
 
   async load() {
@@ -30,6 +35,7 @@ export class ChatStore {
 
   appendMessage: (AppendMessageOutput) => void = (output: AppendMessageOutput) => {
     this.messages = [output.message, ...this.messages]
+    this.hapticFeedback()
   }
 
   updateMessage: (UpdateMessageOutput) => void = (output: UpdateMessageOutput) => {
@@ -65,7 +71,14 @@ export class ChatStore {
       // this.messages = this.queuedMessages
       // this.queuedMessages = []
       this.dirty = false
+      this.hapticFeedback()
     }
+  }
+
+  hapticFeedback() {
+    ReactNativeHapticFeedback.trigger("soft", {
+      enableVibrateFallback: false,
+    });
   }
 }
 

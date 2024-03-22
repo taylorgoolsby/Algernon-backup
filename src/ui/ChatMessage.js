@@ -40,7 +40,7 @@ const ChatMessage = ({
               : styles.aiMessageText
           }
           onLayout={handleLayout}>
-          {message.text}
+          {message.text.trim()}
         </Text>
       ) : (
         <Spinner />
@@ -84,13 +84,13 @@ const styles = StyleSheet.create({
   userMessageText: {
     color: Colors.userBubbleText,
     // color: 'rgba(255, 255, 255, 0.97)',
-    fontSize: 14,
+    fontSize: Colors.fontSize,
     lineHeight: 21,
   },
   aiMessageText: {
     // color: 'rgba(255, 255, 255, 0.97)',
     color: Colors.aiBubbleText,
-    fontSize: 14,
+    fontSize: Colors.fontSize,
     lineHeight: 21,
   },
 })

@@ -24,7 +24,7 @@ import {observer} from 'mobx-react'
 import preferencesStore from '../stores/PreferencesStore.js'
 import {BlurView} from '@react-native-community/blur'
 import chatStore from '../stores/ChatStore.js'
-import Colors from "../Colors.js";
+import Colors from '../Colors.js'
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon)
 
@@ -34,7 +34,8 @@ const ChatScreen: any = observer(({navigation}) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
-  const canPost = !!input.trim() && (messages[0] ? !!messages[0].completed : true)
+  const canPost =
+    !!input.trim() && (messages[0] ? !!messages[0].completed : true)
 
   // scrollToBottom when message updates the first time (initial load):
   const initialLoad = useRef(true)
@@ -179,12 +180,12 @@ const ChatScreen: any = observer(({navigation}) => {
         {/*/>*/}
       </View>
 
-      {messages.length > 0 ? (
-        <KeyboardAvoidingView
-          style={styles.container}
-          behavior={Platform.OS === 'ios' ? 'height' : null}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} //
-        >
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'height' : null}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} //
+      >
+        {messages.length > 0 ? (
           <FlatList
             style={styles.chatContainer}
             contentContainerStyle={{
@@ -207,8 +208,8 @@ const ChatScreen: any = observer(({navigation}) => {
               return <ChatMessage message={message} />
             }}
           />
-        </KeyboardAvoidingView>
-      ) : null}
+        ) : null}
+      </KeyboardAvoidingView>
 
       <BlurView
         style={styles.header}
@@ -328,10 +329,7 @@ const ChatScreen: any = observer(({navigation}) => {
                 {/*  onPress={sendMessage}*/}
                 {/*  color={'#fff'}*/}
                 {/*/>*/}
-                <TouchableOpacity
-                  disabled={!canPost}
-                  onPress={sendMessage}
-                >
+                <TouchableOpacity disabled={!canPost} onPress={sendMessage}>
                   <AnimatedIcon
                     name={'arrow-up-circle'}
                     size={30}
@@ -366,7 +364,7 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: -1,
     // backgroundColor: '#0105AA',
-    backgroundColor: Colors.chatBg
+    backgroundColor: Colors.chatBg,
   },
   backgroundOrb: {
     position: 'absolute',
@@ -454,6 +452,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     paddingTop: 0,
     marginRight: 10,
+    fontSize: Colors.fontSize,
   },
   sendButton: {
     height: 50,

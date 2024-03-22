@@ -47,15 +47,7 @@ export default class LongTermAnnotation {
 
         for (const annotationText of annotations) {
           const embedding: Array<number> = await TextFeatureExtractor.extractFeatures(annotationText)
-          console.log("embedding", typeof embedding[0]);
-          // const embedding = await pipe(annotationText, {
-          //   pooling: 'mean',
-          //   normalize: true,
-          // })
-          // const vector = Array.from(embedding.data)
           const annotationId = await LongTermAnnotation.insert(embedding)
-          console.log('annotationId', annotationId)
-
           await AnnotationInterface.insert(
             annotationId,
             message.messageId,
@@ -207,7 +199,7 @@ Explanation: Similar to the previous example, this input is an acknowledgement w
         }
         break
       } catch (err) {
-        console.error('Error parsing JSON', rawJSON)
+        console.warn('Annotator did not output JSON', rawJSON)
       }
     }
 

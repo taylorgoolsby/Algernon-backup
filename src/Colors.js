@@ -3,6 +3,8 @@
 const defaultText = 'rgba(0, 0, 0, 0.90)'
 
 export default class {
+  static fontSize = 16
+
   static chatBg = 'white'
 
   static chatHeaderBlurType = 'light'
