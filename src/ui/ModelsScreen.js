@@ -50,6 +50,7 @@ const ModelsScreen: any = () => {
   }, [models])
 
   const addModel = () => {
+    // Since a new model is added at the end, there is no need to update selectedModelIndex.
     setModels([...models, {...defaultModel}])
   }
 
