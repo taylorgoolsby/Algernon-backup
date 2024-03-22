@@ -21,7 +21,6 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import ChatMessage from './ChatMessage.js'
 import ChatIteration from '../agent/ChatIteration.js'
 import {observer} from 'mobx-react'
-import type {ModelConfig} from '../types/ModelConfig.js'
 import preferencesStore from '../stores/PreferencesStore.js'
 import {BlurView} from '@react-native-community/blur'
 import chatStore from '../stores/ChatStore.js'
@@ -50,8 +49,8 @@ const ChatScreen: any = observer(({navigation}) => {
     chatStore.onRenderDone()
   }, [messages])
 
-  const handleModelSelect = (model: ModelConfig) => {
-    preferencesStore.selectModel(model)
+  const handleModelSelect = (modelIndex: number) => {
+    preferencesStore.selectModel(modelIndex)
     setIsExpanded(false) // Collapse the list after selection
   }
 
@@ -251,7 +250,7 @@ const ChatScreen: any = observer(({navigation}) => {
                 <Button
                   key={index}
                   title={model.title}
-                  onPress={() => handleModelSelect(model)}
+                  onPress={() => handleModelSelect(index)}
                   color="#FFFFFF"
                 />
               ))}

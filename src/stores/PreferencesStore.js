@@ -2,7 +2,7 @@
 
 import RNFS from 'react-native-fs'
 import type {ModelConfig} from '../types/ModelConfig.js'
-import {makeObservable, observable} from 'mobx'
+import {makeObservable, observable, computed} from 'mobx'
 
 /*
 export type ModelConfig = {
@@ -25,28 +25,37 @@ export type EditableModelConfig = {
 
 const path = `${RNFS.DocumentDirectoryPath}/preferences.json`
 
+const defaultModel: EditableModelConfig = {
+  local: true,
+  title: 'Built-In Phi-2',
+  apiBase: '',
+  apiKey: '',
+  completionOptions: [],
+}
+
 export class PreferencesStore {
   models: Array<ModelConfig> = []
   editableModels: Array<EditableModelConfig> = []
-  selectedModel: ?ModelConfig = null
+  selectedModelIndex: number = 0
 
   constructor() {
     makeObservable(this, {
-      selectedModel: observable,
+      models: observable,
+      selectedModelIndex: observable,
+      selectedModel: computed,
     })
+  }
+
+  get selectedModel(): ?ModelConfig {
+    return this.models[this.selectedModelIndex] ?? defaultModel
   }
 
   async save(models: Array<EditableModelConfig>): Promise<void> {
     if (!models.length) {
-      models.push({
-        local: true,
-        title: 'Built-In Phi-2',
-        apiBase: '',
-        apiKey: '',
-        completionOptions: [],
-      })
+      models.push(defaultModel)
     }
 
+    // Remove incomplete data:
     const modelsToSave = models
       .filter(model => !!model.local || !!model.title)
       .map(model => {
@@ -60,7 +69,7 @@ export class PreferencesStore {
 
     const preferences = {
       editableModels: modelsToSave,
-      selectedModel: this.selectedModel,
+      selectedModelIndex: this.selectedModelIndex,
     }
 
     console.log('saving preferences', JSON.stringify(preferences))
@@ -94,7 +103,7 @@ export class PreferencesStore {
       console.error(err)
       preferences = {
         editableModels: [],
-        selectedModel: null,
+        selectedModelIndex: 0,
       }
     }
 
@@ -102,15 +111,7 @@ export class PreferencesStore {
     this.editableModels = preferences.editableModels ?? []
 
     if (!this.editableModels.length) {
-      this.editableModels = [
-        {
-          local: true,
-          title: 'Built-In Phi-2',
-          apiBase: '',
-          apiKey: '',
-          completionOptions: [],
-        },
-      ]
+      this.editableModels = [defaultModel]
     }
 
     // Convert models from EditableModelConfig to ModelConfig:
@@ -130,16 +131,11 @@ export class PreferencesStore {
         }
       })
 
-    // console.log("this.models", this.models);
-    // console.log("this.selectedModel", this.selectedModel);
-    if (!this.selectedModel) {
-      // console.log('setting default model')
-      this.selectedModel = preferences.selectedModel || this.models[0]
-    }
+    this.selectedModelIndex = preferences.selectedModelIndex ?? 0
   }
 
-  selectModel(model: ModelConfig) {
-    this.selectedModel = model
+  selectModel(modelIndex: number) {
+    this.selectedModelIndex = modelIndex
     this.save(this.editableModels).catch(err => {
       console.error(err)
     })
