@@ -1,16 +1,16 @@
 // @flow
 
-import type { GPTMessage } from "../types/GPTMessage.js";
-import type { ModelConfig } from "../types/ModelConfig.js";
-import type { AppendMessageOutput } from "../types/AppendMessageOutput.js";
-import type { UpdateMessageOutput } from "../types/UpdateMessageOutput.js";
-import MessageInterface from "../schema/Message/MessageInterface.js";
-import { MessageRole } from "../schema/Message/MessageSchema.mjs";
-import InferenceRest from "../rest/InferenceRest.js";
-import type { ChatCompletionsResponse } from "../types/ChatCompletion.js";
-import type { MessageSQL } from "../schema/Message/MessageSchema.mjs";
-import CompletionInterface from "../schema/Completion/CompletionInterface.js";
-import { CompletionType } from "../schema/Completion/CompletionSchema.mjs";
+import type {GPTMessage} from '../types/GPTMessage.js'
+import type {ModelConfig} from '../types/ModelConfig.js'
+import type {AppendMessageOutput} from '../types/AppendMessageOutput.js'
+import type {UpdateMessageOutput} from '../types/UpdateMessageOutput.js'
+import MessageInterface from '../schema/Message/MessageInterface.js'
+import {MessageRole} from '../schema/Message/MessageSchema.mjs'
+import InferenceRest from '../rest/InferenceRest.js'
+import type {ChatCompletionsResponse} from '../types/ChatCompletion.js'
+import type {MessageSQL} from '../schema/Message/MessageSchema.mjs'
+import CompletionInterface from '../schema/Completion/CompletionInterface.js'
+import {CompletionType} from '../schema/Completion/CompletionSchema.mjs'
 
 export default class GeneralResponse {
   /*
@@ -22,10 +22,11 @@ export default class GeneralResponse {
     emptyResponse: MessageSQL,
     shortTermSummary: string,
     longTermSummary: string,
+    previousResponse: ?string,
     userPrompt: string,
     onAppendMessage: (output: AppendMessageOutput) => any,
     onUpdateMessage: (output: UpdateMessageOutput) => any,
-  ) {
+  ): Promise<MessageSQL> {
     const context: Array<GPTMessage> = [
       {
         role: 'system',
@@ -63,25 +64,27 @@ Personality Traits
       },
       longTermSummary
         ? {
-          role: 'assistant',
-          content: longTermSummary,
-        }
+            role: 'assistant',
+            content: longTermSummary,
+          }
         : null,
       shortTermSummary
         ? {
-          role: 'assistant',
-          content: shortTermSummary,
-        }
+            role: 'assistant',
+            content: shortTermSummary,
+          }
         : null,
+      previousResponse ? {role: 'assistant', content: previousResponse} : null,
       {
         role: 'user',
         content: userPrompt,
       },
-    ]
-      .filter(Boolean)
+    ].filter(Boolean)
+
+    console.log("context", context);
 
     // Then streaming begins and incoming tokens are relayed back to the client.
-    const response = await GeneralResponse.stream(
+    const completeMessage = await GeneralResponse.stream(
       windowId,
       model,
       context,
@@ -90,7 +93,12 @@ Personality Traits
     )
 
     // All completions are saved to DB:
-    await CompletionInterface.insert(CompletionType.GENERAL, model, context, {role: 'assistant', content: response})
+    await CompletionInterface.insert(CompletionType.GENERAL, model, context, {
+      role: 'assistant',
+      content: completeMessage.text,
+    })
+
+    return completeMessage
   }
 
   static stream(
@@ -99,7 +107,7 @@ Personality Traits
     context: Array<GPTMessage>,
     response: MessageSQL,
     onUpdateMessage: (output: UpdateMessageOutput) => any,
-  ): Promise<string> {
+  ): Promise<MessageSQL> {
     return new Promise(async (resolve, reject) => {
       let buffer = ''
       let previousAutocompletion = null
@@ -193,14 +201,15 @@ Personality Traits
                 // console.debug('saving complete message: ', finalText)
                 await MessageInterface.completeData(
                   response.messageId,
-                  autocompletion
+                  autocompletion,
                 )
-                resolve(autocompletion)
               })
-              .catch((err) => {
+              .catch(err => {
                 console.error(err)
                 reject(err)
               })
+
+            resolve(response)
           }
 
           // send:

@@ -5,6 +5,7 @@ import {View, Text, StyleSheet} from 'react-native'
 import type {MessageSQL} from '../schema/Message/MessageSchema.mjs'
 import {MessageRole} from '../schema/Message/MessageSchema.mjs'
 import Spinner from './Spinner.js'
+import Colors from "../Colors.js";
 
 const ChatMessage = ({
   message,
@@ -51,8 +52,8 @@ const ChatMessage = ({
 const styles = StyleSheet.create({
   userMessage: {
     alignSelf: 'flex-end',
-    backgroundColor: 'rgba(255, 255, 255, 1)',
-    color: '#000',
+    // backgroundColor: 'rgba(255, 255, 255, 1)',
+    backgroundColor: Colors.userBubbleBg,
     borderRadius: 24,
     minWidth: 40,
     marginTop: 12,
@@ -62,8 +63,9 @@ const styles = StyleSheet.create({
   },
   aiMessage: {
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    color: '#fff',
+    // backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    // backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    backgroundColor: Colors.aiBubbleBg,
     borderRadius: 24,
     minWidth: 40,
     marginTop: 12,
@@ -80,12 +82,14 @@ const styles = StyleSheet.create({
     paddingBottom: 18,
   },
   userMessageText: {
-    color: 'rgba(0, 0, 0, 0.80)',
+    color: Colors.userBubbleText,
+    // color: 'rgba(255, 255, 255, 0.97)',
     fontSize: 14,
     lineHeight: 21,
   },
   aiMessageText: {
-    color: 'rgba(255, 255, 255, 0.97)',
+    // color: 'rgba(255, 255, 255, 0.97)',
+    color: Colors.aiBubbleText,
     fontSize: 14,
     lineHeight: 21,
   },

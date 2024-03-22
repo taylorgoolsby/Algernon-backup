@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { View, Animated, StyleSheet } from 'react-native';
+import Colors from "../Colors.js";
 
 
 const Spinner = ({style}: any): any => {
@@ -38,7 +39,7 @@ const Spinner = ({style}: any): any => {
                 inputRange: [0, 1],
                 outputRange: [1.2, 1.4], // Reverse the radius pattern for the second circle
               })}],
-            backgroundColor: 'rgba(200, 200, 255, 0.8)'
+            backgroundColor: Colors.spinnerColor1
             // backgroundColor: 'red'
           },
         ]}
@@ -55,7 +56,7 @@ const Spinner = ({style}: any): any => {
                 inputRange: [0, 1],
                 outputRange: [1, 0.4], // Reverse the radius pattern for the second circle
               })}],
-            backgroundColor: 'rgba(190, 190, 255, 0.75)'
+            backgroundColor: Colors.spinnerColor2
             // backgroundColor: 'red'
           },
         ]}

@@ -10,7 +10,7 @@ export default class AnnotationInterface {
     if (!annotationIds.length) return []
 
     const query = sqltag`
-      SELECT a.text, m.dateCreated
+      SELECT a.text, m.dateCreated, m.text
       FROM Annotation a
       LEFT JOIN Message m
       ON a.messageId = m.messageId

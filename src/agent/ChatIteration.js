@@ -28,7 +28,8 @@ export default class ChatIteration {
         })
 
         const allMessages = await MessageInterface.getAll(windowId);
-        const lastMessage = allMessages[allMessages.length - 1]
+        const lastAgentMessage = allMessages[allMessages.length - 2]
+        const lastUserMessage = allMessages[allMessages.length - 1]
 
         // Show a blank message in the UI while waiting:
         const emptyResponse = await MessageInterface.insert(
@@ -50,24 +51,29 @@ export default class ChatIteration {
           allMessages,
         )
 
-        LongTermAnnotation.backgroundAnnotate(model, lastMessage)
+        LongTermAnnotation.backgroundAnnotate(model, lastUserMessage)
         // const longTermSummary = ''
         const longTermSummary = await LongTermAnnotation.searchAndSummarize(
           model,
           shortTermSummary,
-          lastMessage,
+          lastUserMessage,
         )
 
-        await GeneralResponse.beginStreaming(
+        const finalResponse = await GeneralResponse.beginStreaming(
           windowId,
           model,
           emptyResponse,
           shortTermSummary,
           longTermSummary,
+          lastAgentMessage?.text,
           userPrompt,
           onAppendMessage,
           onUpdateMessage,
         );
+
+        console.log("finalResponse", finalResponse);
+
+        LongTermAnnotation.backgroundAnnotate(model, finalResponse)
       } catch (err) {
         console.error(err);
         onError(err);

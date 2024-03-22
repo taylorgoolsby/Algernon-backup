@@ -202,6 +202,9 @@ Explanation: Similar to the previous example, this input is an acknowledgement w
       console.log('rawJSON for annotating', rawJSON)
       try {
         annotations = JSON.parse(rawJSON)
+        if (!Array.isArray(annotations)) {
+          throw new Error('Annotations are not an array')
+        }
         break
       } catch (err) {
         console.error('Error parsing JSON', rawJSON)

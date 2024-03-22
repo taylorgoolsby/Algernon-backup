@@ -25,7 +25,7 @@ import type {ModelConfig} from '../types/ModelConfig.js'
 import preferencesStore from '../stores/PreferencesStore.js'
 import {BlurView} from '@react-native-community/blur'
 import chatStore from '../stores/ChatStore.js'
-import Spinner from './Spinner.js'
+import Colors from "../Colors.js";
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon)
 
@@ -35,8 +35,7 @@ const ChatScreen: any = observer(({navigation}) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
-  // const canPost = !!input.trim() && messages[0].completed
-  const canPost = !!input.trim()
+  const canPost = !!input.trim() && (messages[0] ? !!messages[0].completed : true)
 
   // scrollToBottom when message updates the first time (initial load):
   const initialLoad = useRef(true)
@@ -173,11 +172,12 @@ const ChatScreen: any = observer(({navigation}) => {
         {/*    },*/}
         {/*  ]}*/}
         {/*/>*/}
-        <BlurView
-          style={styles.backgroundBlurView}
-          blurType="ultraThinMaterialDark" // or "dark", "xlight", etc., depending on your design needs
-          blurAmount={1000} // Adjust the blur amount to get the desired effect
-        />
+        {/*<BlurView*/}
+        {/*  style={styles.backgroundBlurView}*/}
+        {/*  // blurType="ultraThinMaterialDark"*/}
+        {/*  blurType="regular"*/}
+        {/*  blurAmount={1000}*/}
+        {/*/>*/}
       </View>
 
       {messages.length > 0 ? (
@@ -213,7 +213,7 @@ const ChatScreen: any = observer(({navigation}) => {
 
       <BlurView
         style={styles.header}
-        // blurType="dark"
+        blurType={Colors.chatHeaderBlurType}
         blurAmount={70} //
         onLayout={onLayoutHeader} //
       >
@@ -305,7 +305,7 @@ const ChatScreen: any = observer(({navigation}) => {
       >
         <BlurView
           style={styles.footerBlur}
-          // blurType="dark"
+          blurType={Colors.chatFooterBlurType}
           blurAmount={70}
           onLayout={onLayoutFooter} //
         >
@@ -329,15 +329,18 @@ const ChatScreen: any = observer(({navigation}) => {
                 {/*  onPress={sendMessage}*/}
                 {/*  color={'#fff'}*/}
                 {/*/>*/}
-                <TouchableOpacity onPress={sendMessage}>
+                <TouchableOpacity
+                  disabled={!canPost}
+                  onPress={sendMessage}
+                >
                   <AnimatedIcon
                     name={'arrow-up-circle'}
                     size={30}
                     color={colorAnimation.interpolate({
                       inputRange: [0, 1],
                       outputRange: [
-                        'rgba(255, 255, 255, 0.5)',
-                        'rgba(255, 255, 255, 0.97)',
+                        Colors.sendIconDisabledBg,
+                        Colors.sendIconBg,
                       ],
                     })}
                   />
@@ -363,8 +366,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: -1,
-    backgroundColor: '#0105AA',
-    // backgroundColor: 'blue'
+    // backgroundColor: '#0105AA',
+    backgroundColor: Colors.chatBg
   },
   backgroundOrb: {
     position: 'absolute',
@@ -410,11 +413,11 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingLeft: 18,
     paddingRight: 18,
-    backgroundColor: 'rgba(150, 150, 255, 0.1)',
+    backgroundColor: Colors.settingsButtonBg,
   },
   settingsButtonText: {
     fontSize: 16,
-    color: '#fff',
+    color: Colors.settingsButtonText,
   },
   settingsModal: {
     position: 'absolute',
@@ -448,7 +451,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: 'rgba(255, 255, 255, 0.97)',
+    color: Colors.inputText,
     backgroundColor: 'transparent',
     paddingTop: 0,
     marginRight: 10,
