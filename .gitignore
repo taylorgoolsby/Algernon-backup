@@ -37,6 +37,7 @@ local.properties
 
 # node.js
 #
+__pycache__/
 lib/
 node_modules/
 npm-debug.log

@@ -4,7 +4,6 @@ import React, {useState, useEffect, useRef} from 'react'
 import {
   StyleSheet,
   View,
-  Text,
   TextInput,
   Button,
   ScrollView,
@@ -18,7 +17,8 @@ import {
   Platform,
 } from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
-import ChatMessage from './ChatMessage.js'
+import Text from './components/Text.js'
+import ChatMessage from './components/ChatMessage.js'
 import ChatIteration from '../agent/ChatIteration.js'
 import {observer} from 'mobx-react'
 import preferencesStore from '../stores/PreferencesStore.js'
@@ -34,8 +34,9 @@ const ChatScreen: any = observer(({navigation}) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
-  const canPost =
-    !!input.trim() && (messages[0] ? !!messages[0].completed : true)
+  // const canPost =
+  //   !!input.trim() && (messages[0] ? !!messages[0].completed : true)
+  const canPost = true
 
   // scrollToBottom when message updates the first time (initial load):
   const initialLoad = useRef(true)
@@ -218,21 +219,27 @@ const ChatScreen: any = observer(({navigation}) => {
         onLayout={onLayoutHeader} //
       >
         <SafeAreaView style={styles.safeArea}>
-          {!!preferencesStore.selectedModel?.title ? (
-            <TouchableOpacity
-              style={styles.settingsButton}
-              onPress={() => setIsExpanded(!isExpanded)}>
-              <Text style={styles.settingsButtonText}>
-                {preferencesStore.selectedModel.title}
-              </Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={styles.settingsButton}
-              onPress={() => navigation.navigate('Models')}>
-              <Text style={styles.settingsButtonText}>Configure Models</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={() => navigation.navigate('Settings')}
+          >
+            <Text style={styles.settingsButtonText}>Settings</Text>
+          </TouchableOpacity>
+          {/*{!!preferencesStore.selectedModel?.title ? (*/}
+          {/*  <TouchableOpacity*/}
+          {/*    style={styles.settingsButton}*/}
+          {/*    onPress={() => setIsExpanded(!isExpanded)}>*/}
+          {/*    <Text style={styles.settingsButtonText}>*/}
+          {/*      {preferencesStore.selectedModel.title}*/}
+          {/*    </Text>*/}
+          {/*  </TouchableOpacity>*/}
+          {/*) : (*/}
+          {/*  <TouchableOpacity*/}
+          {/*    style={styles.settingsButton}*/}
+          {/*    onPress={() => navigation.navigate('Models')}>*/}
+          {/*    <Text style={styles.settingsButtonText}>Configure Models</Text>*/}
+          {/*  </TouchableOpacity>*/}
+          {/*)}*/}
         </SafeAreaView>
       </BlurView>
 

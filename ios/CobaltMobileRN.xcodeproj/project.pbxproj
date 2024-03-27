@@ -14,6 +14,9 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		7699B88040F8A987B510C191 /* libPods-CobaltMobileRN-CobaltMobileRNTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-CobaltMobileRN-CobaltMobileRNTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		8C097E582BB0EC9C0078CE31 /* CodeGenTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C097E572BB0EC9C0078CE31 /* CodeGenTokenizer.swift */; };
+		8C097E662BB19BE70078CE31 /* CodeGen-merges.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8C097E642BB19BE70078CE31 /* CodeGen-merges.txt */; };
+		8C097E672BB19BE70078CE31 /* CodeGen-vocab.json in Resources */ = {isa = PBXBuildFile; fileRef = 8C097E652BB19BE70078CE31 /* CodeGen-vocab.json */; };
 		8C33BC332BA418EC0023A2D9 /* TextFeatureExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C33BC322BA418EC0023A2D9 /* TextFeatureExtractor.swift */; };
 		8C33BC352BA419EA0023A2D9 /* TextFeatureExtractor.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C33BC342BA419EA0023A2D9 /* TextFeatureExtractor.m */; };
 		8C33BC392BA42DD40023A2D9 /* MiniLM-vocab.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8C33BC382BA42DD40023A2D9 /* MiniLM-vocab.txt */; };
@@ -35,6 +38,10 @@
 		8CACCE5E2BA2BC50004643C2 /* Gemma.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE5B2BA2BC50004643C2 /* Gemma.swift */; };
 		8CACCE5F2BA2BC50004643C2 /* Starcoder2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE5C2BA2BC50004643C2 /* Starcoder2.swift */; };
 		8CACCE602BA2BC50004643C2 /* Qwen2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE5D2BA2BC50004643C2 /* Qwen2.swift */; };
+		8CC3082B2BB378F900D70C69 /* Montserrat-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CC308272BB378F800D70C69 /* Montserrat-VariableFont_wght.ttf */; };
+		8CC3082C2BB378F900D70C69 /* Montserrat-Italic-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CC308282BB378F800D70C69 /* Montserrat-Italic-VariableFont_wght.ttf */; };
+		8CC3082D2BB378F900D70C69 /* Nunito-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CC308292BB378F800D70C69 /* Nunito-VariableFont_wght.ttf */; };
+		8CC3082E2BB378F900D70C69 /* Nunito-Italic-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CC3082A2BB378F800D70C69 /* Nunito-Italic-VariableFont_wght.ttf */; };
 		8CFA35FD2BA18D80009546C7 /* FaissBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CFA35FC2BA18D80009546C7 /* FaissBridge.m */; };
 		8CFA36002BA1A408009546C7 /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA35FF2BA1A408009546C7 /* MLX */; };
 		8CFA36022BA1A408009546C7 /* MLXFFT in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA36012BA1A408009546C7 /* MLXFFT */; };
@@ -77,6 +84,9 @@
 		5DCACB8F33CDC322A6C60F78 /* libPods-CobaltMobileRN.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-CobaltMobileRN.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = CobaltMobileRN/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-CobaltMobileRN-CobaltMobileRNTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CobaltMobileRN-CobaltMobileRNTests.release.xcconfig"; path = "Target Support Files/Pods-CobaltMobileRN-CobaltMobileRNTests/Pods-CobaltMobileRN-CobaltMobileRNTests.release.xcconfig"; sourceTree = "<group>"; };
+		8C097E572BB0EC9C0078CE31 /* CodeGenTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGenTokenizer.swift; sourceTree = "<group>"; };
+		8C097E642BB19BE70078CE31 /* CodeGen-merges.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "CodeGen-merges.txt"; sourceTree = "<group>"; };
+		8C097E652BB19BE70078CE31 /* CodeGen-vocab.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "CodeGen-vocab.json"; sourceTree = "<group>"; };
 		8C33BC322BA418EC0023A2D9 /* TextFeatureExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFeatureExtractor.swift; sourceTree = "<group>"; };
 		8C33BC342BA419EA0023A2D9 /* TextFeatureExtractor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextFeatureExtractor.m; sourceTree = "<group>"; };
 		8C33BC382BA42DD40023A2D9 /* MiniLM-vocab.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "MiniLM-vocab.txt"; sourceTree = "<group>"; };
@@ -97,6 +107,10 @@
 		8CACCE5C2BA2BC50004643C2 /* Starcoder2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Starcoder2.swift; sourceTree = "<group>"; };
 		8CACCE5D2BA2BC50004643C2 /* Qwen2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Qwen2.swift; sourceTree = "<group>"; };
 		8CACCE612BA2C3EF004643C2 /* CobaltMobileRNDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = CobaltMobileRNDebug.entitlements; path = CobaltMobileRN/CobaltMobileRNDebug.entitlements; sourceTree = "<group>"; };
+		8CC308272BB378F800D70C69 /* Montserrat-VariableFont_wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Montserrat-VariableFont_wght.ttf"; path = "../../assets/fonts/Montserrat-VariableFont_wght.ttf"; sourceTree = "<group>"; };
+		8CC308282BB378F800D70C69 /* Montserrat-Italic-VariableFont_wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Montserrat-Italic-VariableFont_wght.ttf"; path = "../../assets/fonts/Montserrat-Italic-VariableFont_wght.ttf"; sourceTree = "<group>"; };
+		8CC308292BB378F800D70C69 /* Nunito-VariableFont_wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Nunito-VariableFont_wght.ttf"; path = "../../assets/fonts/Nunito-VariableFont_wght.ttf"; sourceTree = "<group>"; };
+		8CC3082A2BB378F800D70C69 /* Nunito-Italic-VariableFont_wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Nunito-Italic-VariableFont_wght.ttf"; path = "../../assets/fonts/Nunito-Italic-VariableFont_wght.ttf"; sourceTree = "<group>"; };
 		8CDF7ACA2BA3C1E700C5F5FE /* CobaltMobileRNRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = CobaltMobileRNRelease.entitlements; path = CobaltMobileRN/CobaltMobileRNRelease.entitlements; sourceTree = "<group>"; };
 		8CFA35FB2BA18D80009546C7 /* FaissBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FaissBridge.h; sourceTree = "<group>"; };
 		8CFA35FC2BA18D80009546C7 /* FaissBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FaissBridge.m; sourceTree = "<group>"; };
@@ -226,6 +240,10 @@
 		8C174FB12BACA2510085DF07 /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
+				8CC308282BB378F800D70C69 /* Montserrat-Italic-VariableFont_wght.ttf */,
+				8CC308272BB378F800D70C69 /* Montserrat-VariableFont_wght.ttf */,
+				8CC3082A2BB378F800D70C69 /* Nunito-Italic-VariableFont_wght.ttf */,
+				8CC308292BB378F800D70C69 /* Nunito-VariableFont_wght.ttf */,
 				8C99CED82BACA4E600400086 /* Ionicons.ttf */,
 			);
 			path = Fonts;
@@ -252,9 +270,12 @@
 		8CFD0A252BA3EDF40080EBE1 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				8C097E642BB19BE70078CE31 /* CodeGen-merges.txt */,
+				8C097E652BB19BE70078CE31 /* CodeGen-vocab.json */,
 				8C33BC3F2BA563BE0023A2D9 /* all-MiniLM-L6-v2-coreml-float32.mlpackage */,
 				8C33BC382BA42DD40023A2D9 /* MiniLM-vocab.txt */,
 				8C33BC3D2BA43DEC0023A2D9 /* BertTokenizer.swift */,
+				8C097E572BB0EC9C0078CE31 /* CodeGenTokenizer.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -385,10 +406,16 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8CC3082C2BB378F900D70C69 /* Montserrat-Italic-VariableFont_wght.ttf in Resources */,
 				8C33BC392BA42DD40023A2D9 /* MiniLM-vocab.txt in Resources */,
+				8CC3082E2BB378F900D70C69 /* Nunito-Italic-VariableFont_wght.ttf in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
+				8CC3082B2BB378F900D70C69 /* Montserrat-VariableFont_wght.ttf in Resources */,
+				8CC3082D2BB378F900D70C69 /* Nunito-VariableFont_wght.ttf in Resources */,
 				8C99CED92BACA4E600400086 /* Ionicons.ttf in Resources */,
+				8C097E672BB19BE70078CE31 /* CodeGen-vocab.json in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				8C097E662BB19BE70078CE31 /* CodeGen-merges.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -556,6 +583,7 @@
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				8CACCE552BA29DD2004643C2 /* Phi.swift in Sources */,
 				8CACCE5F2BA2BC50004643C2 /* Starcoder2.swift in Sources */,
+				8C097E582BB0EC9C0078CE31 /* CodeGenTokenizer.swift in Sources */,
 				8CACCE522BA29DD2004643C2 /* Tokenizer.swift in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				8C33BC3E2BA43DEC0023A2D9 /* BertTokenizer.swift in Sources */,
@@ -654,9 +682,14 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = to.tgoolsby.cobalt;
 				PRODUCT_NAME = CobaltMobileRN;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_OBJC_BRIDGING_HEADER = "CobaltMobileRN-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -687,8 +720,13 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = to.tgoolsby.cobalt;
 				PRODUCT_NAME = CobaltMobileRN;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_OBJC_BRIDGING_HEADER = "CobaltMobileRN-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;

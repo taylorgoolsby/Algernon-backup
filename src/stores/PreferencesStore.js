@@ -34,15 +34,19 @@ const defaultModel: EditableModelConfig = {
 }
 
 export class PreferencesStore {
+  loaded: boolean = false
   models: Array<ModelConfig> = []
   editableModels: Array<EditableModelConfig> = []
   selectedModelIndex: number = 0
+  introCompleted: boolean = false
 
   constructor() {
     makeObservable(this, {
+      loaded: observable,
       models: observable,
       selectedModelIndex: observable,
       selectedModel: computed,
+      introCompleted: observable,
     })
   }
 
@@ -50,46 +54,41 @@ export class PreferencesStore {
     return this.models[this.selectedModelIndex] ?? defaultModel
   }
 
-  async save(models: Array<EditableModelConfig>): Promise<void> {
+  reset() {
+    this.loaded = true
+    this.editableModels = [defaultModel]
+    this.updateModels(this.editableModels)
+    this.selectedModelIndex = 0
+    this.introCompleted = false
+  }
+
+  updateModels(models: Array<EditableModelConfig>) {
     if (!models.length) {
       models.push(defaultModel)
     }
+    this.editableModels = models
 
-    // Remove incomplete data:
-    const modelsToSave = models
-      .filter(model => !!model.local || !!model.title)
-      .map(model => {
-        return {
-          ...model,
-          completionOptions: model.completionOptions.filter(
-            option => !!option.name,
-          ),
-        }
-      })
-
-    const preferences = {
-      editableModels: modelsToSave,
-      selectedModelIndex: this.selectedModelIndex,
-    }
-
-    console.log('saving preferences', JSON.stringify(preferences))
-
-    await RNFS.writeFile(path, JSON.stringify(preferences), 'utf8')
-
-    // Convert models from EditableModelConfig to ModelConfig:
-    this.editableModels = modelsToSave
-    this.models = modelsToSave.map((model: EditableModelConfig) => {
+    // Remove incomplete data and convert completionOptions to object format:
+    this.models = models.filter(model => !!model.local || !!model.title).map((model: EditableModelConfig) => {
       return {
-        title: model.title,
-        apiBase: model.apiBase,
-        apiKey: model.apiKey,
-        completionOptions: model.completionOptions.reduce((acc, option) => {
+        ...model,
+        completionOptions: model.completionOptions.filter(option => !!option.name).reduce((acc, option) => {
           // $FlowFixMe
           acc[option.name] = option.value
           return acc
         }, {}),
       }
     })
+  }
+
+  async save(): Promise<void> {
+    const preferences = {
+      editableModels: this.editableModels,
+      selectedModelIndex: this.selectedModelIndex,
+      introCompleted: this.introCompleted
+    }
+    console.log('saving preferences', JSON.stringify(preferences))
+    await RNFS.writeFile(path, JSON.stringify(preferences), 'utf8')
   }
 
   async load(): Promise<void> {
@@ -109,7 +108,6 @@ export class PreferencesStore {
 
     // $FlowFixMe
     this.editableModels = preferences.editableModels ?? []
-
     if (!this.editableModels.length) {
       this.editableModels = [defaultModel]
     }
@@ -119,10 +117,7 @@ export class PreferencesStore {
       .filter(model => !!model.local || !!model.title)
       .map((model: EditableModelConfig) => {
         return {
-          local: model.local,
-          title: model.title,
-          apiBase: model.apiBase,
-          apiKey: model.apiKey,
+          ...model,
           completionOptions: model.completionOptions.reduce((acc, option) => {
             // $FlowFixMe
             acc[option.name] = option.value
@@ -132,6 +127,10 @@ export class PreferencesStore {
       })
 
     this.selectedModelIndex = preferences.selectedModelIndex ?? 0
+
+    this.introCompleted = preferences.introCompleted ?? false
+
+    this.loaded = true
   }
 
   selectModel(modelIndex: number) {
@@ -139,6 +138,10 @@ export class PreferencesStore {
     this.save(this.editableModels).catch(err => {
       console.error(err)
     })
+  }
+
+  completeIntro() {
+    this.introCompleted = true
   }
 }
 

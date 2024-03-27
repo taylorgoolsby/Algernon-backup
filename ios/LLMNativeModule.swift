@@ -6,6 +6,8 @@ import MLXRandom
 
 @objc(LLMNativeModule)
 class LLMNativeModule: NSObject, RCTBridgeModule {
+    let tokenizer = CodeGenTokenizer()
+  
     // This is required by the RCTBridgeModule protocol
     static func moduleName() -> String! {
         return "LLMNativeModule"
@@ -18,9 +20,18 @@ class LLMNativeModule: NSObject, RCTBridgeModule {
   
     @objc(generateResponse:resolver:rejecter:)
     func generateResponse(fromText text: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+      
+//      let tokens = tokenizer.tokenize(text: text)
+//      print("tokens: \(tokens)")
+//
+//      let tokenIds = tokenizer.encode(text: text)
+//      print("tokenIds: \(tokenIds)")
+//
+//      let str = tokenizer.decode(tokenIds: tokenIds)
+//      print("str: \(str)")
 
-        // In debug build, immediately resolve with a debug message
-        resolve("MLX is not available in debug mode")
+//        // In debug build, immediately resolve with a debug message
+        resolve("MLX is currently not supported")
         
         // Use a Task to bridge async/await with the promise-based callback
 //        Task {
@@ -35,7 +46,7 @@ class LLMNativeModule: NSObject, RCTBridgeModule {
     }
   
     let modelConfiguration = ModelConfiguration.phi4bit
-    let temperature: Float = 0.6
+    let temperature: Float = 0.4
     let maxTokens = 100
   
     @MainActor
@@ -46,7 +57,7 @@ class LLMNativeModule: NSObject, RCTBridgeModule {
     func runModelAsync(fromText prompt: String) async throws -> String {
         print("runModelAsync")
         do {
-            let (model, tokenizer) = try await loadModel()
+            let (model, _) = try await loadModel()
 
             await MainActor.run {
                 running = true
@@ -57,6 +68,7 @@ class LLMNativeModule: NSObject, RCTBridgeModule {
             let prompt = modelConfiguration.prepare(prompt: prompt)
             let promptTokens = MLXArray(tokenizer.encode(text: prompt))
             print("Prompt: \(prompt)")
+            print(promptTokens)
 
             // each time you generate you will get something new
             MLXRandom.seed(UInt64(Date.timeIntervalSinceReferenceDate * 1000))
@@ -77,7 +89,7 @@ class LLMNativeModule: NSObject, RCTBridgeModule {
                 }
 
                 outputTokens.append(tokenId)
-                let text = tokenizer.decode(tokens: outputTokens)
+                let text = tokenizer.decode(tokenIds: outputTokens)
               
                 print("Generating \(text)")
 

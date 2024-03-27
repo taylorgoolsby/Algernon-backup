@@ -3,7 +3,6 @@
 import React, {useEffect, useRef, useState} from 'react'
 import {
   View,
-  Text,
   TextInput,
   Button,
   ScrollView,
@@ -12,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native'
+import Text from './components/Text.js'
 import preferencesStore from '../stores/PreferencesStore.js'
 import type {EditableModelConfig} from '../stores/PreferencesStore.js'
 
@@ -27,17 +27,14 @@ const ModelsScreen: any = () => {
     preferencesStore.editableModels,
   )
 
-  const saveModels = () => {
-    // todo:
-    //  When a model configuration is changed, the selected model should also change.
-    Promise.resolve().then(async () => {
-      try {
-        await preferencesStore.save(models)
-        console.log('Models saved successfully')
-      } catch (error) {
-        console.error('Failed to save models:', error)
-      }
-    })
+  async function saveModels() {
+    try {
+      preferencesStore.updateModels(models)
+      await preferencesStore.save()
+      console.log('Models saved successfully')
+    } catch (error) {
+      console.error('Failed to save models:', error)
+    }
   }
 
   const isInit = useRef(true)

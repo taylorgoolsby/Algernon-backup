@@ -1,11 +1,12 @@
 // @flow
 
 import React, {useState} from 'react'
-import {View, Text, StyleSheet} from 'react-native'
-import type {MessageSQL} from '../schema/Message/MessageSchema.mjs'
-import {MessageRole} from '../schema/Message/MessageSchema.mjs'
+import {View, StyleSheet} from 'react-native'
+import type {MessageSQL} from '../../schema/Message/MessageSchema.mjs'
+import {MessageRole} from '../../schema/Message/MessageSchema.mjs'
 import Spinner from './Spinner.js'
-import Colors from "../Colors.js";
+import Colors from "../../Colors.js";
+import Text from './Text.js'
 
 const ChatMessage = ({
   message,
