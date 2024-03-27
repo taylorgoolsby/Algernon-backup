@@ -35,9 +35,10 @@ const ChatScreen: any = observer(({navigation}) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
-  const canPost =
-    !!input.trim() && (messages[0] ? !!messages[0].completed : true)
+  // const canPost =
+  //   !!input.trim() && (messages[0] ? !!messages[0].completed : true)
   // const canPost = true
+  const canPost = !!input.trim()
 
   // scrollToBottom when message updates the first time (initial load):
   const initialLoad = useRef(true)
