@@ -148,8 +148,6 @@ const MarkdownText = (props: any): any => {
   }
 
   function renderChildren(children: Array<any>, parentType: any): Array<any> {
-    console.log("children", children);
-
     const margins = getMargins(children)
 
     return children.map((child, index) => {
@@ -250,7 +248,6 @@ const MarkdownText = (props: any): any => {
       }
 
       if (child.type === LI) {
-        console.log("child.props.children", child.props.children);
         return (
           <Text key={index} style={textStyle}>
             <Bullet />
@@ -271,9 +268,26 @@ const MarkdownText = (props: any): any => {
       }
 
       if (child.type === A) {
+        return (
+          <Text
+            key={index}
+            style={{...textStyle, ...margins[index], color: Colors.blue}}
+          >
+            {renderChildren(child.props.children, Text)}
+          </Text>
+        )
       }
 
       if (child.type === Code) {
+        // todo: monospace font
+        return (
+          <Text
+            key={index}
+            style={{...textStyle, ...margins[index]}}
+          >
+            {renderChildren(child.props.children, Text)}
+          </Text>
+        )
       }
     })
   }
