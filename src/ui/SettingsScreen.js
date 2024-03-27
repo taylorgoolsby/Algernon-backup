@@ -19,16 +19,17 @@ const SettingsScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View styles={styles.row}>
+      <View style={styles.row}>
         <Text>
           Delete All Data
         </Text>
         <TouchableOpacity
+          style={{padding: 10}}
           onPress={deleteData}
         >
           <Icon
             name={'trash-outline'}
-            size={30}
+            size={24}
             color={Colors.trashIcon}
           />
         </TouchableOpacity>
@@ -41,9 +42,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.secondaryBg,
+    alignItems: 'center'
   },
   row: {
-    flexDirection: 'row'
+    flexDirection: 'row',
+    alignItems: 'center'
   }
 });
 

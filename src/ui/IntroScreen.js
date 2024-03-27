@@ -124,9 +124,6 @@ const Slide1 = withIAPContext(() => {
     setSelectedOptionId(optionId)
   }
 
-  console.log("connected", connected);
-  console.log("products", products);
-
   async function confirm() {
     // if (selectedOptionId === 'monthly') {
     //   await requestPurchase({sku: 'monthly1'})

@@ -34,16 +34,19 @@ export default class {
   static introSlideUpBg = 'rgba(9, 15, 44, 0.7)'
   // static introSlideUpBg = 'rgba(0, 0, 0, 0.2)'
 
-  static trashIcon = red
+  static trashIcon = defaultText
 
-  static settingsButtonBg = 'rgba(112, 163, 255, 0.1)'
+  // static settingsButtonBg = 'rgba(112, 163, 255, 0.1)'
+  static settingsButtonBg = 'rgba(196, 219, 255, 0.4)'
   static settingsButtonText = defaultText
   static sendIconBg = 'rgba(0, 0, 0, 0.8)'
   static sendIconDisabledBg = 'rgba(0, 0, 0, 0.4)'
   static inputText = defaultText
 
-  static userBubbleBg = 'rgba(112, 163, 255, 0.1)'
-  static aiBubbleBg = 'rgba(112, 163, 255, 0.1)'
+  // static userBubbleBg = 'rgba(112, 163, 255, 0.1)'
+  // static aiBubbleBg = 'rgba(112, 163, 255, 0.1)'
+  static userBubbleBg = 'rgba(196, 219, 255, 0.4)'
+  static aiBubbleBg = 'rgba(196, 219, 255, 0.4)'
   static userBubbleText = defaultText
   static aiBubbleText = defaultText
 

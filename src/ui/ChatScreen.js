@@ -25,6 +25,7 @@ import preferencesStore from '../stores/PreferencesStore.js'
 import {BlurView} from '@react-native-community/blur'
 import chatStore from '../stores/ChatStore.js'
 import Colors from '../Colors.js'
+import Config from "../Config.js";
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon)
 
@@ -34,9 +35,9 @@ const ChatScreen: any = observer(({navigation}) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
-  // const canPost =
-  //   !!input.trim() && (messages[0] ? !!messages[0].completed : true)
-  const canPost = true
+  const canPost =
+    !!input.trim() && (messages[0] ? !!messages[0].completed : true)
+  // const canPost = true
 
   // scrollToBottom when message updates the first time (initial load):
   const initialLoad = useRef(true)
@@ -57,18 +58,25 @@ const ChatScreen: any = observer(({navigation}) => {
   }
 
   const sendMessage = async () => {
-    if (!preferencesStore.selectedModel) {
-      console.error('No model selected')
-      return
-    }
     if (!canPost) return
-    if (preferencesStore.selectedModel.local) {
-      setErrorMessage('Local models are not supported yet.')
-      return
-    }
+    // if (!preferencesStore.selectedModel) {
+    //   console.error('No model selected')
+    //   return
+    // }
+    // if (preferencesStore.selectedModel.local) {
+    //   setErrorMessage('Local models are not supported yet.')
+    //   return
+    // }
     ChatIteration.iterate(
       chatStore.windowId,
-      preferencesStore.selectedModel,
+      {
+        title: 'GPT-3.5',
+        apiBase: 'https://api.openai.com',
+        apiKey: Config.openAiApiKey,
+        completionOptions: {
+          model: 'gpt-3.5-turbo'
+        }
+      },
       input.trim(),
       output => {
         chatStore.appendMessage(output)
@@ -219,12 +227,12 @@ const ChatScreen: any = observer(({navigation}) => {
         onLayout={onLayoutHeader} //
       >
         <SafeAreaView style={styles.safeArea}>
-          <TouchableOpacity
-            style={styles.settingsButton}
-            onPress={() => navigation.navigate('Settings')}
-          >
-            <Text style={styles.settingsButtonText}>Settings</Text>
-          </TouchableOpacity>
+          {/*<TouchableOpacity*/}
+          {/*  style={styles.settingsButton}*/}
+          {/*  onPress={() => navigation.navigate('Settings')}*/}
+          {/*>*/}
+          {/*  <Text style={styles.settingsButtonText}>Settings</Text>*/}
+          {/*</TouchableOpacity>*/}
           {/*{!!preferencesStore.selectedModel?.title ? (*/}
           {/*  <TouchableOpacity*/}
           {/*    style={styles.settingsButton}*/}
@@ -460,6 +468,7 @@ const styles = StyleSheet.create({
     paddingTop: 0,
     marginRight: 10,
     fontSize: Colors.fontSize,
+    fontFamily: 'Montserrat',
   },
   sendButton: {
     height: 50,
