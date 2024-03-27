@@ -101,6 +101,19 @@ const Slide1 = () => {
     console.log('confirm')
   }
 
+  // On the first render, the logo is the only element with flex: 1,
+  // and if it maxes out its height, then the rendering switches modes.
+  // Instead, the logo will now be rendered with a max height of 154,
+  // and the sectional will be given flex 1.
+  // This will ensure that the logo will always be rendered with a max height of 154.
+  const [logoHeight, setLogoHeight] = useState(0)
+  const onLayout = (event: any) => {
+    const {height} = event.nativeEvent.layout
+    setLogoHeight(height)
+  }
+
+  const maxedLogoHeight = logoHeight >= 154
+
   const monthlyPrice = 6.99
   const annualPrice = Math.trunc(monthlyPrice * 12 * 0.7) - 0.01
 
@@ -110,7 +123,7 @@ const Slide1 = () => {
         flex: 1,
         alignSelf: 'stretch',
       }}>
-      <View style={{flex: 1, alignSelf: 'center'}}>
+      <View style={{alignSelf: 'center', ...(maxedLogoHeight ? {height: 154} : {flex: 1})}} onLayout={onLayout}>
         <View style={{flex: 1, aspectRatio: 1 / (1 + 92/600), marginBottom: 22, maxHeight: 154}}>
           <Image
             source={{uri: 'LogoTransparent'}}
@@ -132,42 +145,31 @@ const Slide1 = () => {
         </View>
       </View>
 
-
       <View
         style={{
           alignSelf: 'stretch',
+          justifyContent: 'center',
           paddingLeft: 30,
           paddingRight: 30,
-          paddingTop: 26,
+          // paddingTop: 26,
           paddingBottom: 40,
-          flex: 1,
+          ...(maxedLogoHeight ? {flex: 1} : {})
         }}>
-        {/*<View style={{flexDirection: 'row', alignItems: 'center'}}>*/}
-        {/*  <Text style={[styles.text, styles.title]}>*/}
-        {/*    {'Welcome to Cobalt'}*/}
-        {/*  </Text>*/}
-        {/*  /!*<Logo/>*!/*/}
-        {/*</View>*/}
-        <Text style={[styles.text, styles.title]}>{'Welcome to Cobalt'}</Text>
-        <Text style={[styles.text, styles.subtitle]}>
-          {/*{'Before using this app, we ask that you subscribe.'}*/}
-          {'Cobalt requires a subscription to operate.'}
-        </Text>
-        <Text style={[styles.text, styles.subtitle]}>{''}</Text>
-        {/*<Text style={[styles.text, styles.subtitle]}>*/}
-        {/*  {'Included are:'}*/}
-        {/*</Text>*/}
-        <List
-          itemStyle={[styles.text, styles.subtitle]}
-          items={[
-            'Free 1-Week Trial',
-            'Unlimited chat messages',
-            'Long Term Memory',
-            // 'Internet capabilities',
-            // 'Set reminders',
-            // 'Set reminders',
-          ]}
-        />
+        <View style={{alignSelf: 'stretch'}}>
+          <Text style={[styles.text, styles.title]}>{'Welcome to Cobalt'}</Text>
+          <Text style={[styles.text, styles.subtitle]}>
+            {'Cobalt requires a subscription to operate.'}
+          </Text>
+          <Text style={[styles.text, styles.subtitle]}>{''}</Text>
+          <List
+            itemStyle={[styles.text, styles.subtitle]}
+            items={[
+              'Free 1-Week Trial',
+              'Unlimited chat messages',
+              'Long Term Memory',
+            ]}
+          />
+        </View>
       </View>
 
       <View
