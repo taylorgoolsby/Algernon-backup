@@ -5,9 +5,8 @@ import parseAxiosError from '../utils/parseAxiosError.js'
 import type {GPTMessage} from "../types/GPTMessage.js";
 import type {ChatCompletionsResponse} from "../types/ChatCompletion.js";
 import type {ModelConfig} from "../types/ModelConfig.js";
-import EventSource from "react-native-sse";
+import EventSource from "../react-native-sse";
 import "react-native-url-polyfill/auto";
-import Config from "../Config.js";
 
 // ordering matters here
 // default model is the first one.

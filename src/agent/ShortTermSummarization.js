@@ -151,6 +151,7 @@ Output 2: "Planning a trip to Japan, visiting Tokyo and Kyoto. Unique activities
     )
 
     const modelName = normalizeModelName(model)
+    console.log("modelName", modelName);
     const input = await NativeTokenizer.processMessages(
       systemMessage,
       nonSystemMessages,

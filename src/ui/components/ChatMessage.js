@@ -7,6 +7,7 @@ import {MessageRole} from '../../schema/Message/MessageSchema.mjs'
 import Spinner from './Spinner.js'
 import Colors from "../../Colors.js";
 import Text from './Text.js'
+import MarkdownText from "./MarkdownText.js";
 
 const ChatMessage = ({
   message,
@@ -34,15 +35,17 @@ const ChatMessage = ({
         messageStyle,
       ]}>
       {!!message.text ? (
-        <Text
-          style={
+        <MarkdownText
+          textStyle={
             message.role === MessageRole.USER
               ? styles.userMessageText
               : styles.aiMessageText
           }
-          onLayout={handleLayout}>
+          // onLayout={handleLayout}
+        >
           {message.text.trim()}
-        </Text>
+          {/*{'this is a p\n\n# header\n\n## Welcome to Cobalt\n\n### h3\n\n* line 1\n* line2\n\nline 3'}*/}
+        </MarkdownText>
       ) : (
         <Spinner />
       )}
@@ -86,13 +89,13 @@ const styles = StyleSheet.create({
     color: Colors.userBubbleText,
     // color: 'rgba(255, 255, 255, 0.97)',
     fontSize: Colors.fontSize,
-    lineHeight: 21,
+    lineHeight: Colors.fontSize * 1.5,
   },
   aiMessageText: {
     // color: 'rgba(255, 255, 255, 0.97)',
     color: Colors.aiBubbleText,
     fontSize: Colors.fontSize,
-    lineHeight: 21,
+    lineHeight: Colors.fontSize * 1.5,
   },
 })
 

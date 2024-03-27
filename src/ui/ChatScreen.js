@@ -71,7 +71,7 @@ const ChatScreen: any = observer(({navigation}) => {
     ChatIteration.iterate(
       chatStore.windowId,
       {
-        title: 'GPT-3.5',
+        title: 'GPT-4',
         apiBase: 'https://api.openai.com',
         apiKey: Config.openAiApiKey,
         completionOptions: {
