@@ -7,14 +7,24 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Image,
+  Platform
 } from 'react-native'
 // import Swiper from 'react-native-swiper'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Colors from '../Colors.js'
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import Text from './components/Text.js'
 import preferencesStore from '../stores/PreferencesStore.js'
 import List from './components/List.js'
+import * as RNIap from 'react-native-iap';
+import {requestPurchase, withIAPContext, useIAP} from 'react-native-iap';
+
+const itemSkus = Platform.select({
+  ios: [
+    'monthly1', // The product ID for your monthly subscription
+    // 'com.yourapp.annual', // The product ID for your annual subscription
+  ],
+});
 
 const Option = props => {
   const {label, note, onSelect, selected} = props
@@ -90,16 +100,50 @@ const Option = props => {
   )
 }
 
-const Slide1 = () => {
+const Slide1 = withIAPContext(() => {
+  const {
+    connected,
+    products,
+    promotedProductsIOS,
+    subscriptions,
+    purchaseHistory,
+    availablePurchases,
+    currentPurchase,
+    currentPurchaseError,
+    initConnectionError,
+    finishTransaction,
+    getProducts,
+    getSubscriptions,
+    getAvailablePurchases,
+    getPurchaseHistory,
+  } = useIAP();
+
   const [selectedOptionId, setSelectedOptionId] = useState(null)
 
   function selectOption(optionId) {
     setSelectedOptionId(optionId)
   }
 
-  function confirm() {
-    console.log('confirm')
+  console.log("connected", connected);
+  console.log("products", products);
+
+  async function confirm() {
+    // if (selectedOptionId === 'monthly') {
+    //   await requestPurchase({sku: 'monthly1'})
+    // } else if (selectedOptionId === 'yearly') {
+    //   // await purchase('com.yourapp.annual')
+    // }
+    preferencesStore.completeIntro()
+    await preferencesStore.save()
   }
+
+  useEffect(() => {
+    // ... listen to currentPurchaseError, to check if any error happened
+  }, [currentPurchaseError]);
+
+  useEffect(() => {
+    // ... listen to currentPurchase, to check if the purchase went through
+  }, [currentPurchase]);
 
   // On the first render, the logo is the only element with flex: 1,
   // and if it maxes out its height, then the rendering switches modes.
@@ -209,17 +253,22 @@ const Slide1 = () => {
               {'Subscription'}
             </Text>
             <Option
-              label={`Monthly ($${monthlyPrice.toFixed(2)})`}
+              label={`Continue with free trial`}
               onSelect={() => selectOption('monthly')}
               selected={selectedOptionId === 'monthly'}
             />
-            <Option
-              id={'yearly'}
-              label={`Annual ($${annualPrice})`}
-              note={'30% OFF'}
-              onSelect={() => selectOption('yearly')}
-              selected={selectedOptionId === 'yearly'}
-            />
+            {/*<Option*/}
+            {/*  label={`Monthly ($${monthlyPrice.toFixed(2)})`}*/}
+            {/*  onSelect={() => selectOption('monthly')}*/}
+            {/*  selected={selectedOptionId === 'monthly'}*/}
+            {/*/>*/}
+            {/*<Option*/}
+            {/*  id={'yearly'}*/}
+            {/*  label={`Annual ($${annualPrice})`}*/}
+            {/*  note={'30% OFF'}*/}
+            {/*  onSelect={() => selectOption('yearly')}*/}
+            {/*  selected={selectedOptionId === 'yearly'}*/}
+            {/*/>*/}
             <TouchableOpacity
               style={{
                 alignSelf: 'flex-end',
@@ -242,7 +291,7 @@ const Slide1 = () => {
       </View>
     </View>
   )
-}
+})
 
 const IntroScreen: any = observer(({navigation}) => {
   async function close() {
