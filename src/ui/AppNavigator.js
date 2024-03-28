@@ -85,7 +85,6 @@ const AppNavigator: any = withIAPContext(observer(() => {
 
   useEffect(() => {
     if (!iapLoaded) return
-    console.log("purchaseHistory", purchaseHistory);
     if (connected && preferencesStore.introCompleted && !paymentStore.isFreeTrialAvailable && !currentPurchase) {
       // If the user has completed the intro, then
       // * they are allowed to use the app for 1 week if they have never purchased before.
@@ -119,7 +118,6 @@ const AppNavigator: any = withIAPContext(observer(() => {
     setInterval(() => {
       const firstInstallTime = DeviceInfo.getFirstInstallTimeSync()
       const timeElapsed = Date.now() - firstInstallTime
-      console.log("timeElapsed", timeElapsed);
       paymentStore.isFreeTrialAvailable = timeElapsed < oneWeek
     }, 1000 * 10)
   }, []);

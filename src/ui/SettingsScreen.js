@@ -22,21 +22,21 @@ const SettingsScreen: any = observer(() => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.row}>
-        <Text>
-          Delete All Data
-        </Text>
-        <TouchableOpacity
-          style={{padding: 10}}
-          onPress={deleteData}
-        >
-          <Icon
-            name={'trash-outline'}
-            size={24}
-            color={Colors.trashIcon}
-          />
-        </TouchableOpacity>
-      </View>
+      {/*<View style={styles.row}>*/}
+      {/*  <Text>*/}
+      {/*    Delete All Data*/}
+      {/*  </Text>*/}
+      {/*  <TouchableOpacity*/}
+      {/*    style={{padding: 10}}*/}
+      {/*    onPress={deleteData}*/}
+      {/*  >*/}
+      {/*    <Icon*/}
+      {/*      name={'trash-outline'}*/}
+      {/*      size={24}*/}
+      {/*      color={Colors.trashIcon}*/}
+      {/*    />*/}
+      {/*  </TouchableOpacity>*/}
+      {/*</View>*/}
 
       {paymentStore.isSubscribed ? (
         <View style={styles.row}>

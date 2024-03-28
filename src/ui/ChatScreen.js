@@ -26,6 +26,7 @@ import {BlurView} from '@react-native-community/blur'
 import chatStore from '../stores/ChatStore.js'
 import Colors from '../Colors.js'
 import Config from "../Config.js";
+import { useDebounce } from 'use-debounce';
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon)
 
@@ -110,20 +111,20 @@ const ChatScreen: any = observer(({navigation}) => {
     // })
   }
 
-  const [headerHeight, setHeaderHeight] = useState(50)
+  // SafeArea causes headerHeight and footerHeight to change over time.
+  const [_headerHeight, setHeaderHeight] = useState(0)
+  const [headerHeight] = useDebounce(_headerHeight, 16);
   const onLayoutHeader = (event: any) => {
     const {height} = event.nativeEvent.layout
     setHeaderHeight(height)
   }
 
-  const [footerHeight, setFooterHeight] = useState(50)
+  const [_footerHeight, setFooterHeight] = useState(0)
+  const [footerHeight] = useDebounce(_footerHeight, 16);
   const onLayoutFooter = (event: any) => {
     const {height} = event.nativeEvent.layout
     setFooterHeight(height)
   }
-
-  const [x1, setX1] = useState(0)
-  const [y1, setY1] = useState(0)
 
   const colorAnimation = useRef(new Animated.Value(0)).current
   useEffect(() => {
@@ -142,52 +143,9 @@ const ChatScreen: any = observer(({navigation}) => {
     }
   }, [canPost])
 
-  // const moveAnimation = useRef(new Animated.Value(0)).current
-  // useEffect(() => {
-  //   Animated.loop(
-  //     Animated.sequence([
-  //       Animated.timing(moveAnimation, {
-  //         toValue: 100, // Move up
-  //         duration: 5000, // Duration of one half of the sine wave
-  //         easing: t => {
-  //           return Math.sin(t * Math.PI * 2)
-  //         },
-  //         useNativeDriver: true,
-  //       }),
-  //       // Animated.timing(moveAnimation, {
-  //       //   toValue: 0, // Move back to original position
-  //       //   duration: 1000, // Duration of the other half
-  //       //   easing: Easing.circle,
-  //       //   useNativeDriver: true,
-  //       // }),
-  //     ]),
-  //   ).start()
-  // }, [moveAnimation])
-
   return (
     <View style={styles.container}>
       <View style={styles.background}>
-        {/*<Animated.View*/}
-        {/*  style={[*/}
-        {/*    styles.backgroundOrb,*/}
-        {/*    {*/}
-        {/*      transform: [*/}
-        {/*        {*/}
-        {/*          translateY: moveAnimation.interpolate({*/}
-        {/*            inputRange: [0, 100],*/}
-        {/*            outputRange: [0, -100], // Adjust these values for the amplitude of the sine wave*/}
-        {/*          }),*/}
-        {/*        },*/}
-        {/*      ],*/}
-        {/*    },*/}
-        {/*  ]}*/}
-        {/*/>*/}
-        {/*<BlurView*/}
-        {/*  style={styles.backgroundBlurView}*/}
-        {/*  // blurType="ultraThinMaterialDark"*/}
-        {/*  blurType="regular"*/}
-        {/*  blurAmount={1000}*/}
-        {/*/>*/}
       </View>
 
       <KeyboardAvoidingView
@@ -195,7 +153,7 @@ const ChatScreen: any = observer(({navigation}) => {
         behavior={Platform.OS === 'ios' ? 'height' : null}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} //
       >
-        {messages.length > 0 ? (
+        {(messages.length > 0 && headerHeight && footerHeight) ? (
           <FlatList
             style={styles.chatContainer}
             contentContainerStyle={{
@@ -234,21 +192,6 @@ const ChatScreen: any = observer(({navigation}) => {
           >
             <Text style={styles.settingsButtonText}>Settings</Text>
           </TouchableOpacity>
-          {/*{!!preferencesStore.selectedModel?.title ? (*/}
-          {/*  <TouchableOpacity*/}
-          {/*    style={styles.settingsButton}*/}
-          {/*    onPress={() => setIsExpanded(!isExpanded)}>*/}
-          {/*    <Text style={styles.settingsButtonText}>*/}
-          {/*      {preferencesStore.selectedModel.title}*/}
-          {/*    </Text>*/}
-          {/*  </TouchableOpacity>*/}
-          {/*) : (*/}
-          {/*  <TouchableOpacity*/}
-          {/*    style={styles.settingsButton}*/}
-          {/*    onPress={() => navigation.navigate('Models')}>*/}
-          {/*    <Text style={styles.settingsButtonText}>Configure Models</Text>*/}
-          {/*  </TouchableOpacity>*/}
-          {/*)}*/}
         </SafeAreaView>
       </BlurView>
 

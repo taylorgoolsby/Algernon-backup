@@ -5,7 +5,7 @@ import DeviceInfo from "react-native-device-info";
 
 const firstInstallTime = DeviceInfo.getFirstInstallTimeSync()
 const timeElapsed = Date.now() - firstInstallTime
-export const oneWeek = 1000 * 60 * 2
+export const oneWeek = 1000 * 60 * 60 * 24 * 7
 
 class PaymentStore {
   // isFreeTrialAvailable is the free trial without purchase.

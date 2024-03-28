@@ -93,7 +93,6 @@ const MarkdownText = (props: any): any => {
         }
 
         if (type === 'strong') {
-          console.log("type", type);
           return <Strong {...props} children={children} />
         }
 
@@ -224,13 +223,13 @@ const MarkdownText = (props: any): any => {
           )
         } else {
           return (
-            <View
+            <Text
               key={index}
               style={{
                 ...margins[index],
               }}>
-              {renderChildren(child.props.children, View)}
-            </View>
+              {renderChildren(child.props.children, Text)}
+            </Text>
           )
         }
       }
