@@ -228,12 +228,12 @@ const ChatScreen: any = observer(({navigation}) => {
         onLayout={onLayoutHeader} //
       >
         <SafeAreaView style={styles.safeArea}>
-          {/*<TouchableOpacity*/}
-          {/*  style={styles.settingsButton}*/}
-          {/*  onPress={() => navigation.navigate('Settings')}*/}
-          {/*>*/}
-          {/*  <Text style={styles.settingsButtonText}>Settings</Text>*/}
-          {/*</TouchableOpacity>*/}
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={() => navigation.navigate('Settings')}
+          >
+            <Text style={styles.settingsButtonText}>Settings</Text>
+          </TouchableOpacity>
           {/*{!!preferencesStore.selectedModel?.title ? (*/}
           {/*  <TouchableOpacity*/}
           {/*    style={styles.settingsButton}*/}

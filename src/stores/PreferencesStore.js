@@ -3,6 +3,7 @@
 import RNFS from 'react-native-fs'
 import type {ModelConfig} from '../types/ModelConfig.js'
 import {makeObservable, observable, computed} from 'mobx'
+import DeviceInfo from "react-native-device-info";
 
 /*
 export type ModelConfig = {
@@ -69,23 +70,27 @@ export class PreferencesStore {
     this.editableModels = models
 
     // Remove incomplete data and convert completionOptions to object format:
-    this.models = models.filter(model => !!model.local || !!model.title).map((model: EditableModelConfig) => {
-      return {
-        ...model,
-        completionOptions: model.completionOptions.filter(option => !!option.name).reduce((acc, option) => {
-          // $FlowFixMe
-          acc[option.name] = option.value
-          return acc
-        }, {}),
-      }
-    })
+    this.models = models
+      .filter(model => !!model.local || !!model.title)
+      .map((model: EditableModelConfig) => {
+        return {
+          ...model,
+          completionOptions: model.completionOptions
+            .filter(option => !!option.name)
+            .reduce((acc, option) => {
+              // $FlowFixMe
+              acc[option.name] = option.value
+              return acc
+            }, {}),
+        }
+      })
   }
 
   async save(): Promise<void> {
     const preferences = {
       editableModels: this.editableModels,
       selectedModelIndex: this.selectedModelIndex,
-      introCompleted: this.introCompleted
+      introCompleted: this.introCompleted,
     }
     console.log('saving preferences', JSON.stringify(preferences))
     await RNFS.writeFile(path, JSON.stringify(preferences), 'utf8')
@@ -135,9 +140,13 @@ export class PreferencesStore {
 
   selectModel(modelIndex: number) {
     this.selectedModelIndex = modelIndex
-    this.save(this.editableModels).catch(err => {
+    this.save().catch(err => {
       console.error(err)
     })
+  }
+
+  showIntro() {
+    this.introCompleted = false
   }
 
   completeIntro() {

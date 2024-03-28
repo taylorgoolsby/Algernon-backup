@@ -14,6 +14,8 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		7699B88040F8A987B510C191 /* libPods-CobaltMobileRN-CobaltMobileRNTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-CobaltMobileRN-CobaltMobileRNTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		8C022CDE2BB5CEE500CBB95A /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C022CDD2BB5CEE500CBB95A /* StoreKit.framework */; };
+		8C022CE02BB5D67900CBB95A /* SyncedProducts.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 8C022CDF2BB5D67900CBB95A /* SyncedProducts.storekit */; };
 		8C097E582BB0EC9C0078CE31 /* CodeGenTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C097E572BB0EC9C0078CE31 /* CodeGenTokenizer.swift */; };
 		8C097E662BB19BE70078CE31 /* CodeGen-merges.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8C097E642BB19BE70078CE31 /* CodeGen-merges.txt */; };
 		8C097E672BB19BE70078CE31 /* CodeGen-vocab.json in Resources */ = {isa = PBXBuildFile; fileRef = 8C097E652BB19BE70078CE31 /* CodeGen-vocab.json */; };
@@ -84,6 +86,8 @@
 		5DCACB8F33CDC322A6C60F78 /* libPods-CobaltMobileRN.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-CobaltMobileRN.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = CobaltMobileRN/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-CobaltMobileRN-CobaltMobileRNTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CobaltMobileRN-CobaltMobileRNTests.release.xcconfig"; path = "Target Support Files/Pods-CobaltMobileRN-CobaltMobileRNTests/Pods-CobaltMobileRN-CobaltMobileRNTests.release.xcconfig"; sourceTree = "<group>"; };
+		8C022CDD2BB5CEE500CBB95A /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		8C022CDF2BB5D67900CBB95A /* SyncedProducts.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = SyncedProducts.storekit; sourceTree = "<group>"; };
 		8C097E572BB0EC9C0078CE31 /* CodeGenTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGenTokenizer.swift; sourceTree = "<group>"; };
 		8C097E642BB19BE70078CE31 /* CodeGen-merges.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "CodeGen-merges.txt"; sourceTree = "<group>"; };
 		8C097E652BB19BE70078CE31 /* CodeGen-vocab.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "CodeGen-vocab.json"; sourceTree = "<group>"; };
@@ -134,6 +138,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8CFD0A222BA3E6340080EBE1 /* FAISS in Frameworks */,
+				8C022CDE2BB5CEE500CBB95A /* StoreKit.framework in Frameworks */,
 				8CFA36082BA1A408009546C7 /* MLXOptimizers in Frameworks */,
 				8CFD0A1D2BA3E32C0080EBE1 /* OpenMP in Frameworks */,
 				8CFD0A242BA3E6340080EBE1 /* FAISS_C in Frameworks */,
@@ -192,6 +197,7 @@
 				8C33BC342BA419EA0023A2D9 /* TextFeatureExtractor.m */,
 				8C9AAF8C2BAB2B4100FF60EF /* NativeTokenizer.m */,
 				8C9AAF8E2BAB2C7300FF60EF /* NativeTokenizer.swift */,
+				8C022CDF2BB5D67900CBB95A /* SyncedProducts.storekit */,
 			);
 			name = CobaltMobileRN;
 			sourceTree = "<group>";
@@ -199,6 +205,7 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				8C022CDD2BB5CEE500CBB95A /* StoreKit.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				5DCACB8F33CDC322A6C60F78 /* libPods-CobaltMobileRN.a */,
 				19F6CBCC0A4E27FBF8BF4A61 /* libPods-CobaltMobileRN-CobaltMobileRNTests.a */,
@@ -413,6 +420,7 @@
 				8CC3082B2BB378F900D70C69 /* Montserrat-VariableFont_wght.ttf in Resources */,
 				8CC3082D2BB378F900D70C69 /* Nunito-VariableFont_wght.ttf in Resources */,
 				8C99CED92BACA4E600400086 /* Ionicons.ttf in Resources */,
+				8C022CE02BB5D67900CBB95A /* SyncedProducts.storekit in Resources */,
 				8C097E672BB19BE70078CE31 /* CodeGen-vocab.json in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				8C097E662BB19BE70078CE31 /* CodeGen-merges.txt in Resources */,
@@ -663,7 +671,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = CobaltMobileRN/CobaltMobileRNDebug.entitlements;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = TY6EV5VRJ3;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = CobaltMobileRN/Info.plist;
@@ -702,7 +710,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = CobaltMobileRN/CobaltMobileRNRelease.entitlements;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = TY6EV5VRJ3;
 				INFOPLIST_FILE = CobaltMobileRN/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Cobalt AI";

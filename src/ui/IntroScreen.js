@@ -7,26 +7,20 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Image,
-  Platform
 } from 'react-native'
 // import Swiper from 'react-native-swiper'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Colors from '../Colors.js'
-import React, {useState, useEffect} from 'react'
+import React, { useState, useEffect, useRef } from "react";
 import Text from './components/Text.js'
 import preferencesStore from '../stores/PreferencesStore.js'
+import paymentStore from '../stores/PaymentStore.js'
 import List from './components/List.js'
-import * as RNIap from 'react-native-iap';
-import {requestPurchase, withIAPContext, useIAP} from 'react-native-iap';
+import Config from '../Config.js'
+import {requestPurchase} from 'react-native-iap'
+import { withIAPContext, useIAP } from "react-native-iap";
 
-const itemSkus = Platform.select({
-  ios: [
-    'monthly1', // The product ID for your monthly subscription
-    // 'com.yourapp.annual', // The product ID for your annual subscription
-  ],
-});
-
-const Option = props => {
+const Option = (props: any) => {
   const {label, note, onSelect, selected} = props
 
   return (
@@ -100,47 +94,41 @@ const Option = props => {
   )
 }
 
-const Slide1 = withIAPContext(() => {
+const Slide1 = withIAPContext((props: any) => {
   const {
     connected,
-    products,
-    promotedProductsIOS,
     subscriptions,
-    purchaseHistory,
-    availablePurchases,
-    currentPurchase,
-    currentPurchaseError,
-    initConnectionError,
-    finishTransaction,
-    getProducts,
     getSubscriptions,
-    getAvailablePurchases,
-    getPurchaseHistory,
+    getPurchaseHistory
   } = useIAP();
 
-  const [selectedOptionId, setSelectedOptionId] = useState(null)
+  const iapLoaded = useRef(false)
+  useEffect(() => {
+    if (connected && !iapLoaded.current) {
+      iapLoaded.current = true
+      getSubscriptions({skus: [Config.monthlyProductId, Config.annualProductId]}).catch(console.error)
+    }
+  }, [connected])
 
-  function selectOption(optionId) {
+  const [selectedOptionId, setSelectedOptionId] = useState(null)
+  function selectOption(optionId: any) {
     setSelectedOptionId(optionId)
   }
 
   async function confirm() {
-    // if (selectedOptionId === 'monthly') {
-    //   await requestPurchase({sku: 'monthly1'})
-    // } else if (selectedOptionId === 'yearly') {
-    //   // await purchase('com.yourapp.annual')
-    // }
-    preferencesStore.completeIntro()
-    await preferencesStore.save()
+    try {
+      if (selectedOptionId === Config.monthlyProductId) {
+        await requestPurchase({ sku: Config.monthlyProductId });
+      } else if (selectedOptionId === Config.annualProductId) {
+        await requestPurchase({ sku: Config.annualProductId });
+      }
+      await getPurchaseHistory()
+      preferencesStore.completeIntro();
+      await preferencesStore.save();
+    } catch (err) {
+      console.error(err);
+    }
   }
-
-  useEffect(() => {
-    // ... listen to currentPurchaseError, to check if any error happened
-  }, [currentPurchaseError]);
-
-  useEffect(() => {
-    // ... listen to currentPurchase, to check if the purchase went through
-  }, [currentPurchase]);
 
   // On the first render, the logo is the only element with flex: 1,
   // and if it maxes out its height, then the rendering switches modes.
@@ -153,10 +141,14 @@ const Slide1 = withIAPContext(() => {
     setLogoHeight(height)
   }
 
+  if (!connected || !subscriptions.length) {
+    return null
+  }
+
   const maxedLogoHeight = logoHeight >= 154
 
-  const monthlyPrice = 6.99
-  const annualPrice = Math.trunc(monthlyPrice * 12 * 0.7) - 0.01
+  const monthlyPrice = subscriptions.find(sub => sub.productId === Config.monthlyProductId)?.localizedPrice ?? '$6.99'
+  const annualPrice = subscriptions.find(sub => sub.productId === Config.annualProductId)?.localizedPrice ?? '$57.99'
 
   return (
     <View
@@ -250,22 +242,18 @@ const Slide1 = withIAPContext(() => {
               {'Subscription'}
             </Text>
             <Option
-              label={`Continue with free trial`}
-              onSelect={() => selectOption('monthly')}
-              selected={selectedOptionId === 'monthly'}
+              id={Config.monthlyProductId}
+              label={`Monthly (${monthlyPrice})`}
+              onSelect={() => selectOption(Config.monthlyProductId)}
+              selected={selectedOptionId === Config.monthlyProductId}
             />
-            {/*<Option*/}
-            {/*  label={`Monthly ($${monthlyPrice.toFixed(2)})`}*/}
-            {/*  onSelect={() => selectOption('monthly')}*/}
-            {/*  selected={selectedOptionId === 'monthly'}*/}
-            {/*/>*/}
-            {/*<Option*/}
-            {/*  id={'yearly'}*/}
-            {/*  label={`Annual ($${annualPrice})`}*/}
-            {/*  note={'30% OFF'}*/}
-            {/*  onSelect={() => selectOption('yearly')}*/}
-            {/*  selected={selectedOptionId === 'yearly'}*/}
-            {/*/>*/}
+            <Option
+              id={Config.annualProductId}
+              label={`Annual (${annualPrice})`}
+              note={'30% OFF'}
+              onSelect={() => selectOption(Config.annualProductId)}
+              selected={selectedOptionId === Config.annualProductId}
+            />
             <TouchableOpacity
               style={{
                 alignSelf: 'flex-end',
@@ -317,17 +305,20 @@ const IntroScreen: any = observer(({navigation}) => {
       />
       <SafeAreaView>
         <View style={styles.header}>
-          <TouchableOpacity style={{padding: 12}} onPress={close}>
+          <TouchableOpacity style={{padding: 12}} onPress={close} disabled={!paymentStore.isFreeTrialAvailable}>
             <Icon
               name={'close-circle'}
               size={30}
               color={Colors.introCloseButton}
+              opacity={paymentStore.isFreeTrialAvailable ? 1 : 0}
             />
           </TouchableOpacity>
         </View>
       </SafeAreaView>
 
-      <Slide1 />
+      <Slide1
+
+      />
       {/*<Swiper style={styles.wrapper}>*/}
       {/*  <Slide1 />*/}
       {/*  <View style={styles.slide}>*/}
