@@ -18,6 +18,7 @@ import { observer } from "mobx-react";
 import { setup, withIAPContext, useIAP } from "react-native-iap";
 import DeviceInfo from "react-native-device-info";
 import Config from '../Config.js'
+import ModalLayer from "./ModalLayer.js";
 
 setup({storekitMode: 'STOREKIT2_MODE'})
 
@@ -144,43 +145,46 @@ const AppNavigator: any = withIAPContext(observer(() => {
   )
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        {introCompleted ? (
-          <>
+    <View style={{flex: 1}}>
+      <NavigationContainer>
+        <Stack.Navigator>
+          {introCompleted ? (
+            <>
+              <Stack.Screen
+                name="Chat"
+                component={ChatScreen}
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name="Models"
+                component={ModelsScreen}
+                options={{
+                  headerShown: true,
+                }}
+              />
+              <Stack.Screen
+                name="Settings"
+                component={SettingsScreen}
+                options={{
+                  headerShown: true,
+                }}
+              />
+            </>
+          ) : (
             <Stack.Screen
-              name="Chat"
-              component={ChatScreen}
+              name="Intro"
+              component={IntroScreen}
               options={{
                 headerShown: false,
               }}
             />
-            <Stack.Screen
-              name="Models"
-              component={ModelsScreen}
-              options={{
-                headerShown: true,
-              }}
-            />
-            <Stack.Screen
-              name="Settings"
-              component={SettingsScreen}
-              options={{
-                headerShown: true,
-              }}
-            />
-          </>
-        ) : (
-          <Stack.Screen
-            name="Intro"
-            component={IntroScreen}
-            options={{
-              headerShown: false,
-            }}
-          />
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+      <ModalLayer/>
+    </View>
   )
 }))
 

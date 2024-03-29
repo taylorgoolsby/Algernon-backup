@@ -11,6 +11,7 @@ import { observer } from "mobx-react";
 import paymentStore from "../stores/PaymentStore.js";
 import { truncateDatabase } from "../schema/initializeDatabase.js";
 import chatStore from "../stores/ChatStore.js";
+import modalStore from "../stores/ModalStore.js";
 
 const {
   FaissBridge
@@ -32,6 +33,13 @@ const SettingsScreen: any = observer(() => {
     }
   }
 
+  async function showDeleteConfirmation() {
+    const confirmation = await modalStore.confirm('Are you sure?', 'All data will be deleted.')
+    if (confirmation) {
+      await deleteData()
+    }
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.row}>
@@ -40,7 +48,7 @@ const SettingsScreen: any = observer(() => {
         </Text>
         <TouchableOpacity
           style={{padding: 10}}
-          onPress={deleteData}
+          onPress={showDeleteConfirmation}
         >
           <Icon
             name={'trash-outline'}

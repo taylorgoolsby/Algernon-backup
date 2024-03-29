@@ -27,6 +27,7 @@ import chatStore from '../stores/ChatStore.js'
 import Colors from '../Colors.js'
 import Config from "../Config.js";
 import { useDebounce } from 'use-debounce';
+import modalStore from "../stores/ModalStore.js";
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon)
 
@@ -34,7 +35,7 @@ const ChatScreen: any = observer(({navigation}) => {
   const messages = [...chatStore.messages]
   const [input, setInput] = useState('')
   const [isExpanded, setIsExpanded] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
+  // const [errorMessage, setErrorMessage] = useState('')
 
   // const canPost =
   //   !!input.trim() && (messages[0] ? !!messages[0].completed : true)
@@ -88,7 +89,7 @@ const ChatScreen: any = observer(({navigation}) => {
       },
       error => {
         console.error(error)
-        setErrorMessage(error.message)
+        modalStore.showError(error.message)
       },
     )
     setInput('')
@@ -227,27 +228,27 @@ const ChatScreen: any = observer(({navigation}) => {
         </BlurView>
       </Modal>
 
-      <Modal
-        animationType="fade"
-        transparent={true}
-        // presentationStyle={"formSheet"}
-        visible={!!errorMessage}
-        onRequestClose={() => {
-          setErrorMessage('')
-        }}>
-        <TouchableWithoutFeedback
-          onPress={() => {
-            setErrorMessage('')
-          }}>
-          <View style={{flex: 1}}>
-            <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
-              <BlurView style={styles.errorBox} blurType="dark" blurAmount={70}>
-                <Text style={styles.errorText}>{errorMessage}</Text>
-              </BlurView>
-            </SafeAreaView>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+      {/*<Modal*/}
+      {/*  animationType="fade"*/}
+      {/*  transparent={true}*/}
+      {/*  // presentationStyle={"formSheet"}*/}
+      {/*  visible={!!errorMessage}*/}
+      {/*  onRequestClose={() => {*/}
+      {/*    setErrorMessage('')*/}
+      {/*  }}>*/}
+      {/*  <TouchableWithoutFeedback*/}
+      {/*    onPress={() => {*/}
+      {/*      setErrorMessage('')*/}
+      {/*    }}>*/}
+      {/*    <View style={{flex: 1}}>*/}
+      {/*      <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>*/}
+      {/*        <BlurView style={styles.errorBox} blurType="dark" blurAmount={70}>*/}
+      {/*          <Text style={styles.errorText}>{errorMessage}</Text>*/}
+      {/*        </BlurView>*/}
+      {/*      </SafeAreaView>*/}
+      {/*    </View>*/}
+      {/*  </TouchableWithoutFeedback>*/}
+      {/*</Modal>*/}
 
       {/*{isExpanded && (*/}
       {/*  <View style={styles.settingsModal}>*/}
@@ -417,21 +418,7 @@ const styles = StyleSheet.create({
   sendButton: {
     height: 50,
     padding: 0,
-  },
-  errorBox: {
-    paddingTop: 10,
-    paddingBottom: 10,
-    paddingLeft: 25,
-    paddingRight: 25,
-    marginLeft: 40,
-    marginRight: 40,
-    borderRadius: 24,
-  },
-  errorText: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: 'rgba(255, 255, 255, 0.97)',
-  },
+  }
 })
 
 export default ChatScreen
