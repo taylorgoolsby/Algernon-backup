@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Image,
+  Linking,
 } from 'react-native'
 // import Swiper from 'react-native-swiper'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -141,6 +142,28 @@ const Slide1 = withIAPContext((props: any) => {
     setLogoHeight(height)
   }
 
+  const openTermsOfService = () => {
+    const url = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
+    Linking.canOpenURL(url).then((supported) => {
+      if (supported) {
+        Linking.openURL(url).catch(console.error);
+      } else {
+        console.log("Don't know how to open URI: " + url);
+      }
+    });
+  };
+
+  const openPrivacyPolicy = () => {
+    const url = 'https://cobalt.tgoolsby.to/privacy';
+    Linking.canOpenURL(url).then((supported) => {
+      if (supported) {
+        Linking.openURL(url).catch(console.error);
+      } else {
+        console.log("Don't know how to open URI: " + url);
+      }
+    });
+  };
+
   if (!connected || !subscriptions.length) {
     return null
   }
@@ -231,7 +254,7 @@ const Slide1 = withIAPContext((props: any) => {
               paddingTop: 12,
               paddingLeft: 20,
               paddingRight: 20,
-              paddingBottom: 12,
+              paddingBottom: 0,
             }}>
             <Text
               style={[
@@ -271,8 +294,21 @@ const Slide1 = withIAPContext((props: any) => {
                 Confirm
               </Text>
             </TouchableOpacity>
+            <View style={styles.legalLinksContainer}>
+              <TouchableOpacity style={{marginRight: 21}} onPress={openTermsOfService}>
+                <Text style={styles.legalLinkText}>Terms</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={openPrivacyPolicy}>
+                <Text style={styles.legalLinkText}>Privacy</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </SafeAreaView>
+        <View style={{
+          marginTop: -3,
+          height: 16,
+          backgroundColor: 'rgb(35, 41, 66)',
+        }}/>
       </View>
     </View>
   )
@@ -355,6 +391,16 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     lineHeight: 16 * 1.8,
+  },
+  legalLinksContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 16,
+  },
+  legalLinkText: {
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: 12,
+    textDecorationLine: 'none',
   },
 })
 
