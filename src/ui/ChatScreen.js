@@ -113,7 +113,7 @@ const ChatScreen: any = observer(({navigation}) => {
         // }
         Voice.onSpeechError = e => {
           console.error(e.error)
-          modalStore.showError(e.error.message)
+          // modalStore.showError(e.error.message)
         }
       }
     })
