@@ -4,44 +4,68 @@ import {makeObservable, observable, computed} from 'mobx'
 
 class ModalStore {
   openModal: boolean = false
-  errorMessage: string = ''
 
-  confirmTitle: string = ''
-  confirmMessage: string = ''
-  confirmCallback: ?(confirmed: boolean) => void
+  title: ?string = null
+  message: ?string = null
+  primaryLabel: ?string = null
+  secondaryLabel: ?string = null
+  onPrimary: ?() => void = null
+  onSecondary: ?() => void = null
 
   constructor() {
     makeObservable(this, {
       openModal: observable,
-      errorMessage: observable,
-      confirmTitle: observable,
-      confirmMessage: observable,
+      title: observable,
+      message: observable,
+      primaryLabel: observable,
+      secondaryLabel: observable,
+      onPrimary: observable,
+      onSecondary: observable,
     })
   }
 
   close: () => void = () => {
     this.openModal = false
-    this.errorMessage = ''
-    this.confirmTitle = ''
-    this.confirmMessage = ''
-    this.confirmCallback = null
+    this.title = null
+    this.message = null
+    this.primaryLabel = null
+    this.secondaryLabel = null
+    this.onPrimary = null
+    this.onSecondary = null
   }
 
   showError(message: string) {
     this.openModal = true
-    this.errorMessage = message
+    this.message = message
   }
 
   confirm(title: string, message: string): Promise<boolean> {
     this.openModal = true
-    this.confirmTitle = title
-    this.confirmMessage = message
+    this.title = title
+    this.message = message
+    this.primaryLabel = 'Yes'
+    this.secondaryLabel = 'Nevermind'
     return new Promise((resolve) => {
-      this.confirmCallback = (confirmed) => {
+      this.onPrimary = () => {
         this.close()
-        resolve(confirmed)
+        resolve(true)
+      }
+      this.onSecondary = () => {
+        this.close()
+        resolve(false)
       }
     })
+  }
+
+  cta(title: ?string, message: string, primaryLabel: string, onPrimary: () => void): void {
+    this.openModal = true
+    this.title = title
+    this.message = message
+    this.primaryLabel = primaryLabel
+    this.onPrimary = () => {
+      this.close()
+      onPrimary()
+    }
   }
 }
 

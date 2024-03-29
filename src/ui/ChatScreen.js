@@ -28,6 +28,14 @@ import Colors from '../Colors.js'
 import Config from '../Config.js'
 import {useDebounce} from 'use-debounce'
 import modalStore from '../stores/ModalStore.js'
+import Voice from '@react-native-voice/voice'
+import {
+  check,
+  request,
+  openSettings,
+  PERMISSIONS,
+  RESULTS,
+} from 'react-native-permissions'
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon)
 
@@ -56,16 +64,87 @@ const ChatScreen: any = observer(({navigation}) => {
     chatStore.onRenderDone()
   }, [messages])
 
-  const startSpeechToText = () => {
-    setIsRecording(true)
-    // Start speech recognition here.
-    // For example: SpeechRecognizer.startListening(result => setInput(result));
+  // const [micReady, setMicReady] = useState(false)
+  // const [speechReady, setSpeechReady] = useState(false)
+  async function checkAndRequestVoice(): Promise<boolean> {
+    let micCheck = await check(PERMISSIONS.IOS.MICROPHONE)
+    console.log('micCheck', micCheck)
+    if (micCheck !== RESULTS.GRANTED) {
+      micCheck = await request(PERMISSIONS.IOS.MICROPHONE)
+      console.log('micCheck', micCheck)
+    }
+
+    let speechCheck = await check(PERMISSIONS.IOS.SPEECH_RECOGNITION)
+    if (speechCheck !== RESULTS.GRANTED) {
+      speechCheck = await request(PERMISSIONS.IOS.SPEECH_RECOGNITION)
+    }
+
+    if (micCheck === RESULTS.BLOCKED || speechCheck === RESULTS.BLOCKED) {
+      modalStore.cta(
+        null,
+        'Please enable microphone and speech recognition permissions in your system settings.',
+        'Open Settings',
+        () => {
+          openSettings().catch(console.error)
+        },
+      )
+    }
+
+    // setMicReady(micCheck === RESULTS.GRANTED)
+    // setSpeechReady(speechCheck === RESULTS.GRANTED)
+    return micCheck === RESULTS.GRANTED && speechCheck === RESULTS.GRANTED
+  }
+
+  const voiceInitialized = useRef(false)
+  const [voiceReady, setVoiceReady] = useState(false)
+  useEffect(() => {
+    Promise.resolve().then(async () => {
+      if (!voiceInitialized.current) {
+        voiceInitialized.current = true
+        // setVoiceReady(await Voice.isAvailable() === 1)
+        setVoiceReady(true)
+        Voice.onSpeechResults = e => {
+          console.log("e.value", e.value);
+          setInput(input + ' ' + e.value[0])
+          // console.log("e.value", e.value);
+        }
+        // Voice.onSpeechPartialResults = (e) => {
+        //   console.log("e.value", e.value);
+        // }
+        Voice.onSpeechError = e => {
+          console.error(e.error)
+          modalStore.showError(e.error.message)
+        }
+      }
+    })
+  }, [])
+
+  const startSpeechToText = async () => {
+    // This function is called whenever the user presses the mic button,
+    // which is always displayed when input is empty.
+
+    // If permissions have not been granted, then this function will request
+    // them and start recording once they have been accepted.
+
+    // It will always ask for permissions, even if they have been rejected in
+    // the past.
+
+    // If the user rejects these permissions, then this function will exit
+    // early so no recording is started.
+
+    const permissionsGranted = await checkAndRequestVoice()
+
+    if (permissionsGranted && voiceReady) {
+      setIsRecording(true)
+      Voice.start('en-US') // todo: detect language
+    }
   }
 
   const stopSpeechToText = () => {
-    setIsRecording(false)
-    // Stop speech recognition here.
-    // For example: SpeechRecognizer.stopListening();
+    if (isRecording) {
+      setIsRecording(false)
+      Voice.stop()
+    }
   }
 
   const handleModelSelect = (modelIndex: number) => {
@@ -126,7 +205,7 @@ const ChatScreen: any = observer(({navigation}) => {
   }
 
   // SafeArea causes headerHeight and footerHeight to change over time.
-  const initialLayout = useRef(true);
+  const initialLayout = useRef(true)
   const [isInitialLayout, setIsInitialLayout] = useState(true)
   useEffect(() => {
     if (initialLayout.current) {
@@ -154,20 +233,17 @@ const ChatScreen: any = observer(({navigation}) => {
     }
 
     // SafeArea height jitters around, so snap it to known possible values of 50, 84, 100, or 134
-    const snapHeight = [50, 50 + initialSafeAreaHeight, 100, 100 + initialSafeAreaHeight].reduce((prev, curr) =>
-      Math.abs(curr - height) < Math.abs(prev - height) ? curr : prev
+    const snapHeight = [
+      50,
+      50 + initialSafeAreaHeight,
+      100,
+      100 + initialSafeAreaHeight,
+    ].reduce((prev, curr) =>
+      Math.abs(curr - height) < Math.abs(prev - height) ? curr : prev,
     )
     setSafeAreaHeight(snapHeight)
   }
-
-  // const [_footerHeight, setFooterHeight] = useState(0)
-  // const [footerHeightD] = useDebounce(_footerHeight, 16)
-  // // const footerHeight = isInitialLayout ? footerHeightD : _footerHeight
   const footerHeight = safeAreaHeight
-  // const onLayoutFooter = (event: any) => {
-  //   const {height} = event.nativeEvent.layout
-  //   setFooterHeight(height)
-  // }
 
   const colorAnimation = useRef(new Animated.Value(0)).current
   useEffect(() => {
@@ -307,9 +383,8 @@ const ChatScreen: any = observer(({navigation}) => {
           style={styles.footerBlur}
           blurType={Colors.chatFooterBlurType}
           blurAmount={70}
-          onLayout={onLayoutSafeArea}
-        >
-          <SafeAreaView style={styles.inputSafeArea} >
+          onLayout={onLayoutSafeArea}>
+          <SafeAreaView style={styles.inputSafeArea}>
             <TouchableWithoutFeedback onPress={focusInput}>
               <View style={styles.inputBar}>
                 {/*$FlowFixMe*/}
@@ -329,9 +404,25 @@ const ChatScreen: any = observer(({navigation}) => {
                 {/*  onPress={sendMessage}*/}
                 {/*  color={'#fff'}*/}
                 {/*/>*/}
-                <TouchableOpacity onPress={input.trim() ? sendMessage : (isRecording ? stopSpeechToText : startSpeechToText)}>
+                <TouchableOpacity
+                  style={styles.sendButton}
+                  onPress={
+                    (input.trim() && !isRecording)
+                      ? sendMessage
+                      : isRecording
+                      ? stopSpeechToText
+                      : startSpeechToText
+                  }
+                  disabled={!!input.trim() && !isRecording && !canPost}
+                >
                   <AnimatedIcon
-                    name={input.trim() ? 'arrow-up-circle' : (isRecording ? 'stop-circle' : 'mic')}
+                    name={
+                      (input.trim() && !isRecording)
+                        ? 'arrow-up-circle'
+                        : isRecording
+                        ? 'stop-circle'
+                        : 'mic'
+                    }
                     size={30}
                     color={colorAnimation.interpolate({
                       inputRange: [0, 1],
@@ -345,13 +436,13 @@ const ChatScreen: any = observer(({navigation}) => {
               </View>
             </TouchableWithoutFeedback>
             {isRecording ? (
-              <TouchableOpacity style={styles.recordingContainer} onPress={stopSpeechToText}>
-                <Icon
-                  name={'stop-circle-outline'}
-                  size={30}
-                  color={'white'}
-                />
-                <Text style={styles.recordingText}>{' Tap to stop recording.'}</Text>
+              <TouchableOpacity
+                style={styles.recordingContainer}
+                onPress={stopSpeechToText}>
+                <Icon name={'stop-circle-outline'} size={30} color={'white'} />
+                <Text style={styles.recordingText}>
+                  {' Tap to stop recording.'}
+                </Text>
               </TouchableOpacity>
             ) : null}
           </SafeAreaView>
@@ -457,7 +548,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
     paddingLeft: 27,
-    paddingRight: 23,
+    paddingRight: 0,
   },
   input: {
     flex: 1,
@@ -469,15 +560,15 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat',
   },
   sendButton: {
-    height: 50,
     padding: 0,
+    paddingRight: 23,
   },
   recordingContainer: {
     height: 50,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.blue,
-    flexDirection: 'row'
+    flexDirection: 'row',
   },
   recordingText: {
     color: 'white', // Adjust as needed

@@ -7,25 +7,26 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
   View,
-  Button,
   TouchableOpacity,
 } from "react-native";
 import Text from './components/Text.js'
 import { BlurView } from "@react-native-community/blur";
 import { observer } from "mobx-react";
 import modalStore from "../stores/ModalStore.js";
-import Colors from "../Colors.js";
 
 const ModalLayer: any = observer((props) => {
   const {
     openModal,
-    errorMessage,
-    confirmTitle,
-    confirmMessage,
-    confirmCallback,
+    title,
+    message,
+    primaryLabel,
+    secondaryLabel,
+    onPrimary,
+    onSecondary
   } = modalStore;
 
-  console.log("openModal", openModal);
+  console.log("onPrimary", onPrimary);
+  console.log("primaryLabel", primaryLabel);
 
   return (
     <Modal
@@ -39,26 +40,28 @@ const ModalLayer: any = observer((props) => {
         <View style={{flex: 1}}>
           <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
             <BlurView style={styles.errorBox} blurType="dark" blurAmount={70}>
-              {confirmTitle ? (
-                <Text style={styles.title}>{confirmTitle}</Text>
+              {title ? (
+                <Text style={styles.title}>{title}</Text>
               ) : null}
-              <Text style={styles.message}>{errorMessage || confirmMessage}</Text>
-              {confirmCallback ? (
+              <Text style={[styles.message, (!title && onPrimary ? {marginTop: 8} : {})]}>{message}</Text>
+              {(onPrimary || onSecondary) ? (
                 <View style={styles.confirmOptions}>
-                  {/*$FlowFixMe*/}
-                  <TouchableOpacity
-                    style={styles.confirmPrimaryButton}
-                    onPress={() => confirmCallback(true)}
-                  >
-                    <Text style={styles.confirmYes}>{'Yes'}</Text>
-                  </TouchableOpacity>
-                  {/*$FlowFixMe*/}
-                  <TouchableOpacity
-                    style={styles.confirmSecondaryButton}
-                    onPress={() => confirmCallback(false)}
-                  >
-                    <Text style={styles.confirmNo}>{'Nevermind'}</Text>
-                  </TouchableOpacity>
+                  {onPrimary ? (
+                    <TouchableOpacity
+                      style={styles.primaryButton}
+                      onPress={onPrimary}
+                    >
+                      <Text style={styles.primaryText}>{primaryLabel}</Text>
+                    </TouchableOpacity>
+                  ) : null}
+                  {onSecondary ? (
+                    <TouchableOpacity
+                      style={styles.secondaryButton}
+                      onPress={onSecondary}
+                    >
+                      <Text style={styles.secondaryText}>{secondaryLabel}</Text>
+                    </TouchableOpacity>
+                  ) : null}
                 </View>
               ) : null}
             </BlurView>
@@ -83,8 +86,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
     lineHeight: 28 * 1.5,
     color: 'rgba(255, 255, 255, 0.97)',
-    marginBottom: 16,
     marginLeft: 0,
+    marginBottom: 16,
   },
   message: {
     fontSize: 16,
@@ -95,17 +98,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 20
   },
-  confirmPrimaryButton: {
+  primaryButton: {
     padding: 10,
   },
-  confirmSecondaryButton: {
+  secondaryButton: {
     padding: 10,
   },
-  confirmYes: {
+  primaryText: {
     fontSize: 22,
     color: 'rgba(255, 255, 255, 0.97)',
   },
-  confirmNo: {
+  secondaryText: {
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.97)',
   }
