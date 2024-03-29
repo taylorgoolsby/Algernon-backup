@@ -8,4 +8,5 @@ export default class Config {
   static openAiApiKey: string = RNConfig.OPENAI_API_KEY;
   static monthlyProductId: string = 'sub1.monthly1'
   static annualProductId: string = 'sub1.annual1'
+  static tokensPerChar: number = 0.17421777221526907
 }

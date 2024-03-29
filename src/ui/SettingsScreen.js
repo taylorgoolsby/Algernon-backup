@@ -54,7 +54,25 @@ const SettingsScreen: any = observer(() => {
             />
           </TouchableOpacity>
         </View>
-      ) : null}
+      ) : (
+        <View style={styles.row}>
+          <Text>
+            Subscribe
+          </Text>
+          <TouchableOpacity
+            style={{padding: 10}}
+            onPress={() => {
+              preferencesStore.showIntro()
+            }}
+          >
+            <Icon
+              name={'add-circle-outline'}
+              size={24}
+              color={Colors.trashIcon}
+            />
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   )
 })
