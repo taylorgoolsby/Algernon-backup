@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   primaryText: {
-    fontSize: 22,
+    fontSize: 22, // todo adjust to 20
     color: 'rgba(255, 255, 255, 0.97)',
   },
   secondaryText: {

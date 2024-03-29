@@ -3,7 +3,6 @@
 import RNFS from 'react-native-fs'
 import type {ModelConfig} from '../types/ModelConfig.js'
 import {makeObservable, observable, computed} from 'mobx'
-import DeviceInfo from "react-native-device-info";
 
 /*
 export type ModelConfig = {
