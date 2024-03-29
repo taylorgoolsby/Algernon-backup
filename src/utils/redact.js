@@ -8,6 +8,7 @@ export const redactedFields: Array<RegExp> = [
   /password_sha/,
   /identity/,
   /key/,
+  /Key/,
   /Token/,
   /token/,
   /access_token/,
@@ -20,7 +21,11 @@ export const redactedFields: Array<RegExp> = [
 export default function redact<T>(value: T): T {
   if (typeof value === 'string') {
     // $FlowFixMe
-    return value.replace(/sk-\w{44}/g, "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+    return value
+      // openai key
+      .replace(/sk-\w{44}/g, "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+      // codepush key
+      .replace(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/g, "00000000-0000-0000-0000-000000000000")
   }
 
   const v = clone(value)
