@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     lineHeight: 28 * 1.5,
     color: 'rgba(255, 255, 255, 0.97)',
     marginBottom: 16,
-    marginLeft: -1,
+    marginLeft: 0,
   },
   message: {
     fontSize: 16,

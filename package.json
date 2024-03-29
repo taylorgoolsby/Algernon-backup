@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@react-native-community/blur": "4.4.0",
+    "@react-native-voice/voice": "^3.2.4",
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/native-stack": "^6.9.26",
     "@taylorgoolsby/sql-template-tag": "5.2.0",

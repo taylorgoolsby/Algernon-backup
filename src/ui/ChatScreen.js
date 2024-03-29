@@ -25,9 +25,9 @@ import preferencesStore from '../stores/PreferencesStore.js'
 import {BlurView} from '@react-native-community/blur'
 import chatStore from '../stores/ChatStore.js'
 import Colors from '../Colors.js'
-import Config from "../Config.js";
-import { useDebounce } from 'use-debounce';
-import modalStore from "../stores/ModalStore.js";
+import Config from '../Config.js'
+import {useDebounce} from 'use-debounce'
+import modalStore from '../stores/ModalStore.js'
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon)
 
@@ -35,12 +35,13 @@ const ChatScreen: any = observer(({navigation}) => {
   const messages = [...chatStore.messages]
   const [input, setInput] = useState('')
   const [isExpanded, setIsExpanded] = useState(false)
+  const [isRecording, setIsRecording] = useState(false)
   // const [errorMessage, setErrorMessage] = useState('')
 
-  // const canPost =
-  //   !!input.trim() && (messages[0] ? !!messages[0].completed : true)
+  const canPost =
+    !!input.trim() && (messages[0] ? !!messages[0].completed : true)
   // const canPost = true
-  const canPost = !!input.trim()
+  // const canPost = !!input.trim()
 
   // scrollToBottom when message updates the first time (initial load):
   const initialLoad = useRef(true)
@@ -54,6 +55,18 @@ const ChatScreen: any = observer(({navigation}) => {
   useEffect(() => {
     chatStore.onRenderDone()
   }, [messages])
+
+  const startSpeechToText = () => {
+    setIsRecording(true)
+    // Start speech recognition here.
+    // For example: SpeechRecognizer.startListening(result => setInput(result));
+  }
+
+  const stopSpeechToText = () => {
+    setIsRecording(false)
+    // Stop speech recognition here.
+    // For example: SpeechRecognizer.stopListening();
+  }
 
   const handleModelSelect = (modelIndex: number) => {
     preferencesStore.selectModel(modelIndex)
@@ -77,8 +90,8 @@ const ChatScreen: any = observer(({navigation}) => {
         apiBase: 'https://api.openai.com',
         apiKey: Config.openAiApiKey,
         completionOptions: {
-          model: 'gpt-3.5-turbo'
-        }
+          model: 'gpt-3.5-turbo',
+        },
       },
       input.trim(),
       output => {
@@ -113,23 +126,52 @@ const ChatScreen: any = observer(({navigation}) => {
   }
 
   // SafeArea causes headerHeight and footerHeight to change over time.
+  const initialLayout = useRef(true);
+  const [isInitialLayout, setIsInitialLayout] = useState(true)
+  useEffect(() => {
+    if (initialLayout.current) {
+      initialLayout.current = false
+      setTimeout(() => {
+        setIsInitialLayout(false)
+      }, 160)
+    }
+  }, [])
+
   const [_headerHeight, setHeaderHeight] = useState(0)
-  const [headerHeight] = useDebounce(_headerHeight, 16);
+  const [headerHeightD] = useDebounce(_headerHeight, 16)
+  const headerHeight = isInitialLayout ? headerHeightD : _headerHeight
   const onLayoutHeader = (event: any) => {
     const {height} = event.nativeEvent.layout
     setHeaderHeight(height)
   }
 
-  const [_footerHeight, setFooterHeight] = useState(0)
-  const [footerHeight] = useDebounce(_footerHeight, 16);
-  const onLayoutFooter = (event: any) => {
+  const [initialSafeAreaHeight, setInitialSafeAreaHeight] = useState(0)
+  const [safeAreaHeight, setSafeAreaHeight] = useState(0)
+  const onLayoutSafeArea = (event: any) => {
     const {height} = event.nativeEvent.layout
-    setFooterHeight(height)
+    if (isInitialLayout) {
+      setInitialSafeAreaHeight(height - 50)
+    }
+
+    // SafeArea height jitters around, so snap it to known possible values of 50, 84, 100, or 134
+    const snapHeight = [50, 50 + initialSafeAreaHeight, 100, 100 + initialSafeAreaHeight].reduce((prev, curr) =>
+      Math.abs(curr - height) < Math.abs(prev - height) ? curr : prev
+    )
+    setSafeAreaHeight(snapHeight)
   }
+
+  // const [_footerHeight, setFooterHeight] = useState(0)
+  // const [footerHeightD] = useDebounce(_footerHeight, 16)
+  // // const footerHeight = isInitialLayout ? footerHeightD : _footerHeight
+  const footerHeight = safeAreaHeight
+  // const onLayoutFooter = (event: any) => {
+  //   const {height} = event.nativeEvent.layout
+  //   setFooterHeight(height)
+  // }
 
   const colorAnimation = useRef(new Animated.Value(0)).current
   useEffect(() => {
-    if (canPost) {
+    if (canPost || isRecording) {
       Animated.timing(colorAnimation, {
         toValue: 1,
         duration: 120,
@@ -142,19 +184,18 @@ const ChatScreen: any = observer(({navigation}) => {
         useNativeDriver: false,
       }).start()
     }
-  }, [canPost])
+  }, [canPost, isRecording])
 
   return (
     <View style={styles.container}>
-      <View style={styles.background}>
-      </View>
+      <View style={styles.background}></View>
 
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'height' : null}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} //
       >
-        {(messages.length > 0 && headerHeight && footerHeight) ? (
+        {messages.length > 0 && headerHeight && footerHeight ? (
           <FlatList
             style={styles.chatContainer}
             contentContainerStyle={{
@@ -189,8 +230,7 @@ const ChatScreen: any = observer(({navigation}) => {
         <SafeAreaView style={styles.safeArea}>
           <TouchableOpacity
             style={styles.settingsButton}
-            onPress={() => navigation.navigate('Settings')}
-          >
+            onPress={() => navigation.navigate('Settings')}>
             <Text style={styles.settingsButtonText}>Settings</Text>
           </TouchableOpacity>
         </SafeAreaView>
@@ -267,9 +307,9 @@ const ChatScreen: any = observer(({navigation}) => {
           style={styles.footerBlur}
           blurType={Colors.chatFooterBlurType}
           blurAmount={70}
-          onLayout={onLayoutFooter} //
+          onLayout={onLayoutSafeArea}
         >
-          <SafeAreaView style={styles.safeArea}>
+          <SafeAreaView style={styles.inputSafeArea} >
             <TouchableWithoutFeedback onPress={focusInput}>
               <View style={styles.inputBar}>
                 {/*$FlowFixMe*/}
@@ -289,9 +329,9 @@ const ChatScreen: any = observer(({navigation}) => {
                 {/*  onPress={sendMessage}*/}
                 {/*  color={'#fff'}*/}
                 {/*/>*/}
-                <TouchableOpacity disabled={!canPost} onPress={sendMessage}>
+                <TouchableOpacity onPress={input.trim() ? sendMessage : (isRecording ? stopSpeechToText : startSpeechToText)}>
                   <AnimatedIcon
-                    name={'arrow-up-circle'}
+                    name={input.trim() ? 'arrow-up-circle' : (isRecording ? 'stop-circle' : 'mic')}
                     size={30}
                     color={colorAnimation.interpolate({
                       inputRange: [0, 1],
@@ -304,6 +344,16 @@ const ChatScreen: any = observer(({navigation}) => {
                 </TouchableOpacity>
               </View>
             </TouchableWithoutFeedback>
+            {isRecording ? (
+              <TouchableOpacity style={styles.recordingContainer} onPress={stopSpeechToText}>
+                <Icon
+                  name={'stop-circle-outline'}
+                  size={30}
+                  color={'white'}
+                />
+                <Text style={styles.recordingText}>{' Tap to stop recording.'}</Text>
+              </TouchableOpacity>
+            ) : null}
           </SafeAreaView>
         </BlurView>
       </KeyboardAvoidingView>
@@ -358,6 +408,9 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flexDirection: 'row',
+  },
+  inputSafeArea: {
+    flexDirection: 'column',
   },
   settingsButton: {
     // position: 'absolute',
@@ -418,7 +471,17 @@ const styles = StyleSheet.create({
   sendButton: {
     height: 50,
     padding: 0,
-  }
+  },
+  recordingContainer: {
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.blue,
+    flexDirection: 'row'
+  },
+  recordingText: {
+    color: 'white', // Adjust as needed
+  },
 })
 
 export default ChatScreen
