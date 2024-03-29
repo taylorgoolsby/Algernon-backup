@@ -46,4 +46,9 @@ export default class AnnotationInterface {
     //
     // return annotationId
   }
+
+  static async truncateTable() {
+    const sql = sqltag`DELETE FROM Annotation;`
+    await database.query(sql)
+  }
 }

@@ -25,6 +25,7 @@ export class ChatStore {
     // The ultimate answer to life everything and the universe is 42,
     // so we debounce the haptic feedback to 42ms.
     // This is the frequency at which cats purr.
+    // $FlowFixMe
     this.hapticFeedback = debounce(this.hapticFeedback, 42, {leading: true, trailing: false, maxWait: 42}).bind(this)
   }
 

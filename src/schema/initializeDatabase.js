@@ -4,6 +4,11 @@ import SQLite from "react-native-sqlite-storage";
 import createTables from "./createTables.js";
 import VersionInterface from "./Version/VersionInterface.js";
 import { setDB, query } from "./database.js";
+import AnnotationInterface from "./Annotation/AnnotationInterface.js";
+import CompletionInterface from "./Completion/CompletionInterface.js";
+import MessageInterface from "./Message/MessageInterface.js";
+import ShortTermMemoryInterface from "./ShortTermMemory/ShortTermMemoryInterface.js";
+import sqltag from "@taylorgoolsby/sql-template-tag";
 
 SQLite.enablePromise(true)
 const databaseName = 'Cobalt.db'
@@ -105,4 +110,13 @@ async function migrate() {
   //   migrationScript,
   // )
   // console.log('Migration complete.')
+}
+
+export async function truncateDatabase() {
+  await AnnotationInterface.truncateTable()
+  await CompletionInterface.truncateTable()
+  await MessageInterface.truncateTable()
+  await MessageInterface.truncateTable()
+  await ShortTermMemoryInterface.truncateTable()
+  await query(sqltag`DELETE FROM sqlite_sequence;`)
 }

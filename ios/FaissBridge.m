@@ -27,6 +27,37 @@ RCT_EXPORT_METHOD(init:(NSInteger)k
     resolve(@(YES));
 }
 
+// Method to delete the entire index, both from memory and file system
+RCT_EXPORT_METHOD(deleteEntireIndex:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    // First, deallocate the index if it exists
+    if (index) {
+        faiss_Index_free((FaissIndex *)index);
+        index = NULL; // Ensure the pointer is set to NULL after freeing
+    }
+    
+    // Get the file path for the index
+    NSString *filePath = [self indexPath];
+    
+    // Create a file manager instance
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    // Check if the index file exists
+    if ([fileManager fileExistsAtPath:filePath]) {
+        NSError *error;
+        
+        // Attempt to delete the file
+        if (![fileManager removeItemAtPath:filePath error:&error]) {
+            // If there is an error deleting the file, reject the promise with the error details
+            reject(@"delete_error", @"Failed to delete index file", error);
+            return;
+        }
+    }
+    
+    // If everything is successful, resolve the promise
+    resolve(@(YES));
+}
+
 // Method to get the total number of vectors in the index
 RCT_EXPORT_METHOD(ntotal:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {

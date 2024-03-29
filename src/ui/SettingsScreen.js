@@ -1,7 +1,7 @@
 // @flow
 
 import React from 'react';
-import { TouchableOpacity, View, StyleSheet } from "react-native";
+import { TouchableOpacity, View, StyleSheet, NativeModules } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import Colors from "../Colors.js";
 import Text from './components/Text.js'
@@ -9,12 +9,24 @@ import preferencesStore from "../stores/PreferencesStore.js";
 import {deepLinkToSubscriptions} from "react-native-iap";
 import { observer } from "mobx-react";
 import paymentStore from "../stores/PaymentStore.js";
+import { truncateDatabase } from "../schema/initializeDatabase.js";
+import chatStore from "../stores/ChatStore.js";
+
+const {
+  FaissBridge
+} = NativeModules;
 
 const SettingsScreen: any = observer(() => {
   async function deleteData() {
     try {
       preferencesStore.reset()
       await preferencesStore.save()
+
+      await truncateDatabase()
+
+      await FaissBridge.deleteEntireIndex()
+
+      await chatStore.load()
     } catch (err) {
       console.error(err);
     }
@@ -22,21 +34,21 @@ const SettingsScreen: any = observer(() => {
 
   return (
     <View style={styles.container}>
-      {/*<View style={styles.row}>*/}
-      {/*  <Text>*/}
-      {/*    Delete All Data*/}
-      {/*  </Text>*/}
-      {/*  <TouchableOpacity*/}
-      {/*    style={{padding: 10}}*/}
-      {/*    onPress={deleteData}*/}
-      {/*  >*/}
-      {/*    <Icon*/}
-      {/*      name={'trash-outline'}*/}
-      {/*      size={24}*/}
-      {/*      color={Colors.trashIcon}*/}
-      {/*    />*/}
-      {/*  </TouchableOpacity>*/}
-      {/*</View>*/}
+      <View style={styles.row}>
+        <Text>
+          Complete Reset
+        </Text>
+        <TouchableOpacity
+          style={{padding: 10}}
+          onPress={deleteData}
+        >
+          <Icon
+            name={'trash-outline'}
+            size={24}
+            color={Colors.trashIcon}
+          />
+        </TouchableOpacity>
+      </View>
 
       {paymentStore.isSubscribed ? (
         <View style={styles.row}>
