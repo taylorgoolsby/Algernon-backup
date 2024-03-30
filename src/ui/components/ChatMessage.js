@@ -1,20 +1,49 @@
 // @flow
 
-import React, {useState} from 'react'
-import {View, StyleSheet} from 'react-native'
+import React, {useState, useRef} from 'react'
+import {TouchableWithoutFeedback, StyleSheet, Animated, Easing} from 'react-native'
 import type {MessageSQL} from '../../schema/Message/MessageSchema.mjs'
 import {MessageRole} from '../../schema/Message/MessageSchema.mjs'
 import Spinner from './Spinner.js'
 import Colors from "../../Colors.js";
 import Text from './Text.js'
 import MarkdownText from "./MarkdownText.js";
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 const ChatMessage = ({
   message,
 }: {
   message: MessageSQL,
 }): any => {
+  const scaleValue = useRef(new Animated.Value(1)).current;
   const [isSingleLine, setIsSingleLine] = useState(true)
+
+  function showOptions() {
+    console.log('showOptions')
+    ReactNativeHapticFeedback.trigger("soft", {
+      enableVibrateFallback: false,
+    });
+  }
+
+  const onLongPressIn = () => {
+    Animated.timing(scaleValue, {
+      toValue: 1.034, // Scale up to 110%
+      duration: 700,
+      easing: Easing.out(Easing.poly(2)),
+      useNativeDriver: true, // Use native driver for better performance
+    }).start();
+  };
+
+  const onLongPressOut = () => {
+    Animated.spring(scaleValue, {
+      toValue: 1, // Scale back to original size
+      tension: 1800,
+      friction: 17,
+      // duration: 80,
+      // easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  };
 
   const handleLayout = (event: any) => {
     const {height} = event.nativeEvent.layout
@@ -27,29 +56,43 @@ const ChatMessage = ({
     : styles.multiLineMessage
 
   return (
-    <View
-      style={[
-        message.role === MessageRole.USER
-          ? styles.userMessage
-          : styles.aiMessage,
-        messageStyle,
-      ]}>
-      {!!message.text ? (
-        <MarkdownText
-          textStyle={
-            message.role === MessageRole.USER
-              ? styles.userMessageText
-              : styles.aiMessageText
-          }
-          // onLayout={handleLayout}
-        >
-          {message.text.trim()}
-          {/*{'this is a p\n\n# header\n\n## Welcome to Cobalt\n\n### h3\n\n* line 1\n* line2\n\nline 3'}*/}
-        </MarkdownText>
-      ) : (
-        <Spinner />
-      )}
-    </View>
+    <TouchableWithoutFeedback
+      onPressIn={onLongPressIn}
+      onPressOut={onLongPressOut}
+      onLongPress={() => {
+        showOptions()
+        onLongPressOut()
+      }} // Start the effect on long press
+      delayLongPress={700} // Delay time (ms) before onLongPress is called
+      >
+      <Animated.View
+        style={[
+          {
+            transform: [{scale: scaleValue}]
+          },
+          message.role === MessageRole.USER
+            ? styles.userMessage
+            : styles.aiMessage,
+          messageStyle,
+        ]}
+      >
+        {!!message.text ? (
+          <MarkdownText
+            textStyle={
+              message.role === MessageRole.USER
+                ? styles.userMessageText
+                : styles.aiMessageText
+            }
+            onLayout={handleLayout}
+          >
+            {message.text.trim()}
+            {/*{'this is a p\n\n# header\n\n## Welcome to Cobalt\n\n### h3\n\n* line 1\n* line2\n\nline 3'}*/}
+          </MarkdownText>
+        ) : (
+          <Spinner />
+        )}
+      </Animated.View>
+    </TouchableWithoutFeedback>
   )
 }
 
