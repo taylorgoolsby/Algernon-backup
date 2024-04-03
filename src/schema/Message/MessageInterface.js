@@ -42,6 +42,7 @@ export default class MessageInterface {
       SELECT * 
       FROM Message
       WHERE windowId = ${windowId}
+      AND deleted = 0
       ORDER BY messageId ${raw(order ?? 'ASC')};
     `
     const rows = await database.query(sql)
@@ -126,6 +127,16 @@ export default class MessageInterface {
       UPDATE Message SET
         completed = 1,
         text = ${text},
+        dateUpdated = CURRENT_TIMESTAMP
+      WHERE messageId = ${messageId};
+    `
+    await database.query(query)
+  }
+
+  static async softDelete(messageId: number) {
+    const query = sqltag`
+      UPDATE Message SET 
+        deleted = 1,
         dateUpdated = CURRENT_TIMESTAMP
       WHERE messageId = ${messageId};
     `

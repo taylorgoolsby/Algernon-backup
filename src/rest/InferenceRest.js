@@ -2,11 +2,10 @@
 
 import axios from 'axios'
 import parseAxiosError from '../utils/parseAxiosError.js'
-import type {GPTMessage} from "../types/GPTMessage.js";
-import type {ChatCompletionsResponse} from "../types/ChatCompletion.js";
-import type {ModelConfig} from "../types/ModelConfig.js";
-import EventSource from "../react-native-sse";
-import "react-native-url-polyfill/auto";
+import type {GPTMessage} from '../types/GPTMessage.js'
+import type {ChatCompletionsResponse} from '../types/ChatCompletion.js'
+import type {ModelConfig} from '../types/ModelConfig.js'
+import EventSource from '../react-native-sse'
 
 // ordering matters here
 // default model is the first one.
@@ -18,66 +17,50 @@ export const standardModels = [
 ]
 
 export default class InferenceRest {
-  static async getAvailableModels(authToken: ?string): Promise<Array<string>> {
-    if (!authToken) return []
+  static async chatCompletion(
+    model: ModelConfig,
+    messages: Array<GPTMessage>,
+  ): Promise<ChatCompletionsResponse> {
+    const apiBase = model.apiBase
+    const apiKey = model.apiKey
 
-    // if (authToken === Config.openAiPublicTrialKey) {
-    //   return ['gpt-3.5-turbo-1106']
-    // }
+    if (!apiBase) {
+      throw new Error('apiBase is required')
+    }
 
-    const res = await send(
-      'GET',
-      'https://api.openai.com/v1/models',
-      null,
-      authToken,
+    const url = getUrl(apiBase)
+    const headers = getHeaders(apiBase, apiKey)
+    const data = getBody(apiBase, messages, model.completionOptions, false)
+
+    let res = await send(
+      url,
+      data,
+      headers,
     )
-    const list = res.data
-    // const filteredList = list.filter((model) => {
-    //   return standardModels.includes(model.id)
-    // })
-    const filteredList = standardModels.filter((model) => {
-      return list.some((m) => m.id === model)
-    })
-    // const modelNames = filteredList.map((model) => model.id)
-    return filteredList
-  }
 
-  static async getBestChatModel(authToken: ?string): Promise<?string> {
-    if (!authToken) return null
+    if (res.error) {
+      if (res.error instanceof Error) {
+        throw res.error
+      } else {
+        throw new Error(res.error)
+      }
+    }
 
-    const res = await send(
-      'GET',
-      'https://api.openai.com/v1/models',
-      null,
-      authToken,
-    )
-    const list = res.data
-    const gpt_4_32k = list.find((model) => model.id === 'gpt-4-32k')
-    const gpt_4 = list.find((model) => model.id === 'gpt-4-32k')
-    const gpt_35_turbo_16k = list.find(
-      (model) => model.id === 'gpt-3.5-turbo-16k',
-    )
-    const gpt_35_turbo = list.find((model) => model.id === 'gpt-3.5-turbo')
-    return (
-      gpt_4_32k?.id || gpt_4?.id || gpt_35_turbo_16k?.id || gpt_35_turbo?.id
-    )
-  }
-
-  static async getDefaultChatModel(authToken: ?string): Promise<?string> {
-    if (!authToken) return null
-
-    const res = await send(
-      'GET',
-      'https://api.openai.com/v1/models',
-      null,
-      authToken,
-    )
-    const list = res.data
-    // const gpt_4_32k = list.find((model) => model.id === 'gpt-4-32k')
-    const gpt_4 = list.find((model) => model.id === 'gpt-4-32k')
-    // const gpt_35_turbo_16k = list.find((model) => model.id === 'gpt-3.5-turbo-16k')
-    const gpt_35_turbo = list.find((model) => model.id === 'gpt-3.5-turbo')
-    return gpt_35_turbo?.id || gpt_4?.id
+    if (apiBase === 'https://api.anthropic.com') {
+      const content: string = res.content.map(block => block.type === 'text' ? block.text : '').join('\n\n')
+      return {
+        choices: [{
+          message: {
+            content,
+            role: 'assistant'
+          },
+          // todo: handle all cases
+          finish_reason: res.stop_reason === 'end_turn' ? 'stop' : 'length',
+        }]
+      }
+    } else {
+      return res
+    }
   }
 
   static relayChatCompletionStream(
@@ -93,31 +76,21 @@ export default class InferenceRest {
       throw new Error('apiBase is required')
     }
 
-    let headers = {}
-    if (apiKey) {
-      headers = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      }
-    }
+    const url = getUrl(apiBase)
+    const headers = getHeaders(apiBase, apiKey)
+    const data = getBody(apiBase, messages, model.completionOptions, true)
 
-    // todo: As long as completionOptions is configured by the end user,
-    //  it should be safe to pass them through without checking what they are.
-    const data: any = {...model.completionOptions} ?? {}
-    data.messages = messages
-    data.stream = true
-
-    const url = `${apiBase}/v1/chat/completions`
+    console.log("messages", messages);
+    console.log("data", data);
 
     const es = new EventSource(url, {
       headers,
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify(data),
       pollingInterval: 25000,
     })
 
-
-    let buffer = "";
+    let buffer = ''
     let dataLog: any = []
     const listener = (event: any) => {
       const data = event.data
@@ -142,7 +115,7 @@ export default class InferenceRest {
 
         if (/^data: \[DONE\]/.test(item)) {
           buffer = items.slice(i + 1).join('\n\n')
-          es.close();
+          es.close()
           return
         }
 
@@ -163,17 +136,17 @@ export default class InferenceRest {
       // All items in the array have been processed, so clear the buffer.
       // Equivalent to items.slice(items.length).join('\n\n')
       buffer = ''
-    };
+    }
 
     const closeListener = (event: any) => {
-      if (event.type === "error") {
-        console.error("Connection error:", event.message);
-        es.close();
+      if (event.type === 'error') {
+        console.error('Connection error:', event.message)
+        es.close()
         onError(new Error(event.message))
-      } else if (event.type === "exception") {
-        console.error("Error:", event.message, event.error);
+      } else if (event.type === 'exception') {
+        console.error('Error:', event.message, event.error)
         onError(event.error)
-        es.close();
+        es.close()
       } else if (event.type === 'close') {
         console.log('closed third party')
       }
@@ -186,59 +159,10 @@ export default class InferenceRest {
     }
 
     // Add listener
-    es.addEventListener("open", () => console.log("Open SSE connection."));
-    es.addEventListener("data", listener);
-    es.addEventListener("error", closeListener);
-    es.addEventListener("close", closeListener);
-  }
-
-  static async chatCompletion(
-    model: ModelConfig,
-    messages: Array<GPTMessage>,
-  ): Promise<ChatCompletionsResponse> {
-    const apiBase = model.apiBase
-    const apiKey = model.apiKey
-
-    if (!apiBase) {
-      throw new Error('apiBase is required')
-    }
-
-    // const responseFormat = canUseJSON(model)
-    //   ? {
-    //       type: options?.responseFormat ?? 'json_object',
-    //     }
-    //   : {
-    //       type: options?.responseFormat || 'text',
-    //     }
-
-    // console.debug('GPT', messages[messages.length - 1])
-
-    // todo: As long as completionOptions is configured by the end user,
-    //  it should be safe to pass them through without checking what they are.
-    const data: any = {...model.completionOptions} ?? {}
-    data.messages = messages
-    data.stream = false
-
-    console.log('axios start')
-
-    const res = await send(
-      'POST',
-      `${apiBase}/v1/chat/completions`,
-      data,
-      apiKey,
-    )
-
-    console.log('axios end')
-
-    if (res.error) {
-      if (res.error instanceof Error) {
-        throw res.error
-      } else {
-        throw new Error(res.error)
-      }
-    }
-
-    return res
+    es.addEventListener('open', () => console.log('Open SSE connection.'))
+    es.addEventListener('data', listener)
+    es.addEventListener('error', closeListener)
+    es.addEventListener('close', closeListener)
   }
 }
 
@@ -247,7 +171,7 @@ function makeRequestWithRetry(
   retries: number,
 ): Promise<any> {
   console.log('retries', retries)
-  return call().catch((error) => {
+  return call().catch(error => {
     console.error(error.message)
     if (retries > 0) {
       console.log(`Retrying... Attempts left: ${retries - 1}`)
@@ -257,49 +181,124 @@ function makeRequestWithRetry(
   })
 }
 
-async function send(
-  method: 'GET' | 'POST',
-  url: string,
-  data: ?{ [string]: any },
-  authToken: ?string,
-): any {
-  const config: { url: string, headers?: { ... }, ... } = {
-    method: method.toLowerCase(),
-    url,
-  }
+function getHeaders(apiBase: string, apiKey: ?string): {[string]: string} {
+  let headers: {[string]: string} = {}
+  if (apiKey) {
+    headers = {
+      'Content-Type': 'application/json',
+    }
 
-  if (authToken) {
-    config.headers = {
-      Authorization: `Bearer ${authToken}`,
+    if (apiKey) {
+      if (apiBase === 'https://api.openai.com') {
+        // $FlowFixMe
+        headers['Authorization'] = `Bearer ${apiKey}`
+      } else if (apiBase === 'https://api.anthropic.com') {
+        // $FlowFixMe
+        headers['x-api-key'] = apiKey
+        // $FlowFixMe
+        headers['anthropic-version'] = '2023-06-01'
+      } else if (apiBase === 'https://api.mistral.ai') {
+        // $FlowFixMe
+        headers['Authorization'] = `Bearer ${apiKey}`
+      }
     }
   }
 
-  if (method === 'GET') {
-    // $FlowFixMe
-    config.params = data
-  } else if (method === 'POST') {
-    // $FlowFixMe
-    config.data = data
+  return headers
+}
+
+function getUrl(apiBase: string): string {
+  if (apiBase === 'https://api.openai.com') {
+    return 'https://api.openai.com/v1/chat/completions'
+  } else if (apiBase === 'https://api.anthropic.com') {
+    return `https://api.anthropic.com/v1/messages`
+  } else if (apiBase === 'https://api.mistral.ai') {
+    return 'https://api.mistral.ai/v1/chat/completions'
+  } else {
+    return `${apiBase}/v1/chat/completions`
   }
+}
+
+function getBody(apiBase: string, messages: Array<GPTMessage>, completionOptions: ?{[string]: any}, stream: boolean): any {
+  if (apiBase === 'https://api.openai.com') {
+    return {
+      ...completionOptions,
+      messages,
+      stream,
+    }
+  } else if (apiBase === 'https://api.anthropic.com') {
+    const systemMessages = messages?.filter(message => message.role === 'system') ?? []
+    const nonSystemMessages = messages?.filter(message => message.role !== 'system') ?? []
+
+    const system = systemMessages.map(message => message.content)?.join('\n\n') ?? ''
+
+    return {
+      ...completionOptions,
+      system,
+      messages: nonSystemMessages,
+      max_tokens: 4000,
+      stream,
+    }
+  } else if (apiBase === 'https://api.mistral.ai') {
+    return {
+      ...completionOptions,
+      messages,
+      stream,
+    }
+  } else {
+    return {
+      ...completionOptions,
+      messages,
+      stream,
+    }
+  }
+}
+
+async function send(
+  url: string,
+  data: {[string]: any},
+  headers: {[string]: any},
+): any {
+  const config: any = {
+    method: 'POST',
+    url,
+    data,
+    headers,
+    timeout: 10000
+  }
+
+  // if (authToken) {
+  //   config.headers = {
+  //     Authorization: `Bearer ${authToken}`,
+  //   }
+  // }
+  //
+  // if (method === 'GET') {
+  //   // $FlowFixMe
+  //   config.params = data
+  // } else if (method === 'POST') {
+  //   // $FlowFixMe
+  //   config.data = data
+  // }
 
   // console.debug(
   //   `Sending ${method} request to ${url}`,
   // )
 
   // $FlowFixMe
-  config.timeout = 10000
+  // config.timeout = 10000
 
   const res = await makeRequestWithRetry(
     () =>
       axios(config)
-        .then((response) => {
+        .then(response => {
           return response.data
         })
-        .catch((err) => {
+        .catch(err => {
           // parseAxiosError will throw when a connection cannot be established.
           return parseAxiosError(err)
         })
-        .then((response) => {
+        .then(response => {
           if (response.error) {
             throw new Error(response.error.message)
           } else {
@@ -307,7 +306,7 @@ async function send(
           }
         }),
     3,
-  ).catch((err) => {
+  ).catch(err => {
     console.error(err)
     return {
       error: err,

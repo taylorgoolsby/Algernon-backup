@@ -18,7 +18,7 @@ import preferencesStore from '../stores/PreferencesStore.js'
 import paymentStore from '../stores/PaymentStore.js'
 import List from './components/List.js'
 import Config from '../Config.js'
-import {requestPurchase} from 'react-native-iap'
+import {requestPurchase, finishTransaction} from 'react-native-iap'
 import { withIAPContext, useIAP } from "react-native-iap";
 
 const Option = (props: any) => {
@@ -119,9 +119,16 @@ const Slide1 = withIAPContext((props: any) => {
   async function confirm() {
     try {
       if (selectedOptionId === Config.monthlyProductId) {
-        await requestPurchase({ sku: Config.monthlyProductId });
+        const purchase = await requestPurchase({ sku: Config.monthlyProductId });
+        // paymentStore.
+        console.log("purchase", purchase);
+        await paymentStore.storePaymentStatus(true, purchase)
+        await finishTransaction({purchase});
       } else if (selectedOptionId === Config.annualProductId) {
-        await requestPurchase({ sku: Config.annualProductId });
+        const purchase = await requestPurchase({ sku: Config.annualProductId });
+        console.log("purchase", purchase);
+        await paymentStore.storePaymentStatus(true, purchase)
+        await finishTransaction({purchase});
       }
       await getPurchaseHistory()
       preferencesStore.completeIntro();
@@ -277,23 +284,45 @@ const Slide1 = withIAPContext((props: any) => {
               onSelect={() => selectOption(Config.annualProductId)}
               selected={selectedOptionId === Config.annualProductId}
             />
-            <TouchableOpacity
+            <View
               style={{
-                alignSelf: 'flex-end',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
                 marginTop: 14,
-                paddingTop: 6,
-                paddingRight: 22,
               }}
-              disabled={!selectedOptionId}
-              onPress={confirm}>
-              <Text
-                style={[
-                  styles.text,
-                  selectedOptionId ? {opacity: 1} : {opacity: 0.5},
-                ]}>
-                Confirm
-              </Text>
-            </TouchableOpacity>
+            >
+              <TouchableOpacity
+                style={{
+                  paddingTop: 6,
+                  paddingLeft: 23,
+                  paddingBottom: 16,
+                }}
+                onPress={() => paymentStore.restorePurchases()}>
+                <Text
+                  style={[
+                    styles.text,
+                    {opacity: 0.5},
+                  ]}>
+                  Restore
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  paddingTop: 6,
+                  paddingRight: 22,
+                  paddingBottom: 16,
+                }}
+                disabled={!selectedOptionId}
+                onPress={confirm}>
+                <Text
+                  style={[
+                    styles.text,
+                    selectedOptionId ? {opacity: 1} : {opacity: 0.5},
+                  ]}>
+                  Confirm
+                </Text>
+              </TouchableOpacity>
+            </View>
             <View style={styles.legalLinksContainer}>
               <TouchableOpacity style={{marginRight: 21}} onPress={openTermsOfService}>
                 <Text style={styles.legalLinkText}>Terms</Text>
@@ -395,7 +424,6 @@ const styles = StyleSheet.create({
   legalLinksContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 16,
   },
   legalLinkText: {
     color: 'rgba(255, 255, 255, 0.5)',

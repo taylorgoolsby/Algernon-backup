@@ -63,6 +63,9 @@ const AppNavigator: any = withIAPContext(observer(() => {
     getPurchaseHistory,
   } = useIAP();
 
+  console.log("purchaseHistory", purchaseHistory);
+  console.log("currentPurchase", currentPurchase);
+
   const [iapLoaded, setIapLoaded] = useState(false);
 
   useEffect(() => {
@@ -78,38 +81,53 @@ const AppNavigator: any = withIAPContext(observer(() => {
     }
   }, [connected, subscriptions]);
 
-  useEffect(() => {
-    if (connected && iapLoaded) {
-      paymentStore.isSubscribed = !!currentPurchase
-    }
-  }, [connected, iapLoaded, currentPurchase]);
+  // useEffect(() => {
+  //   if (connected && iapLoaded) {
+  //     paymentStore.isSubscribed = !!currentPurchase
+  //   }
+  // }, [connected, iapLoaded, currentPurchase]);
+
 
   useEffect(() => {
-    if (!iapLoaded) return
-    if (connected && preferencesStore.introCompleted && !paymentStore.isFreeTrialAvailable && !currentPurchase) {
-      // If the user has completed the intro, then
-      // * they are allowed to use the app for 1 week if they have never purchased before.
-      // * If it has been 1 week since firstInstallTime, and they have not purchased before, then show the purchase screen.
-      // * If it has been 1 week, and they have purchased before, then if there is no currentPurchase, and it has been 1 week since the last purchase, then show the purchase screen.
-
-      if (!purchaseHistory.length) {
+    if (preferencesStore.loaded) {
+      if (paymentStore.isSubscribed && !preferencesStore.introCompleted) {
+        // If isSubscribed, make sure intro screen does not appear.
+        preferencesStore.completeIntro()
+        preferencesStore.save().catch(console.error)
+      } else if (!paymentStore.isSubscribed && !paymentStore.isFreeTrialAvailable) {
+        // If not isSubscribed, then user might be on unpaid free-trial
         preferencesStore.showIntro()
         preferencesStore.save().catch(console.error)
-      } else {
-        const lastPurchaseTime = purchaseHistory[purchaseHistory.length - 1]?.transactionDate
-        const timeSinceLastPurchase = Date.now() - lastPurchaseTime
-        if (oneWeek < timeSinceLastPurchase) {
-          preferencesStore.showIntro()
-          preferencesStore.save().catch(console.error)
-        }
       }
     }
+  }, [paymentStore.isSubscribed, preferencesStore.introCompleted, preferencesStore.loaded]);
 
-    if (connected && !preferencesStore.introCompleted && !!currentPurchase) {
-      preferencesStore.completeIntro()
-      preferencesStore.save().catch(console.error)
-    }
-  }, [connected, iapLoaded, purchaseHistory, currentPurchase, preferencesStore.introCompleted, paymentStore.isFreeTrialAvailable])
+  // useEffect(() => {
+  //   if (!iapLoaded) return
+  //   if (connected && preferencesStore.introCompleted && !paymentStore.isFreeTrialAvailable && !currentPurchase) {
+  //     // If the user has completed the intro, then
+  //     // * they are allowed to use the app for 1 week if they have never purchased before.
+  //     // * If it has been 1 week since firstInstallTime, and they have not purchased before, then show the purchase screen.
+  //     // * If it has been 1 week, and they have purchased before, then if there is no currentPurchase, and it has been 1 week since the last purchase, then show the purchase screen.
+  //
+  //     if (!purchaseHistory.length) {
+  //       preferencesStore.showIntro()
+  //       preferencesStore.save().catch(console.error)
+  //     } else {
+  //       const lastPurchaseTime = purchaseHistory[purchaseHistory.length - 1]?.transactionDate
+  //       const timeSinceLastPurchase = Date.now() - lastPurchaseTime
+  //       if (oneWeek < timeSinceLastPurchase) {
+  //         preferencesStore.showIntro()
+  //         preferencesStore.save().catch(console.error)
+  //       }
+  //     }
+  //   }
+  //
+  //   if (connected && !preferencesStore.introCompleted && !!currentPurchase) {
+  //     preferencesStore.completeIntro()
+  //     preferencesStore.save().catch(console.error)
+  //   }
+  // }, [connected, iapLoaded, purchaseHistory, currentPurchase, preferencesStore.introCompleted, paymentStore.isFreeTrialAvailable])
 
   // Update preferencesStore.isFreeTrialAvailable
   const intervalSet = useRef(false);

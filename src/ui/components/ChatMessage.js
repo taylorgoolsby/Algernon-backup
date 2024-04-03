@@ -1,7 +1,7 @@
 // @flow
 
 import React, {useState, useRef} from 'react'
-import {TouchableWithoutFeedback, StyleSheet, Animated, Easing} from 'react-native'
+import { View, Dimensions, StyleSheet, Animated, Easing, TouchableOpacity } from "react-native";
 import type {MessageSQL} from '../../schema/Message/MessageSchema.mjs'
 import {MessageRole} from '../../schema/Message/MessageSchema.mjs'
 import Spinner from './Spinner.js'
@@ -9,17 +9,37 @@ import Colors from "../../Colors.js";
 import Text from './Text.js'
 import MarkdownText from "./MarkdownText.js";
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import Icon from 'react-native-vector-icons/Ionicons';
+import modalStore from '../../stores/ModalStore.js'
+import MessageInterface from "../../schema/Message/MessageInterface.js";
+import chatStore from "../../stores/ChatStore.js";
 
 const ChatMessage = ({
   message,
+  showOptions,
+  onOpenOptions,
+  onPressIn,
+  showDeleteOption
 }: {
   message: MessageSQL,
+  showOptions: boolean,
+  onOpenOptions: () => void,
+  onPressIn: () => void,
+  showDeleteOption: boolean,
 }): any => {
   const scaleValue = useRef(new Animated.Value(1)).current;
   const [isSingleLine, setIsSingleLine] = useState(true)
 
-  function showOptions() {
-    console.log('showOptions')
+  async function handleDeleteMessage() {
+    const confirmed = await modalStore.confirm('Are you sure?', null)
+    if (confirmed) {
+      await MessageInterface.softDelete(message.messageId)
+      await chatStore.load()
+    }
+  }
+
+  function openOptions() {
+    onOpenOptions()
     ReactNativeHapticFeedback.trigger("soft", {
       enableVibrateFallback: false,
     });
@@ -32,6 +52,7 @@ const ChatMessage = ({
       easing: Easing.out(Easing.poly(2)),
       useNativeDriver: true, // Use native driver for better performance
     }).start();
+    onPressIn()
   };
 
   const onLongPressOut = () => {
@@ -55,25 +76,36 @@ const ChatMessage = ({
     ? styles.singleLineMessage
     : styles.multiLineMessage
 
+  const screenWidth = Dimensions.get('window').width;
+
+  const options = (
+    <View
+      style={[
+        {alignSelf: 'stretch', justifyContent: 'flex-end', width: 36},
+        messageStyle,
+      ]}>
+      {showDeleteOption ? (
+        <TouchableOpacity style={{padding: 10}} onPress={handleDeleteMessage}>
+          <Icon name="trash-outline" size={16} color="rgba(0, 0, 0, 0.5)" />
+        </TouchableOpacity>
+      ) : null}
+    </View>
+  )
+
   return (
-    <TouchableWithoutFeedback
-      onPressIn={onLongPressIn}
-      onPressOut={onLongPressOut}
-      onLongPress={() => {
-        showOptions()
-        onLongPressOut()
-      }} // Start the effect on long press
-      delayLongPress={700} // Delay time (ms) before onLongPress is called
-      >
-      <Animated.View
+    <View style={{
+      flexDirection: 'row',
+      justifyContent: message.role === MessageRole.USER ? 'flex-end' : 'flex-start',
+    }}>
+      {message.role === MessageRole.USER ? options : null}
+
+      <View
         style={[
-          {
-            transform: [{scale: scaleValue}]
-          },
           message.role === MessageRole.USER
             ? styles.userMessage
             : styles.aiMessage,
           messageStyle,
+          {maxWidth: screenWidth - 36 - 20 - 10}
         ]}
       >
         {!!message.text ? (
@@ -91,12 +123,22 @@ const ChatMessage = ({
         ) : (
           <Spinner />
         )}
-      </Animated.View>
-    </TouchableWithoutFeedback>
+      </View>
+
+      {message.role === MessageRole.USER ? null : options}
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
+  optionsRow: {
+    flexDirection: 'row',
+  },
+  optionsBox: {
+    position: "absolute",
+    top: 0,
+    backgroundColor: 'white',
+  },
   userMessage: {
     alignSelf: 'flex-end',
     // backgroundColor: 'rgba(255, 255, 255, 1)',

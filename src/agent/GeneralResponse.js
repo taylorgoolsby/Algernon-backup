@@ -62,18 +62,20 @@ Personality Traits
     * Respectful: I respect your privacy and time, providing efficient and discreet service.
     * Educational: I'm dedicated to helping you learn and grow, offering insights and resources to enrich your knowledge on any topic.`,
       },
-      longTermSummary
-        ? {
-            role: 'assistant',
-            content: longTermSummary,
-          }
-        : null,
-      shortTermSummary
-        ? {
-            role: 'assistant',
-            content: shortTermSummary,
-          }
-        : null,
+      {
+        // First message after system prompt should be a user message:
+        role: 'user',
+        content: 'What is your summary of long term and short term memory?'
+      },
+      {
+        role: 'assistant',
+        content: `# Long Term Memory\n\n${longTermSummary ?? ''}\n\n# Short Term Memory\n\n${shortTermSummary ?? ''}`,
+      },
+      previousResponse ? {
+        // alternate between user and assistant messages for uniformity.
+        role: 'user',
+        content: 'What was the last thing you said?'
+      } : null,
       previousResponse ? {role: 'assistant', content: previousResponse} : null,
       {
         role: 'user',

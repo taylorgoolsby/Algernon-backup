@@ -39,6 +39,7 @@ export const typeDefs: any = gql`
     role: String @sql(type: "TEXT")
     text: String @sql(type: "TEXT")
     completed: Boolean @sql(type: "INT", default: "0")
+    deleted: Boolean @sql(type: "INT", default: "0")
     dateUpdated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
     dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
   }

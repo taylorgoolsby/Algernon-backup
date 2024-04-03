@@ -36,6 +36,7 @@ import {
   PERMISSIONS,
   RESULTS,
 } from 'react-native-permissions'
+import type {MessageSQL} from '../schema/Message/MessageSchema.mjs'
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon)
 
@@ -45,6 +46,12 @@ const ChatScreen: any = observer(({navigation}) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   // const [errorMessage, setErrorMessage] = useState('')
+  const [showOptionsForMessage, setShowOptionsForMessage] =
+    useState<?MessageSQL>(null)
+
+  function closeOptions() {
+    setShowOptionsForMessage(null)
+  }
 
   const canPost =
     !!input.trim() && (messages[0] ? !!messages[0].completed : true)
@@ -104,7 +111,7 @@ const ChatScreen: any = observer(({navigation}) => {
         // setVoiceReady(await Voice.isAvailable() === 1)
         setVoiceReady(true)
         Voice.onSpeechResults = e => {
-          console.log("e.value", e.value);
+          console.log('e.value', e.value)
           setInput(input + ' ' + e.value[0])
           // console.log("e.value", e.value);
         }
@@ -164,14 +171,7 @@ const ChatScreen: any = observer(({navigation}) => {
     // }
     ChatIteration.iterate(
       chatStore.windowId,
-      {
-        title: 'GPT-4',
-        apiBase: 'https://api.openai.com',
-        apiKey: Config.openAiApiKey,
-        completionOptions: {
-          model: 'gpt-3.5-turbo',
-        },
-      },
+      preferencesStore.selectedModel,
       input.trim(),
       output => {
         chatStore.appendMessage(output)
@@ -181,10 +181,11 @@ const ChatScreen: any = observer(({navigation}) => {
       },
       error => {
         console.error(error)
-        modalStore.showError(error.message)
+        // modalStore.showError(error.message)
       },
     )
     setInput('')
+    inputRef.current?.blur()
   }
 
   // Ref for the TextInput to call focus
@@ -291,7 +292,19 @@ const ChatScreen: any = observer(({navigation}) => {
             keyExtractor={message => message.messageId}
             renderItem={item => {
               const message = item.item
-              return <ChatMessage message={message} />
+              return (
+                <ChatMessage
+                  message={message}
+                  showOptions={
+                    showOptionsForMessage?.messageId === message.messageId
+                  }
+                  onOpenOptions={() => {
+                    setShowOptionsForMessage(message)
+                  }}
+                  onPressIn={closeOptions}
+                  showDeleteOption={item.index === 0}
+                />
+              )
             }}
           />
         ) : null}
@@ -407,17 +420,16 @@ const ChatScreen: any = observer(({navigation}) => {
                 <TouchableOpacity
                   style={styles.sendButton}
                   onPress={
-                    (input.trim() && !isRecording)
+                    input.trim() && !isRecording
                       ? sendMessage
                       : isRecording
                       ? stopSpeechToText
                       : startSpeechToText
                   }
-                  disabled={!!input.trim() && !isRecording && !canPost}
-                >
+                  disabled={!!input.trim() && !isRecording && !canPost}>
                   <AnimatedIcon
                     name={
-                      (input.trim() && !isRecording)
+                      input.trim() && !isRecording
                         ? 'arrow-up-circle'
                         : isRecording
                         ? 'stop-circle'

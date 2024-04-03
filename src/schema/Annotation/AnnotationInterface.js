@@ -14,7 +14,8 @@ export default class AnnotationInterface {
       FROM Annotation a
       LEFT JOIN Message m
       ON a.messageId = m.messageId
-      WHERE a.annotationId IN (${join(annotationIds)});
+      WHERE a.annotationId IN (${join(annotationIds)})
+      AND m.deleted = 0;
     `
     const rows = await database.query(query)
     return rows

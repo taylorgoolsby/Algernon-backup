@@ -1,6 +1,6 @@
 // @flow
 
-import React from 'react';
+import React from 'react'
 import {
   Modal,
   SafeAreaView,
@@ -8,13 +8,13 @@ import {
   TouchableWithoutFeedback,
   View,
   TouchableOpacity,
-} from "react-native";
+} from 'react-native'
 import Text from './components/Text.js'
-import { BlurView } from "@react-native-community/blur";
-import { observer } from "mobx-react";
-import modalStore from "../stores/ModalStore.js";
+import {BlurView} from '@react-native-community/blur'
+import {observer} from 'mobx-react'
+import modalStore from '../stores/ModalStore.js'
 
-const ModalLayer: any = observer((props) => {
+const ModalLayer: any = observer(props => {
   const {
     openModal,
     title,
@@ -22,11 +22,8 @@ const ModalLayer: any = observer((props) => {
     primaryLabel,
     secondaryLabel,
     onPrimary,
-    onSecondary
-  } = modalStore;
-
-  console.log("onPrimary", onPrimary);
-  console.log("primaryLabel", primaryLabel);
+    onSecondary,
+  } = modalStore
 
   return (
     <Modal
@@ -35,30 +32,34 @@ const ModalLayer: any = observer((props) => {
       // presentationStyle={"formSheet"}
       visible={openModal}
       onRequestClose={modalStore.close}>
-      <TouchableWithoutFeedback
-        onPress={modalStore.close}>
+      <TouchableWithoutFeedback onPress={modalStore.close}>
         <View style={{flex: 1}}>
           <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
             <BlurView style={styles.errorBox} blurType="dark" blurAmount={70}>
-              {title ? (
-                <Text style={styles.title}>{title}</Text>
+              {title ? <Text style={styles.title}>{title}</Text> : null}
+              {!!message ? (
+                <Text
+                  style={[
+                    styles.message,
+                    !title && onPrimary ? {marginTop: 8} : {},
+                    !title ? {alignSelf: 'center'} : {},
+                  ]}>
+                  {message}
+                </Text>
               ) : null}
-              <Text style={[styles.message, (!title && onPrimary ? {marginTop: 8} : {})]}>{message}</Text>
-              {(onPrimary || onSecondary) ? (
-                <View style={styles.confirmOptions}>
+              {onPrimary || onSecondary ? (
+                <View style={[styles.confirmOptions, !!message ? {} : {paddingTop: 0}]}>
                   {onPrimary ? (
                     <TouchableOpacity
                       style={styles.primaryButton}
-                      onPress={onPrimary}
-                    >
+                      onPress={onPrimary}>
                       <Text style={styles.primaryText}>{primaryLabel}</Text>
                     </TouchableOpacity>
                   ) : null}
                   {onSecondary ? (
                     <TouchableOpacity
                       style={styles.secondaryButton}
-                      onPress={onSecondary}
-                    >
+                      onPress={onSecondary}>
                       <Text style={styles.secondaryText}>{secondaryLabel}</Text>
                     </TouchableOpacity>
                   ) : null}
@@ -83,7 +84,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     lineHeight: 28 * 1.5,
     color: 'rgba(255, 255, 255, 0.97)',
     marginLeft: 0,
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
   },
   confirmOptions: {
     alignItems: 'center',
-    paddingTop: 20
+    paddingTop: 20,
   },
   primaryButton: {
     padding: 10,
@@ -105,13 +106,13 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   primaryText: {
-    fontSize: 22, // todo adjust to 20
+    fontSize: 18, // todo adjust to 20
     color: 'rgba(255, 255, 255, 0.97)',
   },
   secondaryText: {
-    fontSize: 16,
+    fontSize: 14,
     color: 'rgba(255, 255, 255, 0.97)',
-  }
+  },
 })
 
 export default ModalLayer

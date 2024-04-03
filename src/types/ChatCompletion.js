@@ -1,9 +1,9 @@
 // @flow
 
 export type ChatCompletionsResponse = {
-  id: string,
+  id?: string,
   choices: Array<{
-    index: number,
+    index?: number,
     delta?: {
       content: string,
       tool_calls: Array<{
@@ -18,7 +18,7 @@ export type ChatCompletionsResponse = {
     },
     message?: {
       content: string,
-      tool_calls: Array<{
+      tool_calls?: Array<{
         id: string,
         type: string,
         function: {
@@ -30,10 +30,10 @@ export type ChatCompletionsResponse = {
     },
     finish_reason: 'stop' | 'length' | 'content_filter' | 'tool_calls' | null,
   }>,
-  created: number,
-  model: string,
-  system_fingerprint: string,
-  object: string,
+  created?: number,
+  model?: string,
+  system_fingerprint?: string,
+  object?: string,
   usage?: {
     completion_tokens: number,
     prompt_tokens: number,

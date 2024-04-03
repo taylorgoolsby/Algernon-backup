@@ -39,7 +39,7 @@ class ModalStore {
     this.message = message
   }
 
-  confirm(title: string, message: string): Promise<boolean> {
+  confirm(title: string, message: ?string): Promise<boolean> {
     this.openModal = true
     this.title = title
     this.message = message
@@ -57,14 +57,14 @@ class ModalStore {
     })
   }
 
-  cta(title: ?string, message: string, primaryLabel: string, onPrimary: () => void): void {
+  cta(title: ?string, message: string, primaryLabel: string, onPrimary: ?() => void): void {
     this.openModal = true
     this.title = title
     this.message = message
     this.primaryLabel = primaryLabel
     this.onPrimary = () => {
       this.close()
-      onPrimary()
+      if (onPrimary) onPrimary()
     }
   }
 }

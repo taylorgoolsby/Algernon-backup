@@ -3,6 +3,7 @@
 import RNFS from 'react-native-fs'
 import type {ModelConfig} from '../types/ModelConfig.js'
 import {makeObservable, observable, computed} from 'mobx'
+import Config from "../Config.js";
 
 /*
 export type ModelConfig = {
@@ -25,13 +26,26 @@ export type EditableModelConfig = {
 
 const path = `${RNFS.DocumentDirectoryPath}/preferences.json`
 
-const defaultModel: EditableModelConfig = {
-  local: true,
-  title: 'Built-In Phi-2',
-  apiBase: '',
-  apiKey: '',
-  completionOptions: [],
-}
+const defaultModels: Array<EditableModelConfig> = [
+  // {
+  //   title: 'Mixtral 8x7b',
+  //   apiBase: 'https://api.mistral.ai',
+  //   apiKey: Config.mistralApiKey,
+  //   completionOptions: [{name: 'model', value: 'open-mixtral-8x7b'}],
+  // },
+  // {
+  //   title: 'Claude 3 Haiku',
+  //   apiBase: 'https://api.anthropic.com',
+  //   apiKey: Config.claudeApiKey,
+  //   completionOptions: [{name: 'model', value: 'claude-3-haiku-20240307'}],
+  // },
+  {
+    title: 'GPT 3.5',
+    apiBase: 'https://api.openai.com',
+    apiKey: Config.openAiApiKey,
+    completionOptions: [{name: 'model', value: 'gpt-3.5-turbo'}],
+  }
+]
 
 export class PreferencesStore {
   loaded: boolean = false
@@ -50,13 +64,20 @@ export class PreferencesStore {
     })
   }
 
-  get selectedModel(): ?ModelConfig {
-    return this.models[this.selectedModelIndex] ?? defaultModel
+  get selectedModel(): ModelConfig {
+    if (this.models[this.selectedModelIndex]) {
+      return this.models[this.selectedModelIndex]
+    } else {
+      return {
+        ...defaultModels[0],
+        completionOptions: {},
+      }
+    }
   }
 
   reset() {
     this.loaded = true
-    this.editableModels = [defaultModel]
+    this.editableModels = defaultModels
     this.updateModels(this.editableModels)
     this.selectedModelIndex = 0
     this.introCompleted = false
@@ -64,7 +85,7 @@ export class PreferencesStore {
 
   updateModels(models: Array<EditableModelConfig>) {
     if (!models.length) {
-      models.push(defaultModel)
+      models = defaultModels
     }
     this.editableModels = models
 
@@ -86,6 +107,10 @@ export class PreferencesStore {
   }
 
   async save(): Promise<void> {
+    if (!this.loaded) {
+      throw new Error('Preferences not loaded')
+    }
+
     const preferences = {
       editableModels: this.editableModels,
       selectedModelIndex: this.selectedModelIndex,
@@ -113,11 +138,12 @@ export class PreferencesStore {
     // $FlowFixMe
     this.editableModels = preferences.editableModels ?? []
     if (!this.editableModels.length) {
-      this.editableModels = [defaultModel]
+      this.editableModels = defaultModels
     }
 
     // Convert models from EditableModelConfig to ModelConfig:
-    this.models = this.editableModels
+    // this.models = this.editableModels
+    this.models = defaultModels
       .filter(model => !!model.local || !!model.title)
       .map((model: EditableModelConfig) => {
         return {
