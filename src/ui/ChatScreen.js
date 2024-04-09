@@ -17,17 +17,16 @@ import {
   Platform,
   Appearance,
 } from 'react-native'
-import Slider from '@react-native-community/slider'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Text from './components/Text.js'
-import ChatMessage, { margin, ProfilePic } from "./components/ChatMessage.js";
+import ChatMessage, { margin } from "./components/ChatMessage.js";
+import ProfilePic from './components/ProfilePic.js'
 import ChatIteration from '../agent/ChatIteration.js'
 import {observer} from 'mobx-react'
 import preferencesStore from '../stores/PreferencesStore.js'
 import {BlurView} from '@react-native-community/blur'
 import chatStore from '../stores/ChatStore.js'
 import Colors, { footerActive, footerInactive, headerLeft, headerRight, searchActive } from "../Colors.js";
-import Config from '../Config.js'
 import {useDebounce} from 'use-debounce'
 import modalStore from '../stores/ModalStore.js'
 import Voice from '@react-native-voice/voice'
@@ -39,7 +38,6 @@ import {
   RESULTS,
 } from 'react-native-permissions'
 import type {MessageSQL} from '../schema/Message/MessageSchema.mjs'
-import paymentStore from '../stores/PaymentStore.js'
 
 const darkMode = Appearance.getColorScheme() === 'dark'
 
@@ -345,19 +343,19 @@ const ChatScreen: any = observer(({navigation}) => {
         {messages.length > 0 && headerHeight && footerHeight ? (
           <FlatList
             style={[styles.chatContainer, {flex: 0}]}
-            ListHeaderComponent={(<View style={{height: fillerHeight}}/>)}
+            // ListHeaderComponent={(<View style={{height: fillerHeight}}/>)}
             contentContainerStyle={{
-              paddingBottom: headerHeight,
-              paddingTop: footerHeight,
+              paddingTop: headerHeight,
+              paddingBottom: footerHeight,
             }}
             scrollIndicatorInsets={{
-              top: footerHeight,
-              bottom: headerHeight,
+              bottom: footerHeight,
+              top: headerHeight,
             }}
             automaticallyAdjustsScrollIndicatorInsets={false}
             // $FlowFixMe
             ref={scrollViewRef}
-            inverted
+            // inverted
             data={messages}
             // $FlowFixMe
             keyExtractor={message => message.messageId}

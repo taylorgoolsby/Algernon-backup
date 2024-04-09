@@ -30,12 +30,12 @@ export class ChatStore {
   }
 
   async load() {
-    this.messages = await MessageInterface.getAll(this.windowId, 'DESC')
+    this.messages = await MessageInterface.getAll(this.windowId, 'ASC')
     this.loaded = true
   }
 
   appendMessage: (AppendMessageOutput) => void = (output: AppendMessageOutput) => {
-    this.messages = [output.message, ...this.messages]
+    this.messages = [...this.messages, output.message]
     this.hapticFeedback()
   }
 
