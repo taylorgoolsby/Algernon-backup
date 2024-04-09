@@ -15,16 +15,18 @@ import {
   Animated,
   Modal,
   Platform,
+  Appearance,
 } from 'react-native'
+import Slider from '@react-native-community/slider'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Text from './components/Text.js'
-import ChatMessage from './components/ChatMessage.js'
+import ChatMessage, { margin, ProfilePic } from "./components/ChatMessage.js";
 import ChatIteration from '../agent/ChatIteration.js'
 import {observer} from 'mobx-react'
 import preferencesStore from '../stores/PreferencesStore.js'
 import {BlurView} from '@react-native-community/blur'
 import chatStore from '../stores/ChatStore.js'
-import Colors from '../Colors.js'
+import Colors, { footerActive, footerInactive, headerLeft, headerRight, searchActive } from "../Colors.js";
 import Config from '../Config.js'
 import {useDebounce} from 'use-debounce'
 import modalStore from '../stores/ModalStore.js'
@@ -37,6 +39,9 @@ import {
   RESULTS,
 } from 'react-native-permissions'
 import type {MessageSQL} from '../schema/Message/MessageSchema.mjs'
+import paymentStore from '../stores/PaymentStore.js'
+
+const darkMode = Appearance.getColorScheme() === 'dark'
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon)
 
@@ -45,6 +50,7 @@ const ChatScreen: any = observer(({navigation}) => {
   const [input, setInput] = useState('')
   const [isExpanded, setIsExpanded] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
+  const [showFlipSide, setShowFlipSide] = useState(false)
   // const [errorMessage, setErrorMessage] = useState('')
   const [showOptionsForMessage, setShowOptionsForMessage] =
     useState<?MessageSQL>(null)
@@ -119,7 +125,7 @@ const ChatScreen: any = observer(({navigation}) => {
         //   console.log("e.value", e.value);
         // }
         Voice.onSpeechError = e => {
-          console.error(e.error)
+          console.log(e.error)
           // modalStore.showError(e.error.message)
         }
       }
@@ -205,6 +211,11 @@ const ChatScreen: any = observer(({navigation}) => {
     // })
   }
 
+  const [searchMode, setSearchMode] = useState(false);
+  function enterSearchMode() {
+    setSearchMode(true)
+  }
+
   // SafeArea causes headerHeight and footerHeight to change over time.
   const initialLayout = useRef(true)
   const [isInitialLayout, setIsInitialLayout] = useState(true)
@@ -246,16 +257,16 @@ const ChatScreen: any = observer(({navigation}) => {
   }
   const footerHeight = safeAreaHeight
 
-  const colorAnimation = useRef(new Animated.Value(0)).current
+  const submitColor = useRef(new Animated.Value(0)).current
   useEffect(() => {
     if (canPost || isRecording) {
-      Animated.timing(colorAnimation, {
+      Animated.timing(submitColor, {
         toValue: 1,
         duration: 120,
         useNativeDriver: false,
       }).start()
     } else {
-      Animated.timing(colorAnimation, {
+      Animated.timing(submitColor, {
         toValue: 0,
         duration: 120,
         useNativeDriver: false,
@@ -263,18 +274,78 @@ const ChatScreen: any = observer(({navigation}) => {
     }
   }, [canPost, isRecording])
 
+  const clearColor = useRef(new Animated.Value(0)).current
+  useEffect(() => {
+    if (input) {
+      Animated.timing(clearColor, {
+        toValue: 1,
+        duration: 120,
+        useNativeDriver: false,
+      }).start()
+    } else {
+      Animated.timing(clearColor, {
+        toValue: 0,
+        duration: 120,
+        useNativeDriver: false,
+      }).start()
+    }
+  }, [input])
+
+  const [flatListHeight, setFlatListHeight] = useState(0)
+  const onFlatListLayout = (event: any) => {
+    const {height} = event.nativeEvent.layout
+    setFlatListHeight(height)
+  }
+
+  const [messageHeights, setMessageHeights] = useState<{[string]: number}>({})
+  const onMessageLayout = (event: any, message: MessageSQL) => {
+    const {height} = event.nativeEvent.layout
+    setMessageHeights({
+      ...messageHeights,
+      [message.messageId]: height,
+    })
+  }
+
+  useEffect(() => {
+    if (messages.length < Object.keys(messageHeights).length) {
+      const nextMessageHeights: {[string]: number} = {}
+      for (const message of messages) {
+        if (messageHeights[message.messageId.toString()]) {
+          nextMessageHeights[message.messageId.toString()] = messageHeights[message.messageId.toString()]
+        }
+      }
+      setMessageHeights(nextMessageHeights)
+    }
+  }, [messages.length]);
+
+  let fillerHeight = flatListHeight - footerHeight - headerHeight
+  for (const height of Object.values(messageHeights)) {
+    // $FlowFixMe
+    fillerHeight -= height + 2 * margin
+    if (fillerHeight < 0) {
+      fillerHeight = 0
+      break
+    }
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.background}></View>
 
       <KeyboardAvoidingView
-        style={styles.container}
+        style={[
+          styles.container,
+          {
+            justifyContent: 'flex-start',
+          },
+        ]}
         behavior={Platform.OS === 'ios' ? 'height' : null}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} //
       >
         {messages.length > 0 && headerHeight && footerHeight ? (
           <FlatList
-            style={styles.chatContainer}
+            style={[styles.chatContainer, {flex: 0}]}
+            ListHeaderComponent={(<View style={{height: fillerHeight}}/>)}
             contentContainerStyle={{
               paddingBottom: headerHeight,
               paddingTop: footerHeight,
@@ -302,10 +373,12 @@ const ChatScreen: any = observer(({navigation}) => {
                     setShowOptionsForMessage(message)
                   }}
                   onPressIn={closeOptions}
-                  showDeleteOption={item.index === 0}
+                  isActive={item.index === 0}
+                  onMessageLayout={onMessageLayout}
                 />
               )
             }}
+            onLayout={onFlatListLayout}
           />
         ) : null}
       </KeyboardAvoidingView>
@@ -317,13 +390,59 @@ const ChatScreen: any = observer(({navigation}) => {
         onLayout={onLayoutHeader} //
       >
         <SafeAreaView style={styles.safeArea}>
-          <TouchableOpacity
-            style={styles.settingsButton}
-            onPress={() => navigation.navigate('Settings')}>
-            <Text style={styles.settingsButtonText}>Settings</Text>
-          </TouchableOpacity>
+          <View
+            style={{
+              paddingBottom: 12,
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+              flex: 1,
+            }}>
+            <TouchableOpacity
+              style={[styles.sendButton, {marginRight: 12}]}
+              onPress={() => {
+                setShowFlipSide(!showFlipSide)
+              }}>
+              <Icon
+                name={'analytics-outline'}
+                size={18}
+                color={headerRight}
+                opacity={0.3}
+              />
+            </TouchableOpacity>
+          </View>
         </SafeAreaView>
       </BlurView>
+
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: 2,
+        }}>
+        <SafeAreaView>
+          <TouchableOpacity
+            style={{
+              // paddingLeft: 22,
+              paddingLeft: 31,
+              paddingBottom: 12,
+              paddingRight: 30,
+            }}
+            onPress={() => {
+              navigation.navigate('Settings')
+              inputRef.current?.blur()
+            }} //
+          >
+            <View
+              style={{
+                backgroundColor: headerLeft,
+                height: 19,
+                width: 7,
+              }}
+            />
+          </TouchableOpacity>
+        </SafeAreaView>
+      </View>
 
       <Modal
         animationType="fade"
@@ -357,36 +476,6 @@ const ChatScreen: any = observer(({navigation}) => {
         </BlurView>
       </Modal>
 
-      {/*<Modal*/}
-      {/*  animationType="fade"*/}
-      {/*  transparent={true}*/}
-      {/*  // presentationStyle={"formSheet"}*/}
-      {/*  visible={!!errorMessage}*/}
-      {/*  onRequestClose={() => {*/}
-      {/*    setErrorMessage('')*/}
-      {/*  }}>*/}
-      {/*  <TouchableWithoutFeedback*/}
-      {/*    onPress={() => {*/}
-      {/*      setErrorMessage('')*/}
-      {/*    }}>*/}
-      {/*    <View style={{flex: 1}}>*/}
-      {/*      <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>*/}
-      {/*        <BlurView style={styles.errorBox} blurType="dark" blurAmount={70}>*/}
-      {/*          <Text style={styles.errorText}>{errorMessage}</Text>*/}
-      {/*        </BlurView>*/}
-      {/*      </SafeAreaView>*/}
-      {/*    </View>*/}
-      {/*  </TouchableWithoutFeedback>*/}
-      {/*</Modal>*/}
-
-      {/*{isExpanded && (*/}
-      {/*  <View style={styles.settingsModal}>*/}
-      {/*    <BlurView style={styles.settingsContainer} blurType="regular">*/}
-      {/*      */}
-      {/*    </BlurView>*/}
-      {/*  </View>*/}
-      {/*)}*/}
-
       <KeyboardAvoidingView
         style={styles.footer}
         behavior={Platform.OS === 'ios' ? 'position' : null}
@@ -400,6 +489,33 @@ const ChatScreen: any = observer(({navigation}) => {
           <SafeAreaView style={styles.inputSafeArea}>
             <TouchableWithoutFeedback onPress={focusInput}>
               <View style={styles.inputBar}>
+                <TouchableOpacity
+                  style={styles.clearInputButton}
+                  onPress={() => {
+                    if (searchMode) {
+                      setSearchMode(false)
+                    } else if (!!input) {
+                      setInput('')
+                    } else {
+                      enterSearchMode()
+                    }
+                  }}
+                  // disabled={!input}
+                >
+                  <AnimatedIcon
+                    name={!!input && !searchMode ? 'close-circle' : 'search-circle'}
+                    size={!!input && !searchMode ? 28 : 30}
+                    style={{marginLeft: !!input && !searchMode ? 0 : -1}}
+                    color={searchMode ? searchActive : footerActive}
+                    // color={clearColor.interpolate({
+                    //   inputRange: [0, 1],
+                    //   outputRange: [
+                    //     footerInactive,
+                    //     footerActive,
+                    //   ],
+                    // })}
+                  />
+                </TouchableOpacity>
                 {/*$FlowFixMe*/}
                 <TextInput
                   ref={inputRef}
@@ -407,16 +523,9 @@ const ChatScreen: any = observer(({navigation}) => {
                   multiline
                   value={input}
                   onChangeText={setInput}
-                  placeholder="Message"
-                  placeholderTextColor="#aaa"
+                  placeholder={searchMode ? "Search" : "Message"}
+                  placeholderTextColor={Colors.sendIconDisabledBg}
                 />
-                {/*$FlowFixMe*/}
-                {/*<Button*/}
-                {/*  style={styles.sendButton}*/}
-                {/*  title="Send"*/}
-                {/*  onPress={sendMessage}*/}
-                {/*  color={'#fff'}*/}
-                {/*/>*/}
                 <TouchableOpacity
                   style={styles.sendButton}
                   onPress={
@@ -435,12 +544,12 @@ const ChatScreen: any = observer(({navigation}) => {
                         ? 'stop-circle'
                         : 'mic'
                     }
-                    size={30}
-                    color={colorAnimation.interpolate({
+                    size={28}
+                    color={submitColor.interpolate({
                       inputRange: [0, 1],
                       outputRange: [
-                        Colors.sendIconDisabledBg,
-                        Colors.sendIconBg,
+                        footerInactive,
+                        footerActive,
                       ],
                     })}
                   />
@@ -451,7 +560,7 @@ const ChatScreen: any = observer(({navigation}) => {
               <TouchableOpacity
                 style={styles.recordingContainer}
                 onPress={stopSpeechToText}>
-                <Icon name={'stop-circle-outline'} size={30} color={'white'} />
+                <Icon name={'stop-circle-outline'} size={28} color={'white'} />
                 <Text style={styles.recordingText}>
                   {' Tap to stop recording.'}
                 </Text>
@@ -460,6 +569,38 @@ const ChatScreen: any = observer(({navigation}) => {
           </SafeAreaView>
         </BlurView>
       </KeyboardAvoidingView>
+
+      {showFlipSide ? (
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            flex: 1,
+            alignSelf: 'stretch',
+            backgroundColor: 'black',
+            zIndex: 3,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <View style={{
+            // width: 300,
+            // height: 300,
+            // borderRadius: 140,
+            // borderWidth: 0,
+            // borderColor: Colors.blue,
+          }}>
+            <View style={{
+              transform: [{scale: 1}],
+            }}>
+              <ProfilePic message={messages[0]} noBorder tenX/>
+            </View>
+          </View>
+        </View>
+      ) : null}
     </View>
   )
 })
@@ -477,7 +618,7 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: -1,
     // backgroundColor: '#0105AA',
-    backgroundColor: Colors.chatBg,
+    backgroundColor: darkMode ? 'black' : Colors.chatBg,
   },
   backgroundOrb: {
     position: 'absolute',
@@ -499,6 +640,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
+    zIndex: 2,
   },
   footer: {
     position: 'absolute',
@@ -511,23 +653,12 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flexDirection: 'row',
+    justifyContent: 'flex-end',
   },
   inputSafeArea: {
     flexDirection: 'column',
   },
-  settingsButton: {
-    // position: 'absolute',
-    // top: 15,
-    // left: 15,
-    borderRadius: 10,
-    marginLeft: 20,
-    marginRight: 20,
-    marginBottom: 12,
-    padding: 10,
-    paddingLeft: 18,
-    paddingRight: 18,
-    backgroundColor: Colors.settingsButtonBg,
-  },
+  settingsButton: {},
   settingsButtonText: {
     fontSize: 16,
     color: Colors.settingsButtonText,
@@ -548,32 +679,47 @@ const styles = StyleSheet.create({
     maxHeight: 300,
   },
   chatContainer: {
-    flex: 1,
-    paddingLeft: 20,
-    paddingRight: 20,
+    // flex: 1,
+    // paddingLeft: 20,
+    // paddingRight: 20,
   },
   inputBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 50,
+    minHeight: 50,
+    maxHeight: 73,
+    paddingTop: 3,
+    paddingBottom: 3,
     flex: 1,
     fontSize: 14,
     lineHeight: 21,
-    paddingLeft: 27,
+    paddingLeft: 0,
     paddingRight: 0,
+  },
+  clearInputButton: {
+    padding: 0,
+    paddingLeft: 21,
+    paddingRight: 14,
+    alignSelf: 'stretch',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   input: {
     flex: 1,
     color: Colors.inputText,
     backgroundColor: 'transparent',
     paddingTop: 0,
-    marginRight: 10,
+    marginLeft: 0,
+    marginRight: 12,
     fontSize: Colors.fontSize,
     fontFamily: 'Montserrat',
   },
   sendButton: {
     padding: 0,
-    paddingRight: 23,
+    paddingRight: 19,
+    alignSelf: 'stretch',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   recordingContainer: {
     height: 50,

@@ -17,6 +17,7 @@ export type MessageSQL = {|
   role: MessageRoleType,
   text: string,
   completed: boolean,
+  deleted: boolean,
   dateUpdated: string,
   dateCreated: string,
 |}

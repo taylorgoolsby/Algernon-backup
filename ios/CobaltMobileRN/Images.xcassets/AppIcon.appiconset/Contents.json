@@ -1,55 +1,55 @@
 {
   "images" : [
     {
-      "filename" : "cobalt40.png",
+      "filename" : "Å-40.jpg",
       "idiom" : "iphone",
       "scale" : "2x",
       "size" : "20x20"
     },
     {
-      "filename" : "cobalt60.png",
+      "filename" : "Å-60.png",
       "idiom" : "iphone",
       "scale" : "3x",
       "size" : "20x20"
     },
     {
-      "filename" : "cobalt58.png",
+      "filename" : "Å-58.png",
       "idiom" : "iphone",
       "scale" : "2x",
       "size" : "29x29"
     },
     {
-      "filename" : "cobalt87.png",
+      "filename" : "Å-87.png",
       "idiom" : "iphone",
       "scale" : "3x",
       "size" : "29x29"
     },
     {
-      "filename" : "cobalt80.png",
+      "filename" : "Å-80.png",
       "idiom" : "iphone",
       "scale" : "2x",
       "size" : "40x40"
     },
     {
-      "filename" : "cobalt120 1.png",
+      "filename" : "Å-120 1.png",
       "idiom" : "iphone",
       "scale" : "3x",
       "size" : "40x40"
     },
     {
-      "filename" : "cobalt120.png",
+      "filename" : "Å-120.png",
       "idiom" : "iphone",
       "scale" : "2x",
       "size" : "60x60"
     },
     {
-      "filename" : "cobalt180.png",
+      "filename" : "Å-180.png",
       "idiom" : "iphone",
       "scale" : "3x",
       "size" : "60x60"
     },
     {
-      "filename" : "cobalt1024.png",
+      "filename" : "Å-1024.png",
       "idiom" : "ios-marketing",
       "scale" : "1x",
       "size" : "1024x1024"

@@ -31,6 +31,9 @@ export default class ChatIteration {
         const lastAgentMessage = allMessages[allMessages.length - 2]
         const lastUserMessage = allMessages[allMessages.length - 1]
 
+        console.log("allMessages", allMessages);
+        console.log("lastAgentMessage", lastAgentMessage);
+
         // Show a blank message in the UI while waiting:
         const emptyResponse = await MessageInterface.insert(
           windowId,

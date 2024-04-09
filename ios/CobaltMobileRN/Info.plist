@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Cobalt</string>
+	<string>Algernon</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -31,18 +31,18 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
-	<key>NSPrivacyAccessedAPICategoryDiskSpace</key>
-	<string>This app does not directly need this API, however this app uses react-native-device-info for providing the version number, build number, and first install time to the JavaScript runtime. react-native-device-info makes general references to other APIs which are not needed by this app.</string>
-	<key>NSPrivacyAccessedAPICategorySystemBootTime</key>
-  <string>This app does not directly need this API, however this app uses react-native-device-info for providing the version number, build number, and first install time to the JavaScript runtime. react-native-device-info makes general references to other APIs which are not needed by this app.</string>
-  <key>NSPrivacyAccessedAPICategoryUserDefaults</key>
-  <string>This app does not directly need this API, however this app uses react-native-device-info for providing the version number, build number, and first install time to the JavaScript runtime. react-native-device-info makes general references to other APIs which are not needed by this app.</string>
-  <key>NSPrivacyAccessedAPICategoryFileTimestamp</key>
-  <string>This app does not directly need this API, however this app uses react-native-device-info for providing the version number, build number, and first install time to the JavaScript runtime. react-native-device-info makes general references to other APIs which are not needed by this app.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-  <string>This app does not access the Photo Library, however, this app uses react-native-permissions which is causing automated revision to detect usage. react-native-permissions makes a reference to this API, but the app does not actually use the Photo Library, and it will not request access from the user. react-native-permissions is used by this app to handle checking and requesting permissions for the microphone and speech recognition services.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app requires microphone access to transcribe your speech into text.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app does not access the Photo Library, however, this app uses react-native-permissions which is causing automated revision to detect usage. react-native-permissions makes a reference to this API, but the app does not actually use the Photo Library, and it will not request access from the user. react-native-permissions is used by this app to handle checking and requesting permissions for the microphone and speech recognition services.</string>
+	<key>NSPrivacyAccessedAPICategoryDiskSpace</key>
+	<string>This app does not directly need this API, however this app uses react-native-device-info for providing the version number, build number, and first install time to the JavaScript runtime. react-native-device-info makes general references to other APIs which are not needed by this app.</string>
+	<key>NSPrivacyAccessedAPICategoryFileTimestamp</key>
+	<string>This app does not directly need this API, however this app uses react-native-device-info for providing the version number, build number, and first install time to the JavaScript runtime. react-native-device-info makes general references to other APIs which are not needed by this app.</string>
+	<key>NSPrivacyAccessedAPICategorySystemBootTime</key>
+	<string>This app does not directly need this API, however this app uses react-native-device-info for providing the version number, build number, and first install time to the JavaScript runtime. react-native-device-info makes general references to other APIs which are not needed by this app.</string>
+	<key>NSPrivacyAccessedAPICategoryUserDefaults</key>
+	<string>This app does not directly need this API, however this app uses react-native-device-info for providing the version number, build number, and first install time to the JavaScript runtime. react-native-device-info makes general references to other APIs which are not needed by this app.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Speech recognition is used for speech-to-text.</string>
 	<key>UIAppFonts</key>

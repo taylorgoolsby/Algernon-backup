@@ -5,10 +5,32 @@ import { View, Animated, StyleSheet } from 'react-native';
 import Colors from "../../Colors.js";
 
 
-const Spinner = ({style}: any): any => {
+const Spinner = ({style, dieOut}: any): any => {
+  const startTime = useRef(Date.now());
+  const dieOutAnimation = useRef(new Animated.Value(0)).current;
+
   const animation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    if (dieOut) {
+      startTime.current = Date.now();
+      Animated.sequence([
+        Animated.timing(dieOutAnimation, {
+          toValue: 1,
+          duration: 2000,
+          easing: t => {
+            const d = (Date.now() - startTime.current)
+            const s = 2000
+            return Math.min( d * d * d / s / s / s, 1)
+          },
+          useNativeDriver: false,
+        })
+      ]).start()
+    }
+  }, [dieOut, dieOutAnimation]);
+
+  useEffect(() => {
+    startTime.current = Date.now();
     Animated.loop(
       Animated.sequence([
         Animated.timing(animation, {
@@ -24,7 +46,10 @@ const Spinner = ({style}: any): any => {
   }, [animation]);
 
   return (
-    <View style={[styles.container, style]}>
+    <Animated.View style={[styles.container, style, {transform: [{scale: dieOutAnimation.interpolate({
+          inputRange: [0, 1],
+          outputRange: [1, 0]
+        })}]}]}>
       <Animated.View
         style={[
           styles.circle,
@@ -61,7 +86,7 @@ const Spinner = ({style}: any): any => {
           },
         ]}
       />
-    </View>
+    </Animated.View>
   );
 };
 

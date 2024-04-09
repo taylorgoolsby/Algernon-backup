@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Space Wrapping Effect with Centered Grid Lines</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      background-color: #f8f8f8;
+      cursor: crosshair;
+    }
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+  const canvas = document.getElementById('canvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  const R = 100; // Radius and grid line spacing
+  const flatSpaceOffset = { x: canvas.width / 4, y: canvas.height / 2 }; // Center of flat space
+  const wrappedSpaceOffset = { x: 3 * canvas.width / 4, y: canvas.height / 2 }; // Center of wrapped space
+  let point = { x: flatSpaceOffset.x, y: flatSpaceOffset.y }; // Initial point position in flat space
+  let dragging = false;
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw grid lines
+    drawGrid(R);
+
+    // Draw dividing line
+    ctx.beginPath();
+    ctx.moveTo(canvas.width / 2, 0);
+    ctx.lineTo(canvas.width / 2, canvas.height);
+    ctx.stroke();
+
+    // Draw labels
+    drawLabels();
+
+    // Draw point in flat space
+    ctx.fillStyle = 'blue';
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Transform and draw point in wrapped space
+    const transformedPoint = transformPoint(point);
+    ctx.fillStyle = 'red';
+    ctx.beginPath();
+    ctx.arc(transformedPoint.x, transformedPoint.y, 5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function transformPoint(p) {
+    // Offset point by flat space center
+    let offsetX = p.x - flatSpaceOffset.x;
+    let offsetY = p.y - flatSpaceOffset.y;
+
+    // Convert to polar coordinates
+    let d = Math.sqrt(offsetX ** 2 + offsetY ** 2);
+    let theta = Math.atan2(offsetY, offsetX);
+
+    // Logistic mapping function
+    let r_prime = R * (1 - Math.exp(-d / k)); // k is a constant you can adjust
+
+    // Make sure r_prime never actually reaches R to avoid a sudden jump
+    if (r_prime > 0.98 * R) r_prime = 0.98 * R;
+
+    // Convert back to Cartesian coordinates using r_prime
+    return {
+      x: r_prime * Math.cos(theta) + wrappedSpaceOffset.x,
+      y: r_prime * Math.sin(theta) + wrappedSpaceOffset.y
+    };
+  }
+
+  // You may need to experiment with the value of 'k' to get the desired curvature effect
+  // A smaller 'k' will result in more curvature near the edges of the disk
+  const k = 50; // Example value, adjust as necessary
+
+
+  // function transformPoint(p) {
+  //   // Offset point by flat space center
+  //   let offsetX = p.x - flatSpaceOffset.x;
+  //   let offsetY = p.y - flatSpaceOffset.y;
+  //
+  //   // Convert to polar coordinates
+  //   let r = Math.sqrt(offsetX ** 2 + offsetY ** 2);
+  //   let theta = Math.atan2(offsetY, offsetX);
+  //
+  //   // Take the fractional part of R which r is over:
+  //   const fracR =  r / R - Math.floor(r / R);
+  //
+  //   // Apply modulo to radius
+  //   r = r % R;
+  //
+  //   // Convert back to Cartesian coordinates and offset by wrapped space center
+  //   return {
+  //     x: r * Math.cos(theta) + wrappedSpaceOffset.x,
+  //     y: r * Math.sin(theta) + wrappedSpaceOffset.y
+  //   };
+  // }
+
+  function drawLabels() {
+    ctx.font = "16px Arial";
+    ctx.fillStyle = 'black';
+    ctx.fillText("Flat Space", 10, 20);
+    ctx.fillText("Wrapped Space", canvas.width / 2 + 10, 20);
+
+    // X-axis labels for flat space
+    ctx.fillText("X", flatSpaceOffset.x, canvas.height - 10);
+    // Y-axis label for flat space
+    ctx.save();
+    ctx.translate(flatSpaceOffset.x, flatSpaceOffset.y);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText("Y", 0, -10);
+    ctx.restore();
+
+    // X-axis labels for wrapped space
+    ctx.fillText("X'", wrappedSpaceOffset.x, canvas.height - 10);
+    // Y-axis label for wrapped space
+    ctx.save();
+    ctx.translate(wrappedSpaceOffset.x, wrappedSpaceOffset.y);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText("Y'", 0, -10);
+    ctx.restore();
+  }
+
+  function drawGrid(spacing) {
+    ctx.strokeStyle = '#e0e0e0'; // Light grey for grid lines
+    ctx.beginPath();
+
+    // Vertical lines in flat space
+    for (let x = 0; x < canvas.width / 4; x += spacing) {
+      ctx.moveTo(x + flatSpaceOffset.x, 0);
+      ctx.lineTo(x + flatSpaceOffset.x, canvas.height);
+    }
+    for (let x = 0; x > -canvas.width / 4; x -= spacing) {
+      ctx.moveTo(x + flatSpaceOffset.x, 0);
+      ctx.lineTo(x + flatSpaceOffset.x, canvas.height);
+    }
+
+    // Verticals in wrapped space
+    for (let x = 0; x < canvas.width / 4; x += spacing) {
+      ctx.moveTo(x + wrappedSpaceOffset.x, 0);
+      ctx.lineTo(x + wrappedSpaceOffset.x, canvas.height);
+    }
+    for (let x = 0; x > -canvas.width / 4; x -= spacing) {
+      ctx.moveTo(x + wrappedSpaceOffset.x, 0);
+      ctx.lineTo(x + wrappedSpaceOffset.x, canvas.height);
+    }
+
+    // Horizontal lines in flat space
+    for (let y = 0; y <= canvas.height / 2; y += spacing) {
+      ctx.moveTo(0, flatSpaceOffset.y + y);
+      ctx.lineTo(canvas.width / 2, flatSpaceOffset.y + y);
+    }
+    for (let y = 0; y > -canvas.height / 2; y -= spacing) {
+      ctx.moveTo(0, flatSpaceOffset.y + y);
+      ctx.lineTo(canvas.width / 2, flatSpaceOffset.y + y);
+    }
+
+    // Horizontal lines in wrapped space
+    for (let y = 0; y <= canvas.height / 2; y += spacing) {
+      ctx.moveTo(canvas.width / 2, wrappedSpaceOffset.y + y);
+      ctx.lineTo(canvas.width, wrappedSpaceOffset.y + y);
+    }
+    for (let y = 0; y > -canvas.height / 2; y -= spacing) {
+      ctx.moveTo(canvas.width / 2, wrappedSpaceOffset.y + y);
+      ctx.lineTo(canvas.width, wrappedSpaceOffset.y + y);
+    }
+
+    // Draw concentric circles in wrapped space
+    for (let r = spacing; r < canvas.width / 4; r += spacing) {
+      ctx.arc(flatSpaceOffset.x, flatSpaceOffset.y, r, 0, Math.PI * 2);
+    }
+
+    // Draw concentric circles in wrapped space
+    for (let r = spacing; r < canvas.width / 4; r += spacing) {
+      ctx.arc(wrappedSpaceOffset.x, wrappedSpaceOffset.y, r, 0, Math.PI * 2);
+    }
+
+    ctx.stroke();
+  }
+
+  canvas.addEventListener('mousedown', function(e) {
+    dragging = true;
+    movePoint(e);
+  });
+
+  canvas.addEventListener('mousemove', function(e) {
+    if (dragging) {
+      movePoint(e);
+    }
+  });
+
+  canvas.addEventListener('mouseup', function(e) {
+    dragging = false;
+  });
+
+  function movePoint(e) {
+    if (e.offsetX < canvas.width / 2) {
+      point.x = e.offsetX;
+      point.y = e.offsetY;
+      draw();
+    }
+  }
+
+  // Adjust canvas on window resize
+  window.addEventListener('resize', function() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    draw();
+  });
+
+  draw();
+</script>
+</body>
+</html>

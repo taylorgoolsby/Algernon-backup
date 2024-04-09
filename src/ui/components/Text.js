@@ -2,8 +2,9 @@
 
 import React from 'react';
 import {StyleSheet, Text} from "react-native";
+import Colors from "../../Colors.js";
 
-const MyText = (props) => {
+const MyText: any = (props) => {
   const {
     style,
     children,
@@ -19,6 +20,7 @@ const MyText = (props) => {
 
 const styles = StyleSheet.create({
   text: {
+    color: Colors.defaultText,
     fontSize: 16,
     fontFamily: 'Montserrat',
     lineHeight: 24

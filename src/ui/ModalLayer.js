@@ -35,7 +35,7 @@ const ModalLayer: any = observer(props => {
       <TouchableWithoutFeedback onPress={modalStore.close}>
         <View style={{flex: 1}}>
           <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
-            <BlurView style={styles.errorBox} blurType="dark" blurAmount={70}>
+            <BlurView style={[styles.errorBox]} blurType="dark" blurAmount={70}>
               {title ? <Text style={styles.title}>{title}</Text> : null}
               {!!message ? (
                 <Text
@@ -75,12 +75,12 @@ const ModalLayer: any = observer(props => {
 
 const styles = StyleSheet.create({
   errorBox: {
-    paddingTop: 10,
+    paddingTop: 8,
     paddingBottom: 10,
-    paddingLeft: 25,
+    paddingLeft: 20,
     paddingRight: 25,
-    marginLeft: 40,
-    marginRight: 40,
+    marginLeft: 41,
+    marginRight: 41,
     borderRadius: 24,
   },
   title: {
@@ -97,16 +97,16 @@ const styles = StyleSheet.create({
   },
   confirmOptions: {
     alignItems: 'center',
-    paddingTop: 20,
+    paddingTop: 19,
   },
   primaryButton: {
-    padding: 10,
+    padding: 8,
   },
   secondaryButton: {
-    padding: 10,
+    padding: 8,
   },
   primaryText: {
-    fontSize: 18, // todo adjust to 20
+    fontSize: 17, // todo adjust to 20
     color: 'rgba(255, 255, 255, 0.97)',
   },
   secondaryText: {

@@ -6,6 +6,7 @@ import { BlurView } from "@react-native-community/blur";
 import { StyleSheet, Modal, View, TouchableOpacity, Button } from "react-native";
 import Text from './Text.js'
 import Icon from 'react-native-vector-icons/Ionicons';
+import Colors from "../../Colors.js";
 
 const Picker: any = (props) => {
   const {
@@ -24,7 +25,7 @@ const Picker: any = (props) => {
       <TouchableOpacity style={styles.inline} onPress={() => {
         setIsExpanded(true)
       }}>
-        <Text style={{marginRight: 10}}>
+        <Text style={{marginRight: 10, color: Colors.settingsText}}>
           {selectedItem?.label ?? 'Placeholder'}
         </Text>
         <Icon
@@ -65,7 +66,7 @@ const Picker: any = (props) => {
               setIsExpanded(false)
             }}
           >
-            <Text style={{color: 'black', fontSize: 18}}>Close</Text>
+            <Text style={{color: 'black', fontSize: 18, color: Colors.settingsText}}>Close</Text>
           </TouchableOpacity>
         </BlurView>
       </Modal>

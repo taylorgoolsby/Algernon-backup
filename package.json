@@ -3,16 +3,20 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "test": "jest",
     "build": "rm -rf lib && flow-remove-types src/ -d lib/ && node scripts/generate-sql.mjs",
     "android": "react-native run-android",
     "sim": "react-native run-ios --simulator=\"iPhone 15\"",
     "ios": "react-native run-ios --device",
     "lint": "eslint .",
     "start": "npm run build && react-native start",
-    "test": "jest"
+    "postinstall": "cd ios && pod install && cd ..",
+    "clean": "echo \"close xcode\" && rm -rf node_modules && rm yarn.lock && yarn",
+    "xcode": "xed ios"
   },
   "dependencies": {
     "@react-native-community/blur": "4.4.0",
+    "@react-native-community/slider": "^4.5.0",
     "@react-native-picker/picker": "^2.7.2",
     "@react-native-voice/voice": "^3.2.4",
     "@react-navigation/native": "^6.1.17",

@@ -9,6 +9,8 @@ import CompletionInterface from "./Completion/CompletionInterface.js";
 import MessageInterface from "./Message/MessageInterface.js";
 import ShortTermMemoryInterface from "./ShortTermMemory/ShortTermMemoryInterface.js";
 import sqltag from "@taylorgoolsby/sql-template-tag";
+import chatStore from "../stores/ChatStore.js";
+import { MessageRole } from "./Message/MessageSchema.mjs";
 
 SQLite.enablePromise(true)
 const databaseName = 'Cobalt.db'
@@ -59,11 +61,21 @@ export async function initializeDatabase() {
 
     await migrate()
 
+    await initData()
+
     // Handle DB migrations here
     console.log('Database initialized')
   } catch (error) {
     console.error('Database initialization failed:', error)
   }
+}
+
+async function initData() {
+  const firstMessage = await MessageInterface.getFirst(0)
+  const initialized = !!firstMessage
+  if (initialized) return
+
+  await MessageInterface.insert(chatStore.windowId, MessageRole.ASSISTANT, 'Hi, how are you?', true)
 }
 
 async function migrate() {
@@ -119,4 +131,7 @@ export async function truncateDatabase() {
   await MessageInterface.truncateTable()
   await ShortTermMemoryInterface.truncateTable()
   await query(sqltag`DELETE FROM sqlite_sequence;`)
+  // The Version table does not get truncated.
+
+  await initData()
 }

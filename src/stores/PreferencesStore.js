@@ -52,7 +52,7 @@ export class PreferencesStore {
   models: Array<ModelConfig> = []
   editableModels: Array<EditableModelConfig> = []
   selectedModelIndex: number = 0
-  introCompleted: boolean = false
+  introCompleted: boolean = true
 
   constructor() {
     makeObservable(this, {
@@ -80,7 +80,7 @@ export class PreferencesStore {
     this.editableModels = defaultModels
     this.updateModels(this.editableModels)
     this.selectedModelIndex = 0
-    this.introCompleted = false
+    this.introCompleted = true
   }
 
   updateModels(models: Array<EditableModelConfig>) {
