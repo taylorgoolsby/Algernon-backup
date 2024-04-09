@@ -401,7 +401,8 @@ const ChatScreen: any = observer(({navigation}) => {
                 setShowFlipSide(!showFlipSide)
               }}>
               <Icon
-                name={'analytics-outline'}
+                // name={'analytics-outline'}
+                name={'layers-outline'}
                 size={18}
                 color={headerRight}
                 opacity={0.3}
@@ -542,7 +543,7 @@ const ChatScreen: any = observer(({navigation}) => {
                         ? 'stop-circle'
                         : 'mic'
                     }
-                    size={28}
+                    size={!(input.trim() && !isRecording) && !isRecording ? 26 : 28}
                     color={submitColor.interpolate({
                       inputRange: [0, 1],
                       outputRange: [
@@ -715,6 +716,7 @@ const styles = StyleSheet.create({
   sendButton: {
     padding: 0,
     paddingRight: 19,
+    minWidth: 28,
     alignSelf: 'stretch',
     justifyContent: 'center',
     alignItems: 'center',

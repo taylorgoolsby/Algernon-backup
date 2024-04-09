@@ -130,8 +130,8 @@ const DeleteButton: any = ({
       onPress={handleDeleteMessage}>
       <View
         style={{
-          width: 48,
-          height: 48,
+          width: 42,
+          height: 42,
           justifyContent: 'center',
           alignItems: 'center',
         }}>
@@ -276,7 +276,7 @@ const ProfileRow: any = ({
           alignSelf: 'flex-start',
           marginLeft: 9,
           marginTop: 9,
-          marginBottom: 11,
+          marginBottom: 9,
         },
       ]}
       onPress={() => {}}>

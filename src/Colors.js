@@ -16,7 +16,7 @@ export const headerLeft: string = darkMode ? 'rgba(255, 255, 255, 0.99)' : 'rgba
 export const headerRight: string = darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.48)' // opacity=0.3
 export const userChat: string = blue
 // export const aiChat: string = darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)'
-export const aiChat: string = darkMode ? 'rgba(255, 255, 255, 0.01)' : 'rgba(0, 0, 0, 0.02)'
+export const aiChat: string = darkMode ? 'rgba(255, 255, 255, 0.01)' : 'rgba(0, 0, 0, 0.0)'
 export const userText: string = 'white'
 export const userText2: string = 'rgba(255, 255, 255, 0.5)'
 export const userText2Active: string = 'white'
