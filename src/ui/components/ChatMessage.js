@@ -46,7 +46,7 @@ const ChatMessage: any = observer(
 
     async function handleDeleteMessage() {
       setIsConfirming(true)
-      const confirmed = await modalStore.confirm('Are you sure?', null)
+      const confirmed = await modalStore.confirm('Delete Message?', null)
       setIsConfirming(false)
       if (confirmed) {
         await MessageInterface.softDelete(message.messageId)
@@ -90,12 +90,14 @@ const ChatMessage: any = observer(
           isActive={isActive}
         />
         <MainText message={message} initialLayout={initialLayout} />
-        <DeleteButton
-          message={message}
-          initialLayout={initialLayout}
-          handleDeleteMessage={handleDeleteMessage}
-          isConfirming={isConfirming}
-        />
+        {!message.deleted ? (
+          <DeleteButton
+            message={message}
+            initialLayout={initialLayout}
+            handleDeleteMessage={handleDeleteMessage}
+            isConfirming={isConfirming}
+          />
+        ) : null}
       </View>
     )
   },
@@ -129,11 +131,6 @@ const DeleteButton: any = ({
             },
         {
           alignSelf: 'flex-end',
-          // paddingLeft: 15,
-          // paddingBottom: 15,
-          // paddingRight: 15,
-          // paddingTop: 8,
-          // transform: [{translateX: -(iconLayout?.width ?? 0) / 2}, {translateY: -(iconLayout?.height ?? 0) / 2 }],
         },
       ]}
       onPress={handleDeleteMessage}>
@@ -176,22 +173,6 @@ const MainText: any = ({
     }
   }
 
-  // useEffect(() => {
-  //   if (message.deleted && initialLayout) {
-  //     Animated.timing(maxHeightAnim, {
-  //       toValue: 0,
-  //       duration: 200,
-  //       useNativeDriver: false,
-  //     }).start()
-  //   } else if (!message.deleted && fullLayout) {
-  //     Animated.timing(maxHeightAnim, {
-  //       toValue: 1,
-  //       duration: 200,
-  //       useNativeDriver: false,
-  //     }).start()
-  //   }
-  // }, [message.deleted])
-
   const deleteAnim = useRef(new Animated.Value(message.deleted ? 1 : 0)).current
   useEffect(() => {
     if (message.deleted) {
@@ -210,16 +191,10 @@ const MainText: any = ({
           ? styles.userMessageWrap
           : styles.aiMessageWrap,
         {
-          // marginBottom: 37,
           marginBottom: deleteAnim.interpolate({
             inputRange: [0, 1],
             outputRange: [37, 0],
           }),
-          // opacity: deleteAnim.interpolate({
-          //   inputRange: [0, 1],
-          //   outputRange: [1, 0],
-          // }),
-          // height: 'auto',
           height:
             fullLayout && message.deleted
               ? deleteAnim.interpolate({
@@ -227,18 +202,8 @@ const MainText: any = ({
                   outputRange: [fullLayout.height, 0],
                 })
               : 'auto',
-          minWidth: 140,
+          // minWidth: 140,
           overflow: 'hidden',
-          // transform: [
-          //   {
-          //     scaleY: deleteAnim.interpolate({
-          //       inputRange: [0, 1],
-          //       outputRange: [1, 0],
-          //     }),
-          //   },
-          // ],
-          // height: 'auto',
-          // height: 0,
         },
       ]}
       onLayout={handleLayout}>
@@ -250,7 +215,6 @@ const MainText: any = ({
               : styles.aiMessageText
           }>
           {message.text.trim()}
-          {/*{'this is a p\n\n# header\n\n## Welcome to Cobalt\n\n### h3\n\n* line 1\n* line2\n\nline 3'}*/}
         </MarkdownText>
       ) : (
         <Spinner dieOut={message.deleted} />
@@ -297,33 +261,9 @@ const ProfileRow: any = ({
         }}>
         {message.role === MessageRole.USER ? 'Charlie' : 'Algernon'}
       </Text>
-      {/*{message.role === MessageRole.ASSISTANT ? (*/}
-      {/*  <Text*/}
-      {/*    style={{*/}
-      {/*      // marginTop: 2, marginLeft: 3, marginRight: 14*/}
-      {/*      position: 'absolute',*/}
-      {/*      top: 2,*/}
-      {/*      left: '50%',*/}
-      {/*      marginLeft: -timeWidth / 2,*/}
-      {/*      textAlign: 'center',*/}
-      {/*      color: aiText2,*/}
-      {/*    }}*/}
-      {/*    onLayout={handleTimeLayout}>*/}
-      {/*    {*/}
-      {/*      // parse iso into formatted date*/}
-      {/*      new Date()*/}
-      {/*        .toISOString()*/}
-      {/*        .split('T')[1]*/}
-      {/*        .split('.')[0]*/}
-      {/*        .split(':')*/}
-      {/*        .slice(0, 2)*/}
-      {/*        .join(':')*/}
-      {/*    }*/}
-      {/*  </Text>*/}
+      {/*{!initialLayout || message.deleted ? (*/}
+      {/*  <View style={{width: 42, hieght: 42}} />*/}
       {/*) : null}*/}
-      {!initialLayout || message.deleted ? (
-        <View style={{width: 42, hieght: 42}} />
-      ) : null}
     </TouchableOpacity>
   )
 }
@@ -339,7 +279,6 @@ const styles = StyleSheet.create({
   },
   userMessage: {
     alignSelf: 'flex-end',
-    // backgroundColor: 'rgba(255, 255, 255, 1)',
     backgroundColor: userChat,
     borderRadius: 24,
     minWidth: 40,
@@ -347,14 +286,9 @@ const styles = StyleSheet.create({
     marginBottom: margin,
     marginLeft: 20,
     marginRight: 17,
-    // paddingLeft: 20,
-    // paddingRight: 27,
   },
   aiMessage: {
     alignSelf: 'stretch',
-    // backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    // backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    // backgroundColor: Colors.aiBubbleBg,
     backgroundColor: aiChat,
     borderRadius: 24,
     minWidth: 40,
@@ -362,8 +296,6 @@ const styles = StyleSheet.create({
     marginBottom: margin,
     marginLeft: 18,
     marginRight: 17,
-    // paddingLeft: 25,
-    // paddingRight: 20,
   },
   singleLineMessage: {
     paddingTop: 10,
@@ -383,12 +315,10 @@ const styles = StyleSheet.create({
   },
   userMessageText: {
     color: userText,
-    // color: 'rgba(255, 255, 255, 0.97)',
     fontSize: Colors.fontSize,
     lineHeight: Colors.fontSize * 1.5,
   },
   aiMessageText: {
-    // color: 'rgba(255, 255, 255, 0.97)',
     color: aiText,
     fontSize: Colors.fontSize,
     lineHeight: Colors.fontSize * 1.5,
