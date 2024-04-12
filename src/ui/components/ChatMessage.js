@@ -49,9 +49,7 @@ const ChatMessage: any = observer(
       const confirmed = await modalStore.confirm('Delete Message?', null)
       setIsConfirming(false)
       if (confirmed) {
-        await MessageInterface.softDelete(message.messageId)
-        // todo: delete annotations from faiss
-        await chatStore.load()
+        await chatStore.deleteMessage(message.messageId)
       }
     }
 
@@ -202,7 +200,7 @@ const MainText: any = ({
                   outputRange: [fullLayout.height, 0],
                 })
               : 'auto',
-          // minWidth: 140,
+          minWidth: message.deleted ? 0 : 140,
           overflow: 'hidden',
         },
       ]}

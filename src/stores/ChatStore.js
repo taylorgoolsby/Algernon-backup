@@ -8,15 +8,32 @@ import MessageInterface from "../schema/Message/MessageInterface.js";
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import debounce from 'lodash.debounce'
 
+const INITIAL_LIMIT = 12
+let limit = INITIAL_LIMIT
+
+/*
+
+How pagination works:
+
+1. The app is loaded with the last messages. This is done by figuring out the offset and limit that will include the last message.
+2. When the user scrolls up, the offset is decremented and a new query is performed.
+3. If the offset is less than 0, this means the earliest message is being obtained. There is nothing left to paginate to.
+
+For new messages which are added after the app has loaded, we don't have to paginate to these.
+These are added to the database and the displayedMessageIds independently, but they are mirror operations.
+Only backwards pagination needs to be handled.
+
+* */
+
 export class ChatStore {
   loaded: boolean = false
   windowId: number = 0
+  offset: number = 0
+  completedOffsets: {[string]: boolean} = {}
   messages: {[messageId: string]: MessageSQL} = {}
   displayedMessageIds: Array<string> = []
-  queuedMessages: Array<MessageSQL> = []
   dirty: boolean = false
 
-  searchResults: Array<MessageSQL> = []
 
   constructor() {
     makeObservable(this, {
@@ -25,6 +42,8 @@ export class ChatStore {
       displayedMessageIds: observable,
       dirty: observable,
     })
+
+    this.fetchEarlierMessages = debounce(this.fetchEarlierMessages, 250, {leading: true, trailing: false}).bind(this)
 
     // Wait 2 frames before updating the screen.
     // This allows other events to be handled while a message is updating.
@@ -37,7 +56,21 @@ export class ChatStore {
   }
 
   async load() {
-    const messages = await MessageInterface.getAll(this.windowId, 'ASC')
+    limit = INITIAL_LIMIT
+    const lastMessage = await MessageInterface.getLast(this.windowId)
+    if (!lastMessage) return
+    this.offset = lastMessage.messageId // this offset will return nothing.
+    this.offset -= limit // now the return from this offset will include the last message.
+    if (this.offset < 0) {
+      limit = limit + this.offset
+      this.offset = 0
+    }
+
+    this.completedOffsets = {}
+    // $FlowFixMe
+    this.completedOffsets[this.offset.toString()] = true
+
+    const messages = await MessageInterface.getOffsetLimit(this.windowId, this.offset, limit)
     this.displayedMessageIds = messages.map(message => message.messageId.toString())
     this.messages = {}
     for (const message of messages) {
@@ -56,33 +89,44 @@ export class ChatStore {
 
   updateMessage: (UpdateMessageOutput) => void = (output: UpdateMessageOutput) => {
     this.messages[output.message.messageId.toString()] = output.message
-
-    if (!this.dirty) {
-      // this.messages = updatedMessages;
-      // this.dirty = true
-    } else {
-      // this.queuedMessages = updatedMessages;
-    }
     setTimeout(() => {
       this.hapticFeedback()
     }, 0)
-
-  }
-
-  onRenderDone() {
-    // if (this.dirty && this.queuedMessages.length) {
-    if (this.dirty) {
-      // this.messages = this.queuedMessages
-      // this.queuedMessages = []
-      this.dirty = false
-      this.hapticFeedback()
-    }
   }
 
   hapticFeedback() {
     ReactNativeHapticFeedback.trigger("soft", {
       enableVibrateFallback: false,
     });
+  }
+
+  fetchEarlierMessages: () => Promise<void> = async (): Promise<void> => {
+    this.offset -= limit
+    if (this.offset < 0) {
+      limit = limit + this.offset
+      this.offset = 0
+    }
+
+    if (this.completedOffsets[this.offset.toString()]) {
+      return
+    }
+    this.completedOffsets[this.offset.toString()] = true
+
+    const messages = await MessageInterface.getOffsetLimit(this.windowId, this.offset, limit)
+    this.displayedMessageIds = [...messages.map(message => message.messageId.toString()), ...this.displayedMessageIds]
+    for (const message of messages) {
+      // $FlowFixMe
+      this.messages[message.messageId.toString()] = message
+    }
+  }
+
+  // await chatStore.deleteMessage(message.messageId)
+  deleteMessage: (number) => Promise<void> = async (messageId: number): Promise<void> => {
+    // todo: delete annotations from faiss
+    await MessageInterface.softDelete(messageId)
+    const message = await MessageInterface.get(this.windowId, messageId)
+    // $FlowFixMe
+    this.messages[messageId.toString()] = message
   }
 }
 

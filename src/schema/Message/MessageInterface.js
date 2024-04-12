@@ -9,12 +9,35 @@ import type {
 import { MessageRole } from './MessageSchema.mjs'
 
 export default class MessageInterface {
+  static async get(windowId: number, messageId: number): Promise<?MessageSQL> {
+    const sql = sqltag`
+      SELECT * 
+      FROM Message
+      WHERE windowId = ${windowId}
+      AND messageId = ${messageId};
+    `
+    const rows = await database.query(sql)
+    return rows[0]
+  }
+
   static async getFirst(windowId: number): Promise<?MessageSQL> {
     const sql = sqltag`
       SELECT * 
       FROM Message
       WHERE windowId = ${windowId}
       ORDER BY messageId ASC
+      LIMIT 1;
+    `
+    const rows = await database.query(sql)
+    return rows[0]
+  }
+
+  static async getLast(windowId: number): Promise<?MessageSQL> {
+    const sql = sqltag`
+      SELECT * 
+      FROM Message
+      WHERE windowId = ${windowId}
+      ORDER BY messageId DESC
       LIMIT 1;
     `
     const rows = await database.query(sql)
@@ -28,6 +51,20 @@ export default class MessageInterface {
       WHERE windowId = ${windowId}
       -- AND deleted = 0
       ORDER BY messageId ${raw(order ?? 'ASC')};
+    `
+    const rows = await database.query(sql)
+    return rows
+  }
+
+  static async getOffsetLimit(windowId: number, offset: number, limit: number): Promise<Array<MessageSQL>> {
+    const sql = sqltag`
+      SELECT * 
+      FROM Message
+      WHERE windowId = ${windowId}
+      -- AND deleted = 0
+      ORDER BY messageId ASC
+      LIMIT ${limit}
+      OFFSET ${offset};
     `
     const rows = await database.query(sql)
     return rows

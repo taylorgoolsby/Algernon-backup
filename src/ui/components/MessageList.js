@@ -12,6 +12,7 @@ import {
 } from 'react-native'
 import ChatMessage from './ChatMessage.js'
 import type {MessageSQL} from '../../schema/Message/MessageSchema.mjs'
+import chatStore from "../../stores/ChatStore.js";
 
 /*
 
@@ -99,12 +100,18 @@ const MessageList = ({
   }
 
   const onScroll = (event: any) => {
+    const prevScrollOffset = scrollOffset.current
     scrollOffset.current = event.nativeEvent.contentOffset.y
 
     if (contentHeight.current - scrollOffset.current - visibleHeight <= 0) {
       if (!stickToBottom) setStickToBottom(true)
     } else {
       if (stickToBottom) setStickToBottom(false)
+    }
+
+    // Pagination:
+    if (scrollOffset.current < 250 && scrollOffset.current - prevScrollOffset < 0) {
+      chatStore.fetchEarlierMessages()
     }
   }
 

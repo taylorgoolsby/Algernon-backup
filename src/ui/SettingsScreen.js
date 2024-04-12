@@ -16,7 +16,11 @@ import Icon from 'react-native-vector-icons/Ionicons'
 
 const {FaissBridge} = NativeModules
 
-const SettingsScreen: any = observer(() => {
+const SettingsScreen: any = observer((props: any) => {
+  const {
+    navigation
+  } = props;
+
   async function deleteData() {
     try {
       preferencesStore.reset()
@@ -31,6 +35,8 @@ const SettingsScreen: any = observer(() => {
       await FaissBridge.init(384)
 
       await chatStore.load()
+
+      navigation.goBack()
     } catch (err) {
       console.error(err)
     }
