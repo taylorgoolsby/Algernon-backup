@@ -12,8 +12,8 @@ const red = 'rgb(215, 29, 29)'
 const green = 'rgb(85, 191, 106)'
 const white = 'white'
 
-export const headerLeft: string = darkMode ? 'rgba(255, 255, 255, 0.99)' : 'rgba(0, 0, 0, 0.8)' //blue
-export const headerRight: string = darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.48)' // opacity=0.3
+export const headerLeft: string = darkMode ? 'rgba(255, 255, 255, 0.99)' : 'rgba(0, 0, 0, 0.75)' //blue
+export const headerRight: string = darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.53)' // opacity=0.3
 export const userChat: string = blue
 // export const aiChat: string = darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)'
 export const aiChat: string = darkMode ? 'rgba(255, 255, 255, 0.01)' : 'rgba(0, 0, 0, 0.0)'
@@ -25,7 +25,7 @@ export const aiText2: string = darkMode ? 'rgba(255, 255, 255, 0.22)' : 'rgba(0,
 export const aiText2Active: string = defaultText
 export const inputText: string = defaultText
 export const searchActive: string = darkMode ? '#82acfa' : blue
-export const footerActive: string = darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.38)'
+export const footerActive: string = darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.75)'
 export const footerInactive: string = darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.16)'
 
 export default class {
@@ -43,8 +43,15 @@ export default class {
   static gradient4: string = 'rgba(62, 56, 225, 1)'
   static gradient5: string = 'rgba(120, 201, 251, 1)'
 
-  static fontSize: number = 16
-  static fontFamily: string = 'Montserrat'
+  static fontWeight: string = '400'
+  static fontSize: number = 14
+  static letterSpacing: number = 0.07
+  static fontFamily: string = 'Poppins'
+
+  // static fontWeight: string = '300'
+  // static fontSize: number = 15
+  // static letterSpacing: number = 0.07
+  // static fontFamily: string = 'Figtree'
 
   static chatBg: string = 'white'
 
@@ -89,6 +96,6 @@ export default class {
   * CHAT BUBBLE END
   * */
 
-  static spinnerColor1: string = 'rgba(200, 200, 255, 0.8)'
-  static spinnerColor2: string = 'rgba(190, 190, 255, 0.75)'
+  static spinnerColor1: string = darkMode ? 'rgba(142, 199, 255, 0.9)' : 'rgba(142, 180, 255, 0.9)'
+  static spinnerColor2: string = darkMode ? 'rgba(142, 199, 255, 0.9)' : 'rgba(142, 180, 255, 0.9)'
 }

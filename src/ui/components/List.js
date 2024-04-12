@@ -4,7 +4,7 @@ import React from 'react';
 import {StyleSheet, View} from "react-native";
 import Text from './Text.js'
 
-const List = (props) => {
+const List = (props: any): any => {
   const {
     style,
     itemStyle,

@@ -10,7 +10,6 @@ import Colors, {
   aiText,
   aiText2,
   aiText2Active,
-  darkMode,
   userChat,
   userText,
   userText2,
@@ -24,73 +23,83 @@ import modalStore from '../../stores/ModalStore.js'
 import MessageInterface from '../../schema/Message/MessageInterface.js'
 import chatStore from '../../stores/ChatStore.js'
 import ProfilePic from './ProfilePic.js'
+import {observer} from 'mobx-react'
 
 export const margin = 12
 
-const ChatMessage = ({
-  message,
-  onOpenOptions,
-  isActive,
-  onMessageLayout,
-}: {
-  message: MessageSQL,
-  onOpenOptions: () => void,
-  isActive: boolean,
-  onMessageLayout: (any, MessageSQL) => void,
-}): any => {
-  const [isConfirming, setIsConfirming] = useState(false)
+const ChatMessage: any = observer(
+  ({
+    messageId,
+    // onOpenOptions,
+    isActive,
+     onMessageLayout
+  }:
+  {
+    messageId: string,
+    // onOpenOptions: () => void,
+    isActive: boolean,
+    onMessageLayout: (any, MessageSQL) => void,
+  }): any => {
+    const message = chatStore.messages[messageId]
 
-  async function handleDeleteMessage() {
-    setIsConfirming(true)
-    const confirmed = await modalStore.confirm('Are you sure?', null)
-    setIsConfirming(false)
-    if (confirmed) {
-      await MessageInterface.softDelete(message.messageId)
-      // todo: delete annotations from faiss
-      await chatStore.load()
+    const [isConfirming, setIsConfirming] = useState(false)
+
+    async function handleDeleteMessage() {
+      setIsConfirming(true)
+      const confirmed = await modalStore.confirm('Are you sure?', null)
+      setIsConfirming(false)
+      if (confirmed) {
+        await MessageInterface.softDelete(message.messageId)
+        // todo: delete annotations from faiss
+        await chatStore.load()
+      }
     }
-  }
 
-  function openOptions() {
-    onOpenOptions()
-    ReactNativeHapticFeedback.trigger('soft', {
-      enableVibrateFallback: false,
-    })
-  }
-
-  const [initialLayout, setInitialLayout] = useState(null)
-  const handleInitialLayout = (event: any) => {
-    if (initialLayout === null) {
-      setInitialLayout(event.nativeEvent.layout)
+    function openOptions() {
+      // onOpenOptions()
+      ReactNativeHapticFeedback.trigger('soft', {
+        enableVibrateFallback: false,
+      })
     }
-    onMessageLayout(event, message)
-  }
 
-  // return <View/>
+    const [initialLayout, setInitialLayout] = useState(null)
+    const handleInitialLayout = (event: any) => {
+      if (initialLayout === null) {
+        setInitialLayout(event.nativeEvent.layout)
+      }
+      if (onMessageLayout) onMessageLayout(event, message)
+    }
 
-  return (
-    <View
-      style={[
-        message.role === MessageRole.USER
-          ? styles.userMessage
-          : styles.aiMessage,
-      ]}
-      onLayout={handleInitialLayout}>
-      <ProfileRow
-        message={message}
-        initialLayout={initialLayout}
-        isActive={isActive}
-      />
-      <MainText message={message} initialLayout={initialLayout} />
-      <DeleteButton
-        message={message}
-        initialLayout={initialLayout}
-        handleDeleteMessage={handleDeleteMessage}
-        isConfirming={isConfirming}
-      />
-    </View>
-  )
-}
+    // return <View/>
+
+    if (!message) {
+      return null
+    }
+
+    return (
+      <View
+        style={[
+          message.role === MessageRole.USER
+            ? styles.userMessage
+            : styles.aiMessage,
+        ]}
+        onLayout={handleInitialLayout}>
+        <ProfileRow
+          message={message}
+          initialLayout={initialLayout}
+          isActive={isActive}
+        />
+        <MainText message={message} initialLayout={initialLayout} />
+        <DeleteButton
+          message={message}
+          initialLayout={initialLayout}
+          handleDeleteMessage={handleDeleteMessage}
+          isConfirming={isConfirming}
+        />
+      </View>
+    )
+  },
+)
 
 const DeleteButton: any = ({
   message,
@@ -110,7 +119,7 @@ const DeleteButton: any = ({
         message.deleted
           ? {
               position: 'absolute',
-              bottom: 0,
+              bottom: -1,
               right: -4,
             }
           : {
@@ -186,8 +195,6 @@ const MainText: any = ({
   const deleteAnim = useRef(new Animated.Value(message.deleted ? 1 : 0)).current
   useEffect(() => {
     if (message.deleted) {
-      console.log('message.text', message)
-      console.log('deleting')
       Animated.timing(deleteAnim, {
         toValue: 1,
         duration: 200,
@@ -315,7 +322,7 @@ const ProfileRow: any = ({
       {/*  </Text>*/}
       {/*) : null}*/}
       {!initialLayout || message.deleted ? (
-        <View style={{width: 48, hieght: 48}} />
+        <View style={{width: 42, hieght: 42}} />
       ) : null}
     </TouchableOpacity>
   )
@@ -339,7 +346,7 @@ const styles = StyleSheet.create({
     marginTop: margin,
     marginBottom: margin,
     marginLeft: 20,
-    marginRight: 20,
+    marginRight: 17,
     // paddingLeft: 20,
     // paddingRight: 27,
   },
@@ -353,8 +360,8 @@ const styles = StyleSheet.create({
     minWidth: 40,
     marginTop: margin,
     marginBottom: margin,
-    marginLeft: 20,
-    marginRight: 20,
+    marginLeft: 18,
+    marginRight: 17,
     // paddingLeft: 25,
     // paddingRight: 20,
   },
@@ -368,11 +375,11 @@ const styles = StyleSheet.create({
   },
   userMessageWrap: {
     marginLeft: 11,
-    marginRight: 7,
+    marginRight: 10,
   },
   aiMessageWrap: {
     marginLeft: 11,
-    marginRight: 7,
+    marginRight: 9,
   },
   userMessageText: {
     color: userText,

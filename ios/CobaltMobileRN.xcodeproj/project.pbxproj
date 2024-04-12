@@ -40,10 +40,7 @@
 		8CACCE5E2BA2BC50004643C2 /* Gemma.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE5B2BA2BC50004643C2 /* Gemma.swift */; };
 		8CACCE5F2BA2BC50004643C2 /* Starcoder2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE5C2BA2BC50004643C2 /* Starcoder2.swift */; };
 		8CACCE602BA2BC50004643C2 /* Qwen2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE5D2BA2BC50004643C2 /* Qwen2.swift */; };
-		8CC3082B2BB378F900D70C69 /* Montserrat-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CC308272BB378F800D70C69 /* Montserrat-VariableFont_wght.ttf */; };
-		8CC3082C2BB378F900D70C69 /* Montserrat-Italic-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CC308282BB378F800D70C69 /* Montserrat-Italic-VariableFont_wght.ttf */; };
 		8CC3082D2BB378F900D70C69 /* Nunito-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CC308292BB378F800D70C69 /* Nunito-VariableFont_wght.ttf */; };
-		8CC3082E2BB378F900D70C69 /* Nunito-Italic-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CC3082A2BB378F800D70C69 /* Nunito-Italic-VariableFont_wght.ttf */; };
 		8CFA35FD2BA18D80009546C7 /* FaissBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CFA35FC2BA18D80009546C7 /* FaissBridge.m */; };
 		8CFA36002BA1A408009546C7 /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA35FF2BA1A408009546C7 /* MLX */; };
 		8CFA36022BA1A408009546C7 /* MLXFFT in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA36012BA1A408009546C7 /* MLXFFT */; };
@@ -54,6 +51,9 @@
 		8CFA36232BA291D4009546C7 /* LLMNativeModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CFA36222BA291D4009546C7 /* LLMNativeModule.swift */; };
 		8CFA36252BA29209009546C7 /* LLMNativeModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CFA36242BA29209009546C7 /* LLMNativeModule.m */; };
 		8CFA36282BA299C9009546C7 /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA36272BA299C9009546C7 /* AsyncAlgorithms */; };
+		8CFAFD0B2BC854FF00AF4869 /* DMMono-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CFAFCF92BC854FF00AF4869 /* DMMono-Light.ttf */; };
+		8CFAFD0C2BC854FF00AF4869 /* Poppins-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CFAFCFA2BC854FF00AF4869 /* Poppins-Light.ttf */; };
+		8CFAFD0F2BC86BB800AF4869 /* Figtree-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CFAFD0E2BC86BB800AF4869 /* Figtree-VariableFont_wght.ttf */; };
 		8CFD0A1D2BA3E32C0080EBE1 /* OpenMP in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFD0A1C2BA3E32C0080EBE1 /* OpenMP */; };
 		8CFD0A222BA3E6340080EBE1 /* FAISS in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFD0A212BA3E6340080EBE1 /* FAISS */; };
 		8CFD0A242BA3E6340080EBE1 /* FAISS_C in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFD0A232BA3E6340080EBE1 /* FAISS_C */; };
@@ -111,16 +111,16 @@
 		8CACCE5C2BA2BC50004643C2 /* Starcoder2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Starcoder2.swift; sourceTree = "<group>"; };
 		8CACCE5D2BA2BC50004643C2 /* Qwen2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Qwen2.swift; sourceTree = "<group>"; };
 		8CACCE612BA2C3EF004643C2 /* CobaltMobileRNDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = CobaltMobileRNDebug.entitlements; path = CobaltMobileRN/CobaltMobileRNDebug.entitlements; sourceTree = "<group>"; };
-		8CC308272BB378F800D70C69 /* Montserrat-VariableFont_wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Montserrat-VariableFont_wght.ttf"; path = "../../assets/fonts/Montserrat-VariableFont_wght.ttf"; sourceTree = "<group>"; };
-		8CC308282BB378F800D70C69 /* Montserrat-Italic-VariableFont_wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Montserrat-Italic-VariableFont_wght.ttf"; path = "../../assets/fonts/Montserrat-Italic-VariableFont_wght.ttf"; sourceTree = "<group>"; };
 		8CC308292BB378F800D70C69 /* Nunito-VariableFont_wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Nunito-VariableFont_wght.ttf"; path = "../../assets/fonts/Nunito-VariableFont_wght.ttf"; sourceTree = "<group>"; };
-		8CC3082A2BB378F800D70C69 /* Nunito-Italic-VariableFont_wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Nunito-Italic-VariableFont_wght.ttf"; path = "../../assets/fonts/Nunito-Italic-VariableFont_wght.ttf"; sourceTree = "<group>"; };
 		8CDF7ACA2BA3C1E700C5F5FE /* CobaltMobileRNRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = CobaltMobileRNRelease.entitlements; path = CobaltMobileRN/CobaltMobileRNRelease.entitlements; sourceTree = "<group>"; };
 		8CFA35FB2BA18D80009546C7 /* FaissBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FaissBridge.h; sourceTree = "<group>"; };
 		8CFA35FC2BA18D80009546C7 /* FaissBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FaissBridge.m; sourceTree = "<group>"; };
 		8CFA36172BA286B2009546C7 /* CobaltMobileRN-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CobaltMobileRN-Bridging-Header.h"; sourceTree = "<group>"; };
 		8CFA36222BA291D4009546C7 /* LLMNativeModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMNativeModule.swift; sourceTree = "<group>"; };
 		8CFA36242BA29209009546C7 /* LLMNativeModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LLMNativeModule.m; sourceTree = "<group>"; };
+		8CFAFCF92BC854FF00AF4869 /* DMMono-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "DMMono-Light.ttf"; path = "../../assets/fonts/DMMono-Light.ttf"; sourceTree = "<group>"; };
+		8CFAFCFA2BC854FF00AF4869 /* Poppins-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Poppins-Light.ttf"; path = "../../assets/fonts/Poppins-Light.ttf"; sourceTree = "<group>"; };
+		8CFAFD0E2BC86BB800AF4869 /* Figtree-VariableFont_wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Figtree-VariableFont_wght.ttf"; path = "../../assets/fonts/Figtree-VariableFont_wght.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -247,10 +247,10 @@
 		8C174FB12BACA2510085DF07 /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
-				8CC308282BB378F800D70C69 /* Montserrat-Italic-VariableFont_wght.ttf */,
-				8CC308272BB378F800D70C69 /* Montserrat-VariableFont_wght.ttf */,
-				8CC3082A2BB378F800D70C69 /* Nunito-Italic-VariableFont_wght.ttf */,
+				8CFAFCF92BC854FF00AF4869 /* DMMono-Light.ttf */,
+				8CFAFCFA2BC854FF00AF4869 /* Poppins-Light.ttf */,
 				8CC308292BB378F800D70C69 /* Nunito-VariableFont_wght.ttf */,
+				8CFAFD0E2BC86BB800AF4869 /* Figtree-VariableFont_wght.ttf */,
 				8C99CED82BACA4E600400086 /* Ionicons.ttf */,
 			);
 			path = Fonts;
@@ -413,15 +413,15 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8CC3082C2BB378F900D70C69 /* Montserrat-Italic-VariableFont_wght.ttf in Resources */,
 				8C33BC392BA42DD40023A2D9 /* MiniLM-vocab.txt in Resources */,
-				8CC3082E2BB378F900D70C69 /* Nunito-Italic-VariableFont_wght.ttf in Resources */,
+				8CFAFD0C2BC854FF00AF4869 /* Poppins-Light.ttf in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
-				8CC3082B2BB378F900D70C69 /* Montserrat-VariableFont_wght.ttf in Resources */,
 				8CC3082D2BB378F900D70C69 /* Nunito-VariableFont_wght.ttf in Resources */,
+				8CFAFD0B2BC854FF00AF4869 /* DMMono-Light.ttf in Resources */,
 				8C99CED92BACA4E600400086 /* Ionicons.ttf in Resources */,
 				8C022CE02BB5D67900CBB95A /* SyncedProducts.storekit in Resources */,
 				8C097E672BB19BE70078CE31 /* CodeGen-vocab.json in Resources */,
+				8CFAFD0F2BC86BB800AF4869 /* Figtree-VariableFont_wght.ttf in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				8C097E662BB19BE70078CE31 /* CodeGen-merges.txt in Resources */,
 			);

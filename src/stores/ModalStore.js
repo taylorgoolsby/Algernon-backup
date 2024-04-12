@@ -39,7 +39,7 @@ class ModalStore {
     this.message = message
   }
 
-  confirm(title: string, message: ?string, primaryLabel?: ?string, secondaryLabel?: ?string): Promise<boolean> {
+  confirm(title: ?string, message: ?string, primaryLabel?: ?string, secondaryLabel?: ?string): Promise<boolean> {
     this.openModal = true
     this.title = title
     this.message = message

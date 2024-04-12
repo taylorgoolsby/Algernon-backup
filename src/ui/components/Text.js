@@ -21,8 +21,10 @@ const MyText: any = (props) => {
 const styles = StyleSheet.create({
   text: {
     color: Colors.defaultText,
-    fontSize: 16,
-    fontFamily: 'Montserrat',
+    fontWeight: Colors.fontWeight,
+    fontSize: Colors.fontSize,
+    fontFamily: Colors.fontFamily,
+    letterSpacing: Colors.letterSpacing,
     lineHeight: 24
   }
 })

@@ -19,8 +19,7 @@ const Bullet = (props: any) => {
   )
 }
 
-const Wrapper = (props: any) => {
-}
+const Wrapper = (props: any) => {}
 
 const H1 = () => {}
 
@@ -101,7 +100,16 @@ const MarkdownText = (props: any): any => {
         }
 
         if (type === 'code') {
-          return <Code {...props} children={children} />
+          return (
+            <Code
+              {...props}
+              children={Array.isArray(children) ? children : [children]}
+            />
+          )
+        }
+
+        if (children.type === Code) {
+          return <Code {...props} children={children.props.children} />
         }
 
         return <Text {...props} children={children} />
@@ -152,7 +160,19 @@ const MarkdownText = (props: any): any => {
     return children.map((child, index) => {
       if (typeof child === 'string') {
         return (
-          <Text key={index} style={{...textStyle, ...margins[index]}}>
+          <Text
+            key={index}
+            style={[
+              {...textStyle, ...margins[index]},
+              parentType === Code
+                ? {
+                    fontFamily: 'DM Mono',
+                    fontSize: 14,
+                    fontWeight: 400,
+                    letterSpacing: 0.0,
+                  }
+                : {},
+            ]}>
             {child}
           </Text>
         )
@@ -168,8 +188,7 @@ const MarkdownText = (props: any): any => {
               fontSize: Colors.fontSize * 2,
               lineHeight: Colors.fontSize * 2 * 1.5,
               fontWeight: '700',
-            }}
-          >
+            }}>
             {renderChildren(child.props.children, Text)}
           </Text>
         )
@@ -185,8 +204,7 @@ const MarkdownText = (props: any): any => {
               fontSize: Colors.fontSize * 1.5,
               lineHeight: Colors.fontSize * 1.5 * 1.5,
               fontWeight: '700',
-            }}
-          >
+            }}>
             {renderChildren(child.props.children, Text)}
           </Text>
         )
@@ -202,8 +220,7 @@ const MarkdownText = (props: any): any => {
               fontSize: Colors.fontSize * 1.25,
               lineHeight: Colors.fontSize * 1.25 * 1.5,
               fontWeight: '600',
-            }}
-          >
+            }}>
             {renderChildren(child.props.children, Text)}
           </Text>
         )
@@ -259,8 +276,7 @@ const MarkdownText = (props: any): any => {
         return (
           <Text
             key={index}
-            style={{...textStyle, ...margins[index], fontWeight: 600}}
-          >
+            style={{...textStyle, ...margins[index], fontWeight: 600}}>
             {renderChildren(child.props.children, Text)}
           </Text>
         )
@@ -270,8 +286,7 @@ const MarkdownText = (props: any): any => {
         return (
           <Text
             key={index}
-            style={{...textStyle, ...margins[index], color: Colors.blue}}
-          >
+            style={{...textStyle, ...margins[index], color: Colors.blue}}>
             {renderChildren(child.props.children, Text)}
           </Text>
         )
@@ -280,16 +295,15 @@ const MarkdownText = (props: any): any => {
       if (child.type === Code) {
         // todo: monospace font
         return (
-          <Text
-            key={index}
-            style={{...textStyle, ...margins[index]}}
-          >
-            {renderChildren(child.props.children, Text)}
+          <Text key={index} style={{...textStyle, ...margins[index]}}>
+            {renderChildren(child.props.children, Code)}
           </Text>
         )
       }
     })
   }
+
+  // console.log("compiledChildren", compiledChildren);
 
   return (
     <View style={style} onLayout={onLayout}>

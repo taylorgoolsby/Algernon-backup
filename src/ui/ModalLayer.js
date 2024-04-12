@@ -13,6 +13,7 @@ import Text from './components/Text.js'
 import {BlurView} from '@react-native-community/blur'
 import {observer} from 'mobx-react'
 import modalStore from '../stores/ModalStore.js'
+import Colors from "../Colors.js";
 
 const ModalLayer: any = observer(props => {
   const {
@@ -84,20 +85,20 @@ const styles = StyleSheet.create({
     borderRadius: 24,
   },
   title: {
-    fontSize: 22,
+    fontSize: 22/16 * Colors.fontSize,
     lineHeight: 28 * 1.5,
     color: 'rgba(255, 255, 255, 0.97)',
     marginLeft: 0,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   message: {
-    fontSize: 16,
+    fontSize: Colors.fontSize,
     lineHeight: 16 * 1.5,
     color: 'rgba(255, 255, 255, 0.97)',
   },
   confirmOptions: {
     alignItems: 'center',
-    paddingTop: 19,
+    paddingTop: 15,
   },
   primaryButton: {
     padding: 8,
@@ -106,11 +107,11 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   primaryText: {
-    fontSize: 17, // todo adjust to 20
+    fontSize: 17/16 * Colors.fontSize,
     color: 'rgba(255, 255, 255, 0.97)',
   },
   secondaryText: {
-    fontSize: 14,
+    fontSize: 14/16 * Colors.fontSize,
     color: 'rgba(255, 255, 255, 0.97)',
   },
 })

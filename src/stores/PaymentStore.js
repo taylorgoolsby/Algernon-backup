@@ -62,7 +62,7 @@ class PaymentStore {
         return paymentStatus.status;
       }
     } catch (error) {
-      console.error('Failed to verify payment status', error);
+      // console.error('Failed to verify payment status', error);
     }
     return false;
   };

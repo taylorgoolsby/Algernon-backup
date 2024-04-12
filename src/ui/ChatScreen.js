@@ -7,7 +7,6 @@ import {
   TextInput,
   Button,
   ScrollView,
-  FlatList,
   TouchableOpacity,
   TouchableWithoutFeedback,
   SafeAreaView,
@@ -19,15 +18,20 @@ import {
 } from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Text from './components/Text.js'
-import ChatMessage, { margin } from "./components/ChatMessage.js";
+import ChatMessage from './components/ChatMessage.js'
 import ProfilePic from './components/ProfilePic.js'
 import ChatIteration from '../agent/ChatIteration.js'
 import {observer} from 'mobx-react'
 import preferencesStore from '../stores/PreferencesStore.js'
 import {BlurView} from '@react-native-community/blur'
 import chatStore from '../stores/ChatStore.js'
-import Colors, { footerActive, footerInactive, headerLeft, headerRight, searchActive } from "../Colors.js";
-import {useDebounce} from 'use-debounce'
+import Colors, {
+  footerActive,
+  footerInactive,
+  headerLeft,
+  headerRight,
+  searchActive,
+} from '../Colors.js'
 import modalStore from '../stores/ModalStore.js'
 import Voice from '@react-native-voice/voice'
 import {
@@ -38,42 +42,73 @@ import {
   RESULTS,
 } from 'react-native-permissions'
 import type {MessageSQL} from '../schema/Message/MessageSchema.mjs'
+import LongTermAnnotation from '../agent/LongTermAnnotation.js'
+import MessageList from './components/MessageList.js'
+import { useDebounce } from "use-debounce";
+import ListSlider from "./components/ListSlider.js";
 
 const darkMode = Appearance.getColorScheme() === 'dark'
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon)
 
 const ChatScreen: any = observer(({navigation}) => {
-  const messages = [...chatStore.messages]
+  const displayedMessageIds = chatStore.displayedMessageIds
   const [input, setInput] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [searchInputFocused, setSearchInputFocused] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [showFlipSide, setShowFlipSide] = useState(false)
-  // const [errorMessage, setErrorMessage] = useState('')
   const [showOptionsForMessage, setShowOptionsForMessage] =
     useState<?MessageSQL>(null)
+
+  const [searchResults, setSearchResults] = useState<?Array<string>>(null)
+  const [searchMode, setSearchMode] = useState(false)
+  function enterSearchMode() {
+    setSearchMode(true)
+    setSearchResults(null)
+  }
+  function exitSearchMode() {
+    setSearchMode(false)
+    setSearchResults(null)
+  }
+
+  function onInputValueChange(value: string) {
+    setInput(value)
+  }
+
+  function onSearchInputValueChange(value: string) {
+    setSearchInput(value)
+    LongTermAnnotation.searchAndGetMessages(
+      value,
+      (messages: Array<string>) => {
+        setSearchResults(messages)
+      },
+    )
+  }
+
+  function onFocus() {
+    if (searchMode) {
+      setSearchInputFocused(true)
+    }
+  }
+
+  function onBlur() {
+    if (searchMode) {
+      setSearchInputFocused(false)
+    }
+  }
 
   function closeOptions() {
     setShowOptionsForMessage(null)
   }
 
   const canPost =
-    !!input.trim() && (messages[0] ? !!messages[0].completed : true)
-  // const canPost = true
-  // const canPost = !!input.trim()
+    !!input.trim() && (displayedMessageIds[0] ? !!chatStore.messages[displayedMessageIds[0]].completed : true)
 
-  // scrollToBottom when message updates the first time (initial load):
-  const initialLoad = useRef(true)
-  useEffect(() => {
-    if (chatStore.loaded && initialLoad.current) {
-      initialLoad.current = false
-      // scrollToBottom()
-    }
-  }, [chatStore.loaded])
-
-  useEffect(() => {
-    chatStore.onRenderDone()
-  }, [messages])
+  // useEffect(() => {
+  //   chatStore.onRenderDone()
+  // }, [chatStore.dirty])
 
   // const [micReady, setMicReady] = useState(false)
   // const [speechReady, setSpeechReady] = useState(false)
@@ -101,17 +136,15 @@ const ChatScreen: any = observer(({navigation}) => {
       )
     }
 
-    // setMicReady(micCheck === RESULTS.GRANTED)
-    // setSpeechReady(speechCheck === RESULTS.GRANTED)
     return micCheck === RESULTS.GRANTED && speechCheck === RESULTS.GRANTED
   }
 
   const voiceInitialized = useRef(false)
   const [voiceReady, setVoiceReady] = useState(false)
   useEffect(() => {
-    Promise.resolve().then(async () => {
-      if (!voiceInitialized.current) {
-        voiceInitialized.current = true
+    if (!voiceInitialized.current) {
+      voiceInitialized.current = true
+      Promise.resolve().then(async () => {
         // setVoiceReady(await Voice.isAvailable() === 1)
         setVoiceReady(true)
         Voice.onSpeechResults = e => {
@@ -124,10 +157,11 @@ const ChatScreen: any = observer(({navigation}) => {
         // }
         Voice.onSpeechError = e => {
           console.log(e.error)
-          // modalStore.showError(e.error.message)
+          stopSpeechToText()
+          modalStore.showError('Speech recognition had to stop.')
         }
-      }
-    })
+      })
+    }
   }, [])
 
   const startSpeechToText = async () => {
@@ -163,32 +197,33 @@ const ChatScreen: any = observer(({navigation}) => {
     setIsExpanded(false) // Collapse the list after selection
   }
 
-  const sendMessage = async () => {
-    if (!canPost) return
-    // if (!preferencesStore.selectedModel) {
-    //   console.error('No model selected')
-    //   return
-    // }
-    // if (preferencesStore.selectedModel.local) {
-    //   setErrorMessage('Local models are not supported yet.')
-    //   return
-    // }
-    ChatIteration.iterate(
-      chatStore.windowId,
-      preferencesStore.selectedModel,
-      input.trim(),
-      output => {
-        chatStore.appendMessage(output)
-      },
-      output => {
-        chatStore.updateMessage(output)
-      },
-      error => {
-        console.error(error)
-        // modalStore.showError(error.message)
-      },
-    )
-    setInput('')
+  const submit = async () => {
+    if (searchMode) {
+      LongTermAnnotation.searchAndGetMessages(
+        input.trim(),
+        (messages: Array<string>) => {
+          setSearchResults(messages)
+        },
+      )
+    } else {
+      if (!canPost) return
+      ChatIteration.iterate(
+        chatStore.windowId,
+        preferencesStore.selectedModel,
+        input.trim(),
+        output => {
+          chatStore.appendMessage(output)
+        },
+        output => {
+          chatStore.updateMessage(output)
+        },
+        error => {
+          console.error(error)
+        },
+      )
+      setInput('')
+    }
+
     inputRef.current?.blur()
   }
 
@@ -199,82 +234,28 @@ const ChatScreen: any = observer(({navigation}) => {
     inputRef.current.focus()
   }
 
-  const scrollViewRef = useRef(null)
-  const scrollToBottom = () => {
-    {
-      /*$FlowFixMe*/
-    }
-    // setTimeout(() => {
-    //   scrollViewRef.current?.scrollToEnd({animated: true})
-    // })
-  }
-
-  const [searchMode, setSearchMode] = useState(false);
-  function enterSearchMode() {
-    setSearchMode(true)
-  }
-
-  // SafeArea causes headerHeight and footerHeight to change over time.
-  const initialLayout = useRef(true)
-  const [isInitialLayout, setIsInitialLayout] = useState(true)
-  useEffect(() => {
-    if (initialLayout.current) {
-      initialLayout.current = false
-      setTimeout(() => {
-        setIsInitialLayout(false)
-      }, 160)
-    }
-  }, [])
-
   const [_headerHeight, setHeaderHeight] = useState(0)
-  const [headerHeightD] = useDebounce(_headerHeight, 16)
-  const headerHeight = isInitialLayout ? headerHeightD : _headerHeight
+  const [headerHeight] = useDebounce(_headerHeight, 0) // for some reason layout on safe area changes over time on initial mount.
   const onLayoutHeader = (event: any) => {
     const {height} = event.nativeEvent.layout
     setHeaderHeight(height)
   }
 
-  const [initialSafeAreaHeight, setInitialSafeAreaHeight] = useState(0)
   const [safeAreaHeight, setSafeAreaHeight] = useState(0)
   const onLayoutSafeArea = (event: any) => {
     const {height} = event.nativeEvent.layout
-    if (isInitialLayout) {
-      setInitialSafeAreaHeight(height - 50)
-    }
-
-    // SafeArea height jitters around, so snap it to known possible values of 50, 84, 100, or 134
-    const snapHeight = [
-      50,
-      50 + initialSafeAreaHeight,
-      100,
-      100 + initialSafeAreaHeight,
-    ].reduce((prev, curr) =>
-      Math.abs(curr - height) < Math.abs(prev - height) ? curr : prev,
-    )
-    setSafeAreaHeight(snapHeight)
+    setSafeAreaHeight(height)
   }
-  const footerHeight = safeAreaHeight
 
-  const submitColor = useRef(new Animated.Value(0)).current
-  useEffect(() => {
-    if (canPost || isRecording) {
-      Animated.timing(submitColor, {
-        toValue: 1,
-        duration: 120,
-        useNativeDriver: false,
-      }).start()
-    } else {
-      Animated.timing(submitColor, {
-        toValue: 0,
-        duration: 120,
-        useNativeDriver: false,
-      }).start()
-    }
-  }, [canPost, isRecording])
+  const [footerHeight, setFooterHeight] = useState(0)
+  const onLayoutFooter = (event: any) => {
+    const {height} = event.nativeEvent.layout
+    setFooterHeight(height)
+  }
 
   const clearColor = useRef(new Animated.Value(0)).current
   useEffect(() => {
-    if (input) {
+    if (searchMode || !!input) {
       Animated.timing(clearColor, {
         toValue: 1,
         duration: 120,
@@ -287,99 +268,48 @@ const ChatScreen: any = observer(({navigation}) => {
         useNativeDriver: false,
       }).start()
     }
-  }, [input])
+  }, [searchMode, input])
 
-  const [flatListHeight, setFlatListHeight] = useState(0)
-  const onFlatListLayout = (event: any) => {
-    const {height} = event.nativeEvent.layout
-    setFlatListHeight(height)
-  }
-
-  const [messageHeights, setMessageHeights] = useState<{[string]: number}>({})
-  const onMessageLayout = (event: any, message: MessageSQL) => {
-    const {height} = event.nativeEvent.layout
-    setMessageHeights({
-      ...messageHeights,
-      [message.messageId]: height,
-    })
-  }
-
+  const submitColor = useRef(new Animated.Value(0)).current
   useEffect(() => {
-    if (messages.length < Object.keys(messageHeights).length) {
-      const nextMessageHeights: {[string]: number} = {}
-      for (const message of messages) {
-        if (messageHeights[message.messageId.toString()]) {
-          nextMessageHeights[message.messageId.toString()] = messageHeights[message.messageId.toString()]
-        }
-      }
-      setMessageHeights(nextMessageHeights)
+    if (canPost || isRecording || (searchMode && searchInputFocused)) {
+      Animated.timing(submitColor, {
+        toValue: 1,
+        duration: 120,
+        useNativeDriver: false,
+      }).start()
+    } else {
+      Animated.timing(submitColor, {
+        toValue: 0,
+        duration: 120,
+        useNativeDriver: false,
+      }).start()
     }
-  }, [messages.length]);
-
-  let fillerHeight = flatListHeight - footerHeight - headerHeight
-  for (const height of Object.values(messageHeights)) {
-    // $FlowFixMe
-    fillerHeight -= height + 2 * margin
-    if (fillerHeight < 0) {
-      fillerHeight = 0
-      break
-    }
-  }
+  }, [canPost, isRecording, searchMode, searchInputFocused])
 
   return (
     <View style={styles.container}>
       <View style={styles.background}></View>
 
-      <KeyboardAvoidingView
-        style={[
-          styles.container,
-          {
-            justifyContent: 'flex-start',
-          },
-        ]}
-        behavior={Platform.OS === 'ios' ? 'height' : null}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} //
-      >
-        {messages.length > 0 && headerHeight && footerHeight ? (
-          <FlatList
-            style={[styles.chatContainer, {flex: 0}]}
-            // ListHeaderComponent={(<View style={{height: fillerHeight}}/>)}
-            contentContainerStyle={{
-              paddingTop: headerHeight,
-              paddingBottom: footerHeight,
-            }}
-            scrollIndicatorInsets={{
-              bottom: footerHeight,
-              top: headerHeight,
-            }}
-            automaticallyAdjustsScrollIndicatorInsets={false}
-            // $FlowFixMe
-            ref={scrollViewRef}
-            // inverted
-            data={messages}
-            // $FlowFixMe
-            keyExtractor={message => message.messageId}
-            renderItem={item => {
-              const message = item.item
-              return (
-                <ChatMessage
-                  message={message}
-                  showOptions={
-                    showOptionsForMessage?.messageId === message.messageId
-                  }
-                  onOpenOptions={() => {
-                    setShowOptionsForMessage(message)
-                  }}
-                  onPressIn={closeOptions}
-                  isActive={item.index === 0}
-                  onMessageLayout={onMessageLayout}
-                />
-              )
-            }}
-            onLayout={onFlatListLayout}
-          />
-        ) : null}
-      </KeyboardAvoidingView>
+      {displayedMessageIds.length > 0 && headerHeight && footerHeight ? (
+        <ListSlider
+          searchMode={searchMode}
+          messageIds={displayedMessageIds}
+          searchResults={searchResults}
+          headerHeight={headerHeight}
+          footerHeight={footerHeight}
+          safeAreaFooterHeight={safeAreaHeight}
+          onEmptyAreaPress={() => {inputRef.current?.blur()}}
+        />
+        // <MessageList
+        //   messageIds={displayedMessageIds}
+        //   searchMode={searchMode}
+        //   searchResults={searchResults?.map(message => message.messageId.toString()) ?? []}
+        //   safeAreaFooterHeight={safeAreaHeight}
+        //   footerHeight={footerHeight}
+        //   headerHeight={headerHeight}
+        // />
+      ) : null}
 
       <BlurView
         style={styles.header}
@@ -396,10 +326,12 @@ const ChatScreen: any = observer(({navigation}) => {
               flex: 1,
             }}>
             <TouchableOpacity
-              style={[styles.sendButton, {marginRight: 12}]}
+              style={[styles.sendButton, {paddingRight: 24, opacity: 0}]}
               onPress={() => {
                 setShowFlipSide(!showFlipSide)
-              }}>
+              }}
+              disabled={true}
+            >
               <Icon
                 // name={'analytics-outline'}
                 name={'layers-outline'}
@@ -423,7 +355,7 @@ const ChatScreen: any = observer(({navigation}) => {
           <TouchableOpacity
             style={{
               // paddingLeft: 22,
-              paddingLeft: 31,
+              paddingLeft: 30,
               paddingBottom: 12,
               paddingRight: 30,
             }}
@@ -487,32 +419,28 @@ const ChatScreen: any = observer(({navigation}) => {
           onLayout={onLayoutSafeArea}>
           <SafeAreaView style={styles.inputSafeArea}>
             <TouchableWithoutFeedback onPress={focusInput}>
-              <View style={styles.inputBar}>
+              <View style={styles.inputBar} onLayout={onLayoutFooter}>
                 <TouchableOpacity
                   style={styles.clearInputButton}
                   onPress={() => {
                     if (searchMode) {
-                      setSearchMode(false)
+                      exitSearchMode()
                     } else if (!!input) {
                       setInput('')
                     } else {
                       enterSearchMode()
                     }
-                  }}
-                  // disabled={!input}
-                >
+                  }}>
                   <AnimatedIcon
-                    name={!!input && !searchMode ? 'close-circle' : 'search-circle'}
+                    name={
+                      !!input && !searchMode ? 'close-circle' : 'search-circle'
+                    }
                     size={!!input && !searchMode ? 28 : 30}
                     style={{marginLeft: !!input && !searchMode ? 0 : -1}}
-                    color={searchMode ? searchActive : footerActive}
-                    // color={clearColor.interpolate({
-                    //   inputRange: [0, 1],
-                    //   outputRange: [
-                    //     footerInactive,
-                    //     footerActive,
-                    //   ],
-                    // })}
+                    color={clearColor.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [footerInactive, searchMode ? searchActive : footerActive],
+                    })}
                   />
                 </TouchableOpacity>
                 {/*$FlowFixMe*/}
@@ -520,16 +448,18 @@ const ChatScreen: any = observer(({navigation}) => {
                   ref={inputRef}
                   style={styles.input}
                   multiline
-                  value={input}
-                  onChangeText={setInput}
-                  placeholder={searchMode ? "Search" : "Message"}
+                  onFocus={onFocus}
+                  onBlur={onBlur}
+                  value={searchMode ? searchInput : input}
+                  onChangeText={searchMode ? onSearchInputValueChange : onInputValueChange}
+                  placeholder={searchMode ? 'Search' : 'Message'}
                   placeholderTextColor={Colors.sendIconDisabledBg}
                 />
                 <TouchableOpacity
                   style={styles.sendButton}
                   onPress={
-                    input.trim() && !isRecording
-                      ? sendMessage
+                    input.trim() && !isRecording || searchMode
+                      ? submit
                       : isRecording
                       ? stopSpeechToText
                       : startSpeechToText
@@ -537,19 +467,18 @@ const ChatScreen: any = observer(({navigation}) => {
                   disabled={!!input.trim() && !isRecording && !canPost}>
                   <AnimatedIcon
                     name={
-                      input.trim() && !isRecording
+                      input.trim() && !isRecording || searchMode
                         ? 'arrow-up-circle'
                         : isRecording
                         ? 'stop-circle'
                         : 'mic'
                     }
-                    size={!(input.trim() && !isRecording) && !isRecording ? 26 : 28}
+                    size={
+                      !(input.trim() && !isRecording) && !isRecording ? 26 : 28
+                    }
                     color={submitColor.interpolate({
                       inputRange: [0, 1],
-                      outputRange: [
-                        footerInactive,
-                        footerActive,
-                      ],
+                      outputRange: [footerInactive, footerActive],
                     })}
                   />
                 </TouchableOpacity>
@@ -583,19 +512,22 @@ const ChatScreen: any = observer(({navigation}) => {
             zIndex: 3,
             alignItems: 'center',
             justifyContent: 'center',
-          }}
-        >
-          <View style={{
-            // width: 300,
-            // height: 300,
-            // borderRadius: 140,
-            // borderWidth: 0,
-            // borderColor: Colors.blue,
           }}>
-            <View style={{
-              transform: [{scale: 1}],
-            }}>
-              <ProfilePic message={messages[0]} noBorder tenX/>
+          <View
+            style={
+              {
+                // width: 300,
+                // height: 300,
+                // borderRadius: 140,
+                // borderWidth: 0,
+                // borderColor: Colors.blue,
+              }
+            }>
+            <View
+              style={{
+                transform: [{scale: 1}],
+              }}>
+              <ProfilePic message={chatStore.messages[displayedMessageIds[0]]} noBorder tenX />
             </View>
           </View>
         </View>
@@ -639,7 +571,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    zIndex: 2,
+    zIndex: 1,
   },
   footer: {
     position: 'absolute',
@@ -697,8 +629,8 @@ const styles = StyleSheet.create({
   },
   clearInputButton: {
     padding: 0,
-    paddingLeft: 21,
-    paddingRight: 14,
+    paddingLeft: 25,
+    paddingRight: 12,
     alignSelf: 'stretch',
     justifyContent: 'center',
     alignItems: 'center',
@@ -709,13 +641,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     paddingTop: 0,
     marginLeft: 0,
-    marginRight: 12,
+    marginRight: 8,
+    letterSpacing: Colors.letterSpacing,
     fontSize: Colors.fontSize,
-    fontFamily: 'Montserrat',
+    fontFamily: Colors.fontFamily,
   },
   sendButton: {
     padding: 0,
-    paddingRight: 19,
+    paddingRight: 21,
     minWidth: 28,
     alignSelf: 'stretch',
     justifyContent: 'center',

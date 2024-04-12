@@ -19,6 +19,8 @@ import {setup, withIAPContext, useIAP} from 'react-native-iap'
 import DeviceInfo from 'react-native-device-info'
 import Config from '../Config.js'
 import ModalLayer from './ModalLayer.js'
+import Colors from "../Colors.js";
+import HeaderBackButton from "./components/HeaderBackButton.js";
 
 setup({storekitMode: 'STOREKIT2_MODE'})
 
@@ -126,7 +128,13 @@ const AppNavigator: any = withIAPContext(
     return (
       <View style={{flex: 1}}>
         <NavigationContainer>
-          <Stack.Navigator>
+          <Stack.Navigator screenOptions={{
+            headerTitleStyle: {
+              fontFamily: Colors.fontFamily,
+              fontSize: Colors.fontSize * 18/16,
+            },
+            headerLeft: HeaderBackButton
+          }}>
             {introCompleted ? (
               <>
                 <Stack.Screen

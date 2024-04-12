@@ -79,7 +79,7 @@ const Spinner = ({style, dieOut}: any): any => {
             }),
             transform: [{scale: animation.interpolate({
                 inputRange: [0, 1],
-                outputRange: [1, 0.4], // Reverse the radius pattern for the second circle
+                outputRange: [0.86, 0.4], // Reverse the radius pattern for the second circle
               })}],
             backgroundColor: Colors.spinnerColor2
             // backgroundColor: 'red'
@@ -96,11 +96,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 20,
     width: 20,
+    marginTop: 3,
     // backgroundColor: '#FFF',
   },
   circle: {
     position: 'absolute',
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: Colors.blue,
     opacity: 0.5,
     height: 10,
     width: 10,

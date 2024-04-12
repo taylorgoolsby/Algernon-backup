@@ -175,10 +175,7 @@ Output 2: "Planning a trip to Japan, visiting Tokyo and Kyoto. Unique activities
     ]
 
     const response = await InferenceRest.chatCompletion(model, context)
-    console.log("response", response);
     const nextSummary = response.choices[0]?.message?.content ?? ''
-
-    console.log("nextSummary", nextSummary);
 
     await CompletionInterface.insert(CompletionType.SHORT_TERM_MEMORY, model, context, {role: 'assistant', content: nextSummary})
 

@@ -87,8 +87,6 @@ Rules
       },
     ].filter(Boolean)
 
-    console.log("context", context);
-
     // Then streaming begins and incoming tokens are relayed back to the client.
     const completeMessage = await GeneralResponse.stream(
       windowId,

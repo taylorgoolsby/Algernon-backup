@@ -60,7 +60,6 @@ class CodeGenTokenizer {
       return this.cache[token];
     }
     let word = Array.from(token);
-    console.log("word", word);
     let pairs = this.getPairs(word);
 
 
@@ -69,15 +68,11 @@ class CodeGenTokenizer {
     }
 
     while (true) {
-      console.log("pairs", pairs);
-
       const minPair = Array.from(pairs).reduce((a, b) => {
         const aStr = JSON.stringify(a);
         const bStr = JSON.stringify(b);
         return this.bpeRanks[aStr] !== undefined && (this.bpeRanks[bStr] === undefined || this.bpeRanks[aStr] < this.bpeRanks[bStr]) ? a : b
       });
-
-      console.log("minPair", minPair);
 
       // console.log("this.bpeRanks", this.bpeRanks);
 
@@ -85,14 +80,10 @@ class CodeGenTokenizer {
         break;
       }
       const [first, second] = minPair;
-      console.log("first", first);
-      console.log("second", second);
       let newWord = [];
       let i = 0;
       while (i < word.length) {
-        console.log("newWord", newWord);
         const j = word.indexOf(first, i);
-        console.log("j", j);
         if (j === -1) {
           newWord.push(...word.slice(i));
           break;
@@ -116,7 +107,6 @@ class CodeGenTokenizer {
       }
     }
     const result = word.join(' ');
-    console.log("result", result);
     this.cache[token] = result;
     return result;
   }
@@ -135,11 +125,8 @@ class CodeGenTokenizer {
     let bpeTokens = [];
     for (const match of text.matchAll(this.pat)) {
       const token = match[0];
-      console.log("token", token);
       const bytes = encodeUtf8(token);
-      console.log("bytes", bytes);
       const encodedToken = bytes.map((b) => this.byteEncoder[b] || '').join('');
-      console.log("encodedToken", encodedToken);
       const bpeTokensForToken = this.bpe(encodedToken).split(' ');
       bpeTokens.push(...bpeTokensForToken);
     }

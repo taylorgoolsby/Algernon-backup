@@ -5,6 +5,7 @@ import AnnotationInterface from '../schema/Annotation/AnnotationInterface.js'
 import InferenceRest from '../rest/InferenceRest.js'
 import type {ModelConfig} from "../types/ModelConfig.js";
 import { NativeModules } from 'react-native';
+import MessageInterface from "../schema/Message/MessageInterface.js";
 
 const { TextFeatureExtractor, FaissBridge } = NativeModules;
 
@@ -37,7 +38,6 @@ export default class LongTermAnnotation {
     Promise.resolve().then(async () => {
       try {
         const text = message.text
-        console.log('annotating', text)
 
         const annotations = await LongTermAnnotation.getAnnotations(
           model,
@@ -191,7 +191,6 @@ Explanation: Similar to the previous example, this input is an acknowledgement w
       // todo: Use prompt formatting to encourage JSON output.
       const res = await InferenceRest.chatCompletion(model, context)
       const rawJSON = res.choices[0]?.message?.content ?? ''
-      console.log('rawJSON for annotating', rawJSON)
       try {
         annotations = JSON.parse(rawJSON)
         if (!Array.isArray(annotations)) {
@@ -276,18 +275,13 @@ Explanation: Similar to the previous example, this input is an acknowledgement w
     )
 
     const vectorRes = await LongTermAnnotation.search(topic)
-    console.log('vector search res', vectorRes)
 
     // Filter out labels which are below the distance threshold:
     const annotationIds = vectorRes.labels.filter(
       (label, i) => vectorRes.distances[i] > DISTANCE_THRESHOLD,
     )
 
-    console.log("annotationIds", annotationIds);
-
     const annotations = await AnnotationInterface.retrieve(annotationIds)
-
-    console.log("annotations", annotations);
 
     // todo: timezone
 
@@ -349,5 +343,20 @@ This summary should serve as a reflective, insightful, and concise synthesis of 
     }
 
     return summary
+  }
+
+  static searchAndGetMessages(search: string, onResult: (messages: Array<string>) => void) {
+    Promise.resolve().then(async () => {
+      const vectorRes = await LongTermAnnotation.search(search)
+
+      // Filter out labels which are below the distance threshold:
+      const annotationIds = vectorRes.labels.filter(
+        (label, i) => vectorRes.distances[i] > DISTANCE_THRESHOLD,
+      )
+
+      const messages = await MessageInterface.getFromAnnotations(annotationIds)
+
+      onResult(messages.map(message => message.messageId.toString()))
+    })
   }
 }

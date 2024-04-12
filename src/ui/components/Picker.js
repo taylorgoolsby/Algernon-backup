@@ -16,8 +16,6 @@ const Picker: any = (props) => {
     items
   } = props;
 
-  console.log("selectedItem", selectedItem);
-
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
