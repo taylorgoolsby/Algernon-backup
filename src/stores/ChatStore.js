@@ -1,6 +1,6 @@
 // @flow
 
-import {makeObservable, observable} from 'mobx'
+import {makeObservable, observable, action} from 'mobx'
 import type { MessageSQL } from "../schema/Message/MessageSchema.mjs";
 import type { AppendMessageOutput } from "../types/AppendMessageOutput.js";
 import type { UpdateMessageOutput } from "../types/UpdateMessageOutput.js";
@@ -32,15 +32,23 @@ export class ChatStore {
   completedOffsets: {[string]: boolean} = {}
   messages: {[messageId: string]: MessageSQL} = {}
   displayedMessageIds: Array<string> = []
-  dirty: boolean = false
 
+  inputRef: ?HTMLInputElement = null
+
+  showOptions: boolean = false
+  optionsMessageId: ?number = null
+  optionsMeasure: {x: number, y: number} = {x: 0, y: 0}
 
   constructor() {
     makeObservable(this, {
       loaded: observable,
       messages: observable,
       displayedMessageIds: observable,
-      dirty: observable,
+      showOptions: observable,
+      optionsMessageId: observable,
+      optionsMeasure: observable,
+      openOptions: action.bound,
+      closeOptions: action.bound,
     })
 
     this.fetchEarlierMessages = debounce(this.fetchEarlierMessages, 250, {leading: true, trailing: false}).bind(this)
@@ -127,6 +135,18 @@ export class ChatStore {
     const message = await MessageInterface.get(this.windowId, messageId)
     // $FlowFixMe
     this.messages[messageId.toString()] = message
+  }
+
+
+  openOptions: (number, number, number) => void = (messageId: number, x: number, y: number) => {
+    this.showOptions = true
+    this.optionsMeasure = {x, y}
+    this.optionsMessageId = messageId
+  }
+
+  closeOptions: () => void = () => {
+    this.showOptions = false
+    this.optionsMessageId = null
   }
 }
 

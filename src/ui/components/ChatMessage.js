@@ -1,7 +1,7 @@
 // @flow
 
 import React, {useState, useRef, useEffect} from 'react'
-import {View, StyleSheet, TouchableOpacity, Image, Animated} from 'react-native'
+import { View, StyleSheet, TouchableOpacity, Animated, TouchableWithoutFeedback } from "react-native";
 import type {MessageSQL} from '../../schema/Message/MessageSchema.mjs'
 import {MessageRole} from '../../schema/Message/MessageSchema.mjs'
 import Spinner from './Spinner.js'
@@ -17,10 +17,8 @@ import Colors, {
 } from '../../Colors.js'
 import Text from './Text.js'
 import MarkdownText from './MarkdownText.js'
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback'
 import Icon from 'react-native-vector-icons/Ionicons'
 import modalStore from '../../stores/ModalStore.js'
-import MessageInterface from '../../schema/Message/MessageInterface.js'
 import chatStore from '../../stores/ChatStore.js'
 import ProfilePic from './ProfilePic.js'
 import {observer} from 'mobx-react'
@@ -30,18 +28,16 @@ export const margin = 12
 const ChatMessage: any = observer(
   ({
     messageId,
-    // onOpenOptions,
     isActive,
-     onMessageLayout
-  }:
-  {
+    onMessageLayout,
+  }: {
     messageId: string,
-    // onOpenOptions: () => void,
     isActive: boolean,
     onMessageLayout: (any, MessageSQL) => void,
   }): any => {
     const message = chatStore.messages[messageId]
 
+    const messageRef = useRef<any>(null)
     const [isConfirming, setIsConfirming] = useState(false)
 
     async function handleDeleteMessage() {
@@ -54,9 +50,12 @@ const ChatMessage: any = observer(
     }
 
     function openOptions() {
-      // onOpenOptions()
-      ReactNativeHapticFeedback.trigger('soft', {
-        enableVibrateFallback: false,
+      messageRef?.current?.measure((fx, fy, width, height, px, py) => {
+        if (chatStore.optionsMessageId === message.messageId) {
+          chatStore.closeOptions()
+        } else {
+          chatStore.openOptions(message.messageId, px, py)
+        }
       })
     }
 
@@ -68,35 +67,42 @@ const ChatMessage: any = observer(
       if (onMessageLayout) onMessageLayout(event, message)
     }
 
-    // return <View/>
-
     if (!message) {
       return null
     }
 
     return (
-      <View
-        style={[
-          message.role === MessageRole.USER
-            ? styles.userMessage
-            : styles.aiMessage,
-        ]}
-        onLayout={handleInitialLayout}>
-        <ProfileRow
-          message={message}
-          initialLayout={initialLayout}
-          isActive={isActive}
-        />
-        <MainText message={message} initialLayout={initialLayout} />
-        {!message.deleted ? (
-          <DeleteButton
-            message={message}
-            initialLayout={initialLayout}
-            handleDeleteMessage={handleDeleteMessage}
-            isConfirming={isConfirming}
-          />
-        ) : null}
-      </View>
+      <TouchableWithoutFeedback onPress={() => {
+        chatStore.closeOptions()
+        chatStore.inputRef?.blur()
+      }}>
+        <View style={{alignSelf: 'stretch'}}>
+          <View
+            ref={messageRef}
+            style={[
+              message.role === MessageRole.USER
+                ? styles.userMessage
+                : styles.aiMessage,
+            ]}
+            onLayout={handleInitialLayout}>
+            <ProfileRow
+              message={message}
+              initialLayout={initialLayout}
+              isActive={isActive}
+              onPress={openOptions}
+            />
+            <MainText message={message} initialLayout={initialLayout} />
+            {!message.deleted ? (
+              <DeleteButton
+                message={message}
+                initialLayout={initialLayout}
+                handleDeleteMessage={handleDeleteMessage}
+                isConfirming={isConfirming}
+              />
+            ) : null}
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
     )
   },
 )
@@ -225,10 +231,12 @@ const ProfileRow: any = ({
   message,
   initialLayout,
   isActive,
+  onPress,
 }: {
   message: MessageSQL,
   initialLayout: any,
   isActive: boolean,
+  onPress: () => void,
 }) => {
   const [timeWidth, setTimeWidth] = useState(0)
   const handleTimeLayout = (event: any) => {
@@ -248,7 +256,7 @@ const ProfileRow: any = ({
           marginBottom: 9,
         },
       ]}
-      onPress={() => {}}>
+      onPress={onPress}>
       <ProfilePic message={message} isActive={isActive} />
       <Text
         style={{

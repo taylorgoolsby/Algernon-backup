@@ -44,8 +44,9 @@ import {
 import type {MessageSQL} from '../schema/Message/MessageSchema.mjs'
 import LongTermAnnotation from '../agent/LongTermAnnotation.js'
 import MessageList from './components/MessageList.js'
-import { useDebounce } from "use-debounce";
-import ListSlider from "./components/ListSlider.js";
+import {useDebounce} from 'use-debounce'
+import ListSlider from './components/ListSlider.js'
+import MessageOptions from './components/MessageOptions.js'
 
 const darkMode = Appearance.getColorScheme() === 'dark'
 
@@ -104,7 +105,10 @@ const ChatScreen: any = observer(({navigation}) => {
   }
 
   const canPost =
-    !!input.trim() && (displayedMessageIds[0] ? !!chatStore.messages[displayedMessageIds[0]].completed : true)
+    !!input.trim() &&
+    (displayedMessageIds[0]
+      ? !!chatStore.messages[displayedMessageIds[0]].completed
+      : true)
 
   // useEffect(() => {
   //   chatStore.onRenderDone()
@@ -229,6 +233,10 @@ const ChatScreen: any = observer(({navigation}) => {
 
   // Ref for the TextInput to call focus
   const inputRef = useRef(null)
+  const setInputRef = (ref: any) => {
+    inputRef.current = ref
+    chatStore.inputRef = ref
+  }
   const focusInput = () => {
     // $FlowFixMe
     inputRef.current.focus()
@@ -241,10 +249,16 @@ const ChatScreen: any = observer(({navigation}) => {
     setHeaderHeight(height)
   }
 
-  const [safeAreaHeight, setSafeAreaHeight] = useState(0)
-  const onLayoutSafeArea = (event: any) => {
+  const [innerHeaderHeight, setInnerHeaderHeight] = useState(0)
+  const onLayoutInnerHeader = (event: any) => {
     const {height} = event.nativeEvent.layout
-    setSafeAreaHeight(height)
+    setInnerHeaderHeight(height)
+  }
+
+  const [safeAreaFooterHeight, setSafeAreaFooterHeight] = useState(0)
+  const onLayoutSafeAreaFooter = (event: any) => {
+    const {height} = event.nativeEvent.layout
+    setSafeAreaFooterHeight(height)
   }
 
   const [footerHeight, setFooterHeight] = useState(0)
@@ -298,17 +312,12 @@ const ChatScreen: any = observer(({navigation}) => {
           searchResults={searchResults}
           headerHeight={headerHeight}
           footerHeight={footerHeight}
-          safeAreaFooterHeight={safeAreaHeight}
-          onEmptyAreaPress={() => {inputRef.current?.blur()}}
+          safeAreaFooterHeight={safeAreaFooterHeight}
+          onEmptyAreaPress={() => {
+            chatStore.showOptions = false
+            inputRef.current?.blur()
+          }}
         />
-        // <MessageList
-        //   messageIds={displayedMessageIds}
-        //   searchMode={searchMode}
-        //   searchResults={searchResults?.map(message => message.messageId.toString()) ?? []}
-        //   safeAreaFooterHeight={safeAreaHeight}
-        //   footerHeight={footerHeight}
-        //   headerHeight={headerHeight}
-        // />
       ) : null}
 
       <BlurView
@@ -324,14 +333,14 @@ const ChatScreen: any = observer(({navigation}) => {
               flexDirection: 'row',
               justifyContent: 'flex-end',
               flex: 1,
-            }}>
+            }}
+            onLayout={onLayoutInnerHeader}>
             <TouchableOpacity
               style={[styles.sendButton, {paddingRight: 24, opacity: 0}]}
               onPress={() => {
                 setShowFlipSide(!showFlipSide)
               }}
-              disabled={true}
-            >
+              disabled={true}>
               <Icon
                 // name={'analytics-outline'}
                 name={'layers-outline'}
@@ -416,7 +425,7 @@ const ChatScreen: any = observer(({navigation}) => {
           style={styles.footerBlur}
           blurType={Colors.chatFooterBlurType}
           blurAmount={70}
-          onLayout={onLayoutSafeArea}>
+          onLayout={onLayoutSafeAreaFooter}>
           <SafeAreaView style={styles.inputSafeArea}>
             <TouchableWithoutFeedback onPress={focusInput}>
               <View style={styles.inputBar} onLayout={onLayoutFooter}>
@@ -439,26 +448,31 @@ const ChatScreen: any = observer(({navigation}) => {
                     style={{marginLeft: !!input && !searchMode ? 0 : -1}}
                     color={clearColor.interpolate({
                       inputRange: [0, 1],
-                      outputRange: [footerInactive, searchMode ? searchActive : footerActive],
+                      outputRange: [
+                        footerInactive,
+                        searchMode ? searchActive : footerActive,
+                      ],
                     })}
                   />
                 </TouchableOpacity>
                 {/*$FlowFixMe*/}
                 <TextInput
-                  ref={inputRef}
+                  ref={setInputRef}
                   style={styles.input}
                   multiline
                   onFocus={onFocus}
                   onBlur={onBlur}
                   value={searchMode ? searchInput : input}
-                  onChangeText={searchMode ? onSearchInputValueChange : onInputValueChange}
+                  onChangeText={
+                    searchMode ? onSearchInputValueChange : onInputValueChange
+                  }
                   placeholder={searchMode ? 'Search' : 'Message'}
                   placeholderTextColor={Colors.sendIconDisabledBg}
                 />
                 <TouchableOpacity
                   style={styles.sendButton}
                   onPress={
-                    input.trim() && !isRecording || searchMode
+                    (input.trim() && !isRecording) || searchMode
                       ? submit
                       : isRecording
                       ? stopSpeechToText
@@ -467,7 +481,7 @@ const ChatScreen: any = observer(({navigation}) => {
                   disabled={!!input.trim() && !isRecording && !canPost}>
                   <AnimatedIcon
                     name={
-                      input.trim() && !isRecording || searchMode
+                      (input.trim() && !isRecording) || searchMode
                         ? 'arrow-up-circle'
                         : isRecording
                         ? 'stop-circle'
@@ -527,11 +541,20 @@ const ChatScreen: any = observer(({navigation}) => {
               style={{
                 transform: [{scale: 1}],
               }}>
-              <ProfilePic message={chatStore.messages[displayedMessageIds[0]]} noBorder tenX />
+              <ProfilePic
+                message={chatStore.messages[displayedMessageIds[0]]}
+                noBorder
+                tenX
+              />
             </View>
           </View>
         </View>
       ) : null}
+
+      <MessageOptions
+        headerHeight={headerHeight - innerHeaderHeight}
+        footerHeight={safeAreaFooterHeight - footerHeight}
+      />
     </View>
   )
 })
