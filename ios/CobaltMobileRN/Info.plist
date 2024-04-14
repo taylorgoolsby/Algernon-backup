@@ -52,6 +52,7 @@
 		<string>DMMono-Light.ttf</string>
 		<string>Poppins-Light.ttf</string>
 		<string>Figtree-VariableFont_wght.ttf</string>
+		<string>PTMono-Regular.ttf</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen.storyboard</string>

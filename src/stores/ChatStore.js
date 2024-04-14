@@ -35,20 +35,21 @@ export class ChatStore {
 
   inputRef: ?HTMLInputElement = null
 
-  showOptions: boolean = false
-  optionsMessageId: ?number = null
-  optionsMeasure: {x: number, y: number} = {x: 0, y: 0}
+  optionsMessageIds: Array<number> = []
+  optionsMessageIdFadeOuts: {[string]: boolean} = {}
+  optionsMeasures: {[string]: {x: number, y: number, width: number, height: number}} = {}
 
   constructor() {
     makeObservable(this, {
       loaded: observable,
       messages: observable,
       displayedMessageIds: observable,
-      showOptions: observable,
-      optionsMessageId: observable,
-      optionsMeasure: observable,
+      optionsMessageIds: observable,
+      optionsMeasures: observable,
+      optionsMessageIdFadeOuts: observable,
       openOptions: action.bound,
       closeOptions: action.bound,
+      closeAllOptions: action.bound
     })
 
     this.fetchEarlierMessages = debounce(this.fetchEarlierMessages, 250, {leading: true, trailing: false}).bind(this)
@@ -138,15 +139,31 @@ export class ChatStore {
   }
 
 
-  openOptions: (number, number, number) => void = (messageId: number, x: number, y: number) => {
-    this.showOptions = true
-    this.optionsMeasure = {x, y}
-    this.optionsMessageId = messageId
+  openOptions: (number, number, number, number, number) => void = (messageId: number, x: number, y: number, width: number, height: number) => {
+    this.optionsMessageIds.push(messageId)
+    this.optionsMeasures[messageId.toString()] = {x, y, width, height}
+    delete this.optionsMessageIdFadeOuts[messageId.toString()]
   }
 
-  closeOptions: () => void = () => {
-    this.showOptions = false
-    this.optionsMessageId = null
+  closeOptions: (number) => void = (messageId: number) => {
+    this.startOptionFadeOut(messageId)
+  }
+
+  closeAllOptions: () => void = () => {
+    for (const messageId of this.optionsMessageIds) {
+      this.startOptionFadeOut(messageId)
+    }
+  }
+
+  startOptionFadeOut: (string | number) => void = (messageId: string | number) => {
+    // The option remains in this.optionMessageIds in order to preserve order.
+    this.optionsMessageIdFadeOuts[messageId.toString()] = true
+  }
+
+  onOptionFadeOut: (number) => void = (messageId: number) => {
+    this.optionsMessageIds = this.optionsMessageIds.filter(id => id !== messageId)
+    delete this.optionsMeasures[messageId.toString()]
+    delete this.optionsMessageIdFadeOuts[messageId.toString()]
   }
 }
 

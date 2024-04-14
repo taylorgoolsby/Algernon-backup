@@ -9,12 +9,12 @@ import Colors, {
   aiChat,
   aiText,
   aiText2,
-  aiText2Active,
+  aiText2Active, darkMode,
   userChat,
   userText,
   userText2,
   userText2Active,
-} from '../../Colors.js'
+} from "../../Colors.js";
 import Text from './Text.js'
 import MarkdownText from './MarkdownText.js'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -22,19 +22,24 @@ import modalStore from '../../stores/ModalStore.js'
 import chatStore from '../../stores/ChatStore.js'
 import ProfilePic from './ProfilePic.js'
 import {observer} from 'mobx-react'
+import { BlurView } from "@react-native-community/blur";
 
 export const margin = 12
 
-const ChatMessage: any = observer(
+type ChatMessageProps = {
+  messageId: string,
+  isActive: boolean,
+  onMessageLayout: (any, MessageSQL) => void,
+  isOptionActive?: ?boolean,
+}
+
+const ChatMessage: (ChatMessageProps) => any = observer(
   ({
     messageId,
     isActive,
     onMessageLayout,
-  }: {
-    messageId: string,
-    isActive: boolean,
-    onMessageLayout: (any, MessageSQL) => void,
-  }): any => {
+    isOptionActive,
+  }: ChatMessageProps): any => {
     const message = chatStore.messages[messageId]
 
     const messageRef = useRef<any>(null)
@@ -51,10 +56,11 @@ const ChatMessage: any = observer(
 
     function openOptions() {
       messageRef?.current?.measure((fx, fy, width, height, px, py) => {
-        if (chatStore.optionsMessageId === message.messageId) {
-          chatStore.closeOptions()
+        if (chatStore.optionsMessageIds.includes(message.messageId)) {
+          chatStore.closeOptions(message.messageId)
         } else {
-          chatStore.openOptions(message.messageId, px, py)
+          // $FlowFixMe
+          chatStore.openOptions(message.messageId, px, py, width, height)
         }
       })
     }
@@ -73,7 +79,7 @@ const ChatMessage: any = observer(
 
     return (
       <TouchableWithoutFeedback onPress={() => {
-        chatStore.closeOptions()
+        // chatStore.closeOptions()
         chatStore.inputRef?.blur()
       }}>
         <View style={{alignSelf: 'stretch'}}>
@@ -83,8 +89,14 @@ const ChatMessage: any = observer(
               message.role === MessageRole.USER
                 ? styles.userMessage
                 : styles.aiMessage,
+              isOptionActive ? {backgroundColor: message.role === MessageRole.USER  ? 'rgba(112, 163, 255, 0.5)' : 'rgba(255, 255, 255, 0)'} : {}
             ]}
             onLayout={handleInitialLayout}>
+            {isOptionActive ? <BlurView
+              style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+              blurType={darkMode ? 'dark' : 'light'}
+              blurAmount={70}/> : null}
+
             <ProfileRow
               message={message}
               initialLayout={initialLayout}
@@ -288,20 +300,22 @@ const styles = StyleSheet.create({
     backgroundColor: userChat,
     borderRadius: 24,
     minWidth: 40,
-    marginTop: margin,
-    marginBottom: margin,
-    marginLeft: 20,
-    marginRight: 17,
+    // marginTop: margin,
+    // marginBottom: margin,
+    // marginLeft: 20,
+    // marginRight: 17,
+    overflow: 'hidden',
   },
   aiMessage: {
     alignSelf: 'stretch',
     backgroundColor: aiChat,
     borderRadius: 24,
     minWidth: 40,
-    marginTop: margin,
-    marginBottom: margin,
-    marginLeft: 18,
-    marginRight: 17,
+    // marginTop: margin,
+    // marginBottom: margin,
+    // marginLeft: 18,
+    // marginRight: 17,
+    overflow: 'hidden',
   },
   singleLineMessage: {
     paddingTop: 10,

@@ -10,7 +10,7 @@ import {
   Animated,
   Dimensions,
 } from 'react-native'
-import ChatMessage from './ChatMessage.js'
+import ChatMessage, { margin } from "./ChatMessage.js";
 import type {MessageSQL} from '../../schema/Message/MessageSchema.mjs'
 import chatStore from "../../stores/ChatStore.js";
 
@@ -151,6 +151,8 @@ const MessageList = ({
       style={{
         flex: 1,
         opacity: opacityAnim,
+        // paddingLeft: 18,
+        // paddingRight: 17,
       }}>
       <KeyboardAvoidingView
         style={{
@@ -174,6 +176,8 @@ const MessageList = ({
           automaticallyAdjustsScrollIndicatorInsets={false}
           ListFooterComponent={<View style={{height: paddingFooter}} />}
           contentContainerStyle={{
+            paddingLeft: 18,
+            paddingRight: 17,
             paddingTop: paddingHeader,
             // paddingBottom: paddingFooter,
           }}
@@ -183,6 +187,7 @@ const MessageList = ({
           }}
           data={messageIds}
           keyExtractor={messageId => messageId}
+          ItemSeparatorComponent={() => <View style={{height: margin * 2}} />}
           renderItem={item => {
             const messageId = item.item
             return (

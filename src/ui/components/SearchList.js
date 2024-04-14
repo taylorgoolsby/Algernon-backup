@@ -9,7 +9,7 @@ import {
   Platform,
   Animated,
 } from 'react-native'
-import ChatMessage from './ChatMessage.js'
+import ChatMessage, { margin } from "./ChatMessage.js";
 import type {MessageSQL} from '../../schema/Message/MessageSchema.mjs'
 
 /*
@@ -169,6 +169,8 @@ const SearchList = ({
           automaticallyAdjustsScrollIndicatorInsets={false}
           ListFooterComponent={<View style={{height: paddingFooter}} />}
           contentContainerStyle={{
+            paddingLeft: 18,
+            paddingRight: 17,
             paddingTop: paddingHeader,
             // paddingBottom: paddingFooter,
           }}
@@ -178,6 +180,7 @@ const SearchList = ({
           }}
           data={messageIds}
           keyExtractor={messageId => messageId}
+          ItemSeparatorComponent={() => <View style={{height: margin * 2}} />}
           renderItem={item => {
             const messageId = item.item
             return (

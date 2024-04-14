@@ -314,7 +314,7 @@ const ChatScreen: any = observer(({navigation}) => {
           footerHeight={footerHeight}
           safeAreaFooterHeight={safeAreaFooterHeight}
           onEmptyAreaPress={() => {
-            chatStore.showOptions = false
+            chatStore.closeAllOptions()
             inputRef.current?.blur()
           }}
         />
@@ -527,34 +527,27 @@ const ChatScreen: any = observer(({navigation}) => {
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-          <View
-            style={
-              {
-                // width: 300,
-                // height: 300,
-                // borderRadius: 140,
-                // borderWidth: 0,
-                // borderColor: Colors.blue,
-              }
-            }>
-            <View
-              style={{
-                transform: [{scale: 1}],
-              }}>
-              <ProfilePic
-                message={chatStore.messages[displayedMessageIds[0]]}
-                noBorder
-                tenX
-              />
-            </View>
-          </View>
+          <ProfilePic
+            message={chatStore.messages[displayedMessageIds[0]]}
+            noBorder
+            tenX
+          />
         </View>
       ) : null}
 
-      <MessageOptions
-        headerHeight={headerHeight - innerHeaderHeight}
-        footerHeight={safeAreaFooterHeight - footerHeight}
-      />
+      {chatStore.optionsMessageIds.map((messageId, i) => {
+        return (
+          <MessageOptions
+            key={messageId}
+            style={{
+              zIndex: 500 - i - 1
+            }}
+            messageId={messageId}
+            headerHeight={headerHeight - innerHeaderHeight}
+            footerHeight={safeAreaFooterHeight - footerHeight}
+          />
+        )
+      })}
     </View>
   )
 })
@@ -601,6 +594,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    zIndex: 500,
   },
   footerBlur: {
     flex: 1,
