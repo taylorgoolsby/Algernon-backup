@@ -132,14 +132,14 @@ const MarkdownText = (props: any): any => {
     }
   }, [children])
 
-  function getMargins(children: Array<any>): Array<{[string]: number}> {
+  function getMargins(children: Array<any>, parentType: any): Array<{[string]: number}> {
     return children.map((child, index) => {
       const isFirst = index === 0
       const isLast = index === compiledChildren.length - 1
 
       let result: {[string]: number} = {}
 
-      if (child.type === P || child.type === UL || child.type === OL) {
+      if ((child.type === P || child.type === UL || child.type === OL)) {
         result = {
           marginTop: isFirst ? 0 : (Colors.fontSize * 1.5) / 2,
           marginBottom: isLast ? 0 : (Colors.fontSize * 1.5) / 2,
@@ -151,6 +151,10 @@ const MarkdownText = (props: any): any => {
         result.marginTop = 0
       }
 
+      // if ((child.type === P || child.type === UL || child.type === OL) && parentType === LI) {
+      //   result.marginBottom = 0
+      // }
+
       return result
     })
   }
@@ -160,7 +164,7 @@ const MarkdownText = (props: any): any => {
   }
 
   function renderChildren(children: Array<any>, parentDisplayType: any, parentActualType: any): Array<any> {
-    const margins = getMargins(children)
+    const margins = getMargins(children, parentActualType)
 
     return children.map((child, index) => {
       if (typeof child === 'string') {
@@ -178,7 +182,7 @@ const MarkdownText = (props: any): any => {
                   ? {
                     fontFamily: 'DM Mono',
                     fontSize: 14,
-                    fontWeight: 400,
+                    fontWeight: '400',
                     letterSpacing: 0.0,
                   }
                   : {},
@@ -203,7 +207,7 @@ const MarkdownText = (props: any): any => {
                 fontWeight: '700',
               },
             ]}>
-            {renderChildren(child.props.children, Text)}
+            {renderChildren(child.props.children, Text, child.type)}
           </Text>
         )
       }
@@ -222,7 +226,7 @@ const MarkdownText = (props: any): any => {
                 fontWeight: '700',
               },
             ]}>
-            {renderChildren(child.props.children, Text)}
+            {renderChildren(child.props.children, Text, child.type)}
           </Text>
         )
       }
@@ -241,7 +245,7 @@ const MarkdownText = (props: any): any => {
                 fontWeight: '600',
               },
             ]}>
-            {renderChildren(child.props.children, Text)}
+            {renderChildren(child.props.children, Text, child.type)}
           </Text>
         )
       }
@@ -256,18 +260,18 @@ const MarkdownText = (props: any): any => {
               style={{
                 ...margins[index], // Text inside of Text does not support margin.
               }}>
-              {renderChildren(child.props.children, Text)}
+              {renderChildren(child.props.children, Text, child.type)}
             </Text>
           )
         } else {
           return (
             <Text
               key={index}
-              selectable
               style={{
                 ...margins[index],
+                flexDirection: 'row'
               }}>
-              {renderChildren(child.props.children, Text)}
+              {renderChildren(child.props.children, Text, child.type)}
             </Text>
           )
         }
@@ -287,10 +291,10 @@ const MarkdownText = (props: any): any => {
 
       if (child.type === LI) {
         return (
-          <View key={index} style={[textStyle, {flexDirection: 'row'}]}>
-            {parentActualType === OL ? <Text selectable style={{top: -1, marginRight: 5}}>{`${index + 1}. `}</Text> : <Bullet />}
+          <View key={index} style={{...margins[index], flexDirection: 'row'}}>
+            {parentActualType === OL ? <Text selectable style={{top: -1, minWidth: 19}}>{`${index + 1}. `}</Text> : <Bullet />}
             <View style={{flex: 1}}>
-              {renderChildren(child.props.children, View)}
+              {renderChildren(child.props.children, View, child.type)}
             </View>
           </View>
         )
@@ -301,8 +305,8 @@ const MarkdownText = (props: any): any => {
           <Text
             key={index}
             selectable
-            style={[...textStyle, {...margins[index], fontWeight: 500}]}>
-            {renderChildren(child.props.children, Text)}
+            style={[...textStyle, {...margins[index], fontWeight: '500'}]}>
+            {renderChildren(child.props.children, Text, child.type)}
           </Text>
         )
       }
@@ -313,7 +317,7 @@ const MarkdownText = (props: any): any => {
             key={index}
             selectable
             style={[...textStyle, {...margins[index], color: Colors.blue}]}>
-            {renderChildren(child.props.children, Text)}
+            {renderChildren(child.props.children, Text, child.type)}
           </Text>
         )
       }
@@ -322,12 +326,14 @@ const MarkdownText = (props: any): any => {
         // todo: monospace font
         return (
           <Text key={index} selectable style={[...textStyle, {...margins[index]}]}>
-            {renderChildren(child.props.children, Text, Code)}
+            {renderChildren(child.props.children, Text, child.type)}
           </Text>
         )
       }
     })
   }
+
+  console.log("compiledChildren", compiledChildren);
 
   return (
     <View style={style} onLayout={onLayout}>

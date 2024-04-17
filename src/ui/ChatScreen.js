@@ -647,7 +647,7 @@ const styles = StyleSheet.create({
   },
   clearInputButton: {
     padding: 0,
-    paddingLeft: 25,
+    paddingLeft: 22,
     paddingRight: 7,
     alignSelf: 'stretch',
     justifyContent: 'center',
@@ -663,6 +663,7 @@ const styles = StyleSheet.create({
     letterSpacing: Colors.letterSpacing,
     fontSize: Colors.fontSize,
     fontFamily: Colors.fontFamily,
+    fontWeight: '300'
   },
   sendButton: {
     padding: 0,
