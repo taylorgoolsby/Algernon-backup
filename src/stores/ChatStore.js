@@ -7,9 +7,23 @@ import type { UpdateMessageOutput } from "../types/UpdateMessageOutput.js";
 import MessageInterface from "../schema/Message/MessageInterface.js";
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import debounce from 'lodash.debounce'
+import Colors from "../Colors.js";
 
 const INITIAL_LIMIT = 12
 let limit = INITIAL_LIMIT
+
+type Orb = {
+  xPos: number,
+  yPos: number,
+  xVel: number,
+  yVel: number,
+  color: string,
+}
+
+type OrbSim = {
+  time: number,
+  points: Array<Orb>
+}
 
 /*
 
@@ -34,6 +48,8 @@ export class ChatStore {
   displayedMessageIds: Array<string> = []
 
   inputRef: ?HTMLInputElement = null
+
+  orbSims: {[messageId: string]: OrbSim} = {}
 
   // All items in optionsMessageIds hover, but only the optionsTarget has the options menu.
   optionsMessageIds: Array<number> = []
@@ -151,6 +167,110 @@ export class ChatStore {
     this.messages[messageId.toString()] = message
   }
 
+  getOrCreateOrbSim: (number, ?boolean) => OrbSim = (messageId: number, tenX?: ?boolean): OrbSim => {
+    if (!this.orbSims[messageId.toString()]) {
+      const t = tenX ? 10 : 1
+
+      const r = 7 * t
+      const v = 5 * t
+      const m = Math.random()
+      const phase = Math.random() * 2 * Math.PI
+
+      this.orbSims[messageId.toString()] = {
+        time: Date.now(),
+        points: [
+          {
+            xPos: 0,
+            yPos: 0,
+            xVel: 0,
+            yVel: 0,
+            color: Colors.blue
+          },
+          {
+            xPos: r * Math.sin(Math.PI),
+            yPos: r * Math.cos(Math.PI),
+            xVel: v * Math.cos(Math.PI + phase),
+            yVel: -v * Math.sin(Math.PI + phase),
+            color: 'rgba(255, 186, 0, 0.9)'
+          },
+          {
+            xPos: 0.5 * r * Math.sin(m * 2 * Math.PI),
+            yPos: 0.5 * r * Math.cos(m * 2 * Math.PI),
+            xVel: (Math.random() - 0.5) * 2 * v,
+            yVel: (Math.random() - 0.5) * 2 * v,
+            color: 'rgb(215, 29, 29)'
+          },
+          {
+            xPos: r * Math.sin(2 * Math.PI),
+            yPos: r * Math.cos(2 * Math.PI),
+            xVel: v * Math.cos(2 * Math.PI + phase),
+            yVel: -v * Math.sin(2 * Math.PI + phase),
+            color: Colors.teal
+          },
+          {
+            xPos: 0,
+            yPos: 0,
+            xVel: 0,
+            yVel: 0,
+            color: Colors.blue
+          },
+        ]}
+    }
+    return this.orbSims[messageId.toString()]
+  }
+
+  updateOrbSim: (number, number) => void = (messageId: number, time: number) => {
+    const sim = this.getOrCreateOrbSim(messageId)
+
+    // Implement a simple spring force simulation on the dots:
+    // 1. Calculate the force on each dot
+    // 2. Update the velocity of each dot
+    // 3. Update the position of each dot
+    // 4. Repeat
+    const k = 0.1
+    const dt = (Math.min(time - sim.time, 1000) * 0.001) / 2
+    // const dt = 0
+    sim.time = time
+    const n = sim.points.length
+
+    for (let i = 0; i < n; i++) {
+      if (i === 0) {
+        // first point is fixed.
+        continue
+      }
+      for (let j = 0; j < n; j++) {
+        if (i === j) {
+          continue
+        }
+        const dx = sim.points[j].xPos - sim.points[i].xPos
+        const dy = sim.points[j].yPos - sim.points[i].yPos
+        const d = Math.sqrt(dx * dx + dy * dy)
+        if (d < 0.005) {
+          continue
+        }
+        const f = k * d
+        const fx = (f * dx) / d
+        const fy = (f * dy) / d
+        sim.points[i].xVel += fx * dt
+        sim.points[i].yVel += fy * dt
+        sim.points[i].xPos += sim.points[i].xVel * dt
+        sim.points[i].yPos += sim.points[i].yVel * dt
+
+        if (isNaN(sim.points[i].xVel)) {
+          sim.points[i].xVel = 0
+        }
+        if (isNaN(sim.points[i].yVel)) {
+          sim.points[i].yVel = 0
+        }
+        if (isNaN(sim.points[i].xPos)) {
+          sim.points[i].xPos = 0
+        }
+        if (isNaN(sim.points[i].yPos)) {
+          sim.points[i].yPos = 0
+        }
+      }
+    }
+  }
 
   openOptions: (number, number, number, number, number) => void = (messageId: number, x: number, y: number, width: number, height: number) => {
     this.optionsMessageIds.push(messageId)

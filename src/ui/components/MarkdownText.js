@@ -10,6 +10,7 @@ const Bullet = (props: any) => {
   return (
     <Text
       style={{
+        top: -2,
         marginRight: Colors.fontSize / 2,
         marginLeft: Colors.fontSize / 2,
         fontFamily: 'Verdana',
@@ -157,7 +158,7 @@ const MarkdownText = (props: any): any => {
     return <View style={style} onLayout={onLayout} />
   }
 
-  function renderChildren(children: Array<any>, parentType: any): Array<any> {
+  function renderChildren(children: Array<any>, displayType: any, actualType: any): Array<any> {
     const margins = getMargins(children)
 
     return children.map((child, index) => {
@@ -168,7 +169,7 @@ const MarkdownText = (props: any): any => {
             style={[
               ...textStyle,
               margins[index],
-              parentType === Code
+              displayType === Code
                 ? {
                     fontFamily: 'DM Mono',
                     fontSize: 14,
@@ -237,7 +238,7 @@ const MarkdownText = (props: any): any => {
       }
 
       if (child.type === P) {
-        if (parentType === Text) {
+        if (displayType === Text) {
           // a View cannot be placed inside of a Text
           return (
             <Text
@@ -268,17 +269,19 @@ const MarkdownText = (props: any): any => {
             style={{
               ...margins[index],
             }}>
-            {renderChildren(child.props.children, View)}
+            {renderChildren(child.props.children, View, child.type)}
           </View>
         )
       }
 
       if (child.type === LI) {
         return (
-          <Text key={index} style={textStyle}>
-            <Bullet />
-            {renderChildren(child.props.children, Text)}
-          </Text>
+          <View key={index} style={[textStyle, {flexDirection: 'row'}]}>
+            {actualType === OL ? <Text style={{top: -1}}>{`${index + 1}. `}</Text> : <Bullet />}
+            <View style={{flex: 1}}>
+              {renderChildren(child.props.children, View)}
+            </View>
+          </View>
         )
       }
 
@@ -312,8 +315,6 @@ const MarkdownText = (props: any): any => {
       }
     })
   }
-
-  // console.log("compiledChildren", compiledChildren);
 
   return (
     <View style={style} onLayout={onLayout}>
