@@ -12,11 +12,11 @@ import {
 import chatStore from '../../stores/ChatStore.js'
 import {observer} from 'mobx-react'
 import {BlurView} from '@react-native-community/blur'
-import Colors, {darkMode} from '../../Colors.js'
+import Colors, { darkMode, fadeTime, shadow } from "../../Colors.js";
 import {MessageRole} from '../../schema/Message/MessageSchema.mjs'
 import Text from './Text.js'
 import modalStore from '../../stores/ModalStore.js'
-import ChatMessage, {margin, profileRowHeight} from './ChatMessage.js'
+import ChatMessage, {margin, profileRowMinHeight} from './ChatMessage.js'
 
 // There is only one MessageOptions component open at a time.
 // It is positioned absolutely using the onLayout event of the ChatMessage component to
@@ -34,7 +34,7 @@ type MessageOptionsProps = {
   safeAreaFooterHeight: number,
 }
 
-const easingTime = 280
+const easingTime = fadeTime
 const screenHeight = Dimensions.get('window').height
 
 const MessageOptions: any = observer((props: MessageOptionsProps): any => {
@@ -118,7 +118,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
         let lowerBoundary = !previousMessageMeasure
           ? screenHeight - safeAreaFooterHeight
           : previousMessageTop
-        lowerBoundary += -profileRowHeight
+        lowerBoundary += -profileRowMinHeight
         const maxDy = lowerBoundary - startPanningTop.current
 
         if (gestureState.dy > maxDy) {
@@ -143,7 +143,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
         let lowerBoundary = !previousMessageMeasure
           ? screenHeight - safeAreaFooterHeight
           : previousMessageTop
-        lowerBoundary += -profileRowHeight
+        lowerBoundary += -profileRowMinHeight
         startPanningTop.current = Math.min(
           startPanningTop.current + gestureState.dy,
           lowerBoundary,
@@ -185,13 +185,13 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     if (isOptionTarget) {
       Animated.timing(backgroundColorAnim, {
         toValue: 1,
-        duration: 180,
+        duration: fadeTime,
         useNativeDriver: false,
       }).start()
     } else {
       Animated.timing(backgroundColorAnim, {
         toValue: 0,
-        duration: 180,
+        duration: fadeTime,
         useNativeDriver: false,
       }).start()
     }
@@ -231,11 +231,11 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
             },
             isUser
               ? {
-                  // left:
-                  //   (measure?.x ?? 0) +
-                  //   ((measure?.width ?? 0) - (layout?.width ?? 0)) -
-                  //   0,
-                left: (measure?.x ?? 0) + 0
+                  left:
+                    (measure?.x ?? 0) +
+                    ((measure?.width ?? 0) - (layout?.width ?? 0)) -
+                    0,
+                // left: (measure?.x ?? 0) + 0
                 }
               : {
                   // left:
@@ -245,13 +245,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
                   left: (measure?.x ?? 0) + 0
                 },
             style,
-            {
-              shadowColor: 'rgba(0, 0, 0, 0.2)',
-              shadowOffset: {width: 0, height: 1},
-              shadowOpacity: 0.5,
-              shadowRadius: 1,
-              elevation: 1,
-            },
+            shadow,
             {
               borderRadius: 24,
               backgroundColor: 'rgba(112, 163, 255, 0.5)',
@@ -304,13 +298,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
             zIndex: 500 - zIndexOffset
           },
           style,
-          {
-            shadowColor: 'rgba(0, 0, 0, 0.2)',
-            shadowOffset: {width: 0, height: 1},
-            shadowOpacity: 0.5,
-            shadowRadius: 1,
-            elevation: 1,
-          },
+          shadow,
         ]}
         onLayout={onLayout}
         {...panResponder.panHandlers}>

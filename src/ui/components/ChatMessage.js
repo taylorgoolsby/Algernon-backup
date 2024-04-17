@@ -17,12 +17,12 @@ import Colors, {
   aiText,
   aiText2,
   aiText2Active,
-  darkMode,
+  darkMode, fadeTime,
   userChat,
   userText,
   userText2,
   userText2Active,
-} from '../../Colors.js'
+} from "../../Colors.js";
 import Text from './Text.js'
 import MarkdownText from './MarkdownText.js'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -35,7 +35,7 @@ import {BlurView} from '@react-native-community/blur'
 export const leftMargin = 9
 export const rightMargin = 10
 export const margin = 12
-export const profileRowHeight = 42
+export const profileRowMinHeight = 38
 
 type ChatMessageProps = {
   messageId: string,
@@ -107,13 +107,13 @@ const ChatMessage: ChatMessageProps => any = observer(
       if (isOptionTarget || isOptionColorTarget) {
         Animated.timing(backgroundColorAnim, {
           toValue: 1,
-          duration: 120,
+          duration: fadeTime,
           useNativeDriver: false,
         }).start()
       } else {
         Animated.timing(backgroundColorAnim, {
           toValue: 0,
-          duration: 120,
+          duration: fadeTime,
           useNativeDriver: false,
         }).start()
       }
@@ -145,6 +145,9 @@ const ChatMessage: ChatMessageProps => any = observer(
                 }),
               }
               : null,
+            isFloating ? {
+              alignSelf: 'stretch',
+            } : null
           ]}
           onLayout={handleInitialLayout}>
           {isFloating ? (
@@ -357,10 +360,11 @@ const ProfileRow: any = ({
         {
           flexDirection: 'row',
           alignSelf: isUser ? 'flex-end' : 'flex-start',
-          //flexDirection: isUser ? 'row-reverse' : 'row',
+          flexDirection: isUser ? 'row-reverse' : 'row',
           marginLeft: 9,
           marginTop: 9,
           marginBottom: 9,
+          top: -1, left: 1, paddingRight: 1,
         },
       ]}
       onPress={onPress}>
@@ -378,7 +382,7 @@ const ProfileRow: any = ({
           fontSize: Colors.fontSize,
           fontWeight: '700'
         }}>
-        {message.role === MessageRole.USER ? 'Charlie' : 'Algernon'}
+        {message.role === MessageRole.USER ? 'Taylor G' : 'Flow'}
       </Text>
       {/*{!initialLayout || message.deleted ? (*/}
       {/*  <View style={{width: profileRowHeight, hieght: profileRowHeight}} />*/}

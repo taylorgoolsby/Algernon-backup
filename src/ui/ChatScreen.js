@@ -30,8 +30,8 @@ import Colors, {
   footerInactive,
   headerLeft,
   headerRight,
-  searchActive,
-} from '../Colors.js'
+  searchActive, shadow,
+} from "../Colors.js";
 import modalStore from '../stores/ModalStore.js'
 import Voice from '@react-native-voice/voice'
 import {
@@ -417,7 +417,7 @@ const ChatScreen: any = observer(({navigation}) => {
       </Modal>
 
       <KeyboardAvoidingView
-        style={styles.footer}
+        style={[styles.footer, shadow]}
         behavior={Platform.OS === 'ios' ? 'position' : null}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} //
       >

@@ -12,6 +12,16 @@ const red = 'rgb(215, 29, 29)'
 const green = 'rgb(85, 191, 106)'
 const white = 'white'
 
+export const fadeTime: number = 100
+
+export const shadow: {...} = {
+  shadowColor: darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
+  shadowOffset: {width: 0, height: darkMode ? -1 : 1},
+  shadowOpacity: 0.5,
+  shadowRadius: 1,
+  elevation: 1,
+}
+
 export const headerLeft: string = darkMode ? 'rgba(255, 255, 255, 0.99)' : 'rgba(0, 0, 0, 0.75)' //blue
 export const headerRight: string = darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.53)' // opacity=0.3
 export const userChat: string = blue

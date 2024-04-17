@@ -11,7 +11,7 @@ import {
   Dimensions,
   PanResponder
 } from 'react-native'
-import ChatMessage, { leftMargin, margin, profileRowHeight, rightMargin } from "./ChatMessage.js";
+import ChatMessage, { leftMargin, margin, profileRowMinHeight, rightMargin } from "./ChatMessage.js";
 import type {MessageSQL} from '../../schema/Message/MessageSchema.mjs'
 import chatStore from "../../stores/ChatStore.js";
 
