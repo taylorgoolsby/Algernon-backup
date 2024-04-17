@@ -74,6 +74,7 @@ const ChatMessage: ChatMessageProps => any = observer(
               : null
           ) {
             chatStore.setOptionsTarget(message.messageId)
+            chatStore.setOptionsColorTarget(message.messageId)
           } else {
             chatStore.closeOptions(message.messageId)
           }
@@ -93,10 +94,11 @@ const ChatMessage: ChatMessageProps => any = observer(
     }
 
     const isOptionTarget = chatStore.optionsTarget === message?.messageId
+    const isOptionColorTarget = chatStore.optionsColorTarget === message?.messageId
 
     const backgroundColorAnim = useRef(new Animated.Value(0)).current
     useEffect(() => {
-      if (isOptionTarget) {
+      if (isOptionTarget || isOptionColorTarget) {
         Animated.timing(backgroundColorAnim, {
           toValue: 1,
           duration: 120,
@@ -109,7 +111,7 @@ const ChatMessage: ChatMessageProps => any = observer(
           useNativeDriver: false,
         }).start()
       }
-    }, [isOptionTarget])
+    }, [isOptionTarget, isOptionColorTarget])
 
     if (!message) {
       return null
@@ -184,6 +186,7 @@ const ChatMessage: ChatMessageProps => any = observer(
             // chatStore.closeOptions()
             chatStore.inputRef?.blur()
             chatStore.deselectOptionsTarget()
+            chatStore.deselectOptionsColorTarget()
           }}
         >
           {body}

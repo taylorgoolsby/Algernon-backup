@@ -100,7 +100,8 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
       onStartShouldSetPanResponder: () => true,
       onPanResponderGrant: (e, gestureState) => {
         // startPanningTop.current = (measure?.y ?? 0) + lastPanY.current
-        chatStore.setOptionsTarget(messageId)
+        chatStore.deselectOptionsTarget()
+        chatStore.setOptionsColorTarget(messageId)
       },
       onPanResponderMove: (e, gestureState) => {
         const previousMessageId =

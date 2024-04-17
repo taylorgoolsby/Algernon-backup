@@ -198,6 +198,7 @@ const MessageList = ({
           scrollsToTop={false}
           onScrollBeginDrag={() => {
             chatStore.deselectOptionsTarget()
+            chatStore.deselectOptionsColorTarget()
           }}
           onScroll={onScroll}
           onContentSizeChange={onContentSizeChange}
