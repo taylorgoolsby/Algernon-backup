@@ -18,7 +18,7 @@ import {
 } from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Text from './components/Text.js'
-import ChatMessage from './components/ChatMessage.js'
+import ChatMessage, { leftMargin, rightMargin } from "./components/ChatMessage.js";
 import ProfilePic from './components/ProfilePic.js'
 import ChatIteration from '../agent/ChatIteration.js'
 import {observer} from 'mobx-react'
@@ -358,13 +358,13 @@ const ChatScreen: any = observer(({navigation}) => {
           position: 'absolute',
           top: 0,
           left: 0,
-          zIndex: 2,
+          zIndex: 502,
         }}>
         <SafeAreaView>
           <TouchableOpacity
             style={{
               // paddingLeft: 22,
-              paddingLeft: 30,
+              paddingLeft: leftMargin + 18,
               paddingBottom: 12,
               paddingRight: 30,
             }}
@@ -588,7 +588,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    zIndex: 1,
+    zIndex: 500,
   },
   footer: {
     position: 'absolute',
@@ -647,7 +647,7 @@ const styles = StyleSheet.create({
   },
   clearInputButton: {
     padding: 0,
-    paddingLeft: 22,
+    paddingLeft: leftMargin + 12,
     paddingRight: 7,
     alignSelf: 'stretch',
     justifyContent: 'center',
@@ -667,7 +667,7 @@ const styles = StyleSheet.create({
   },
   sendButton: {
     padding: 0,
-    paddingRight: 21,
+    paddingRight: rightMargin + 5,
     minWidth: 28,
     alignSelf: 'stretch',
     justifyContent: 'center',

@@ -11,7 +11,7 @@ import {
   Dimensions,
   PanResponder
 } from 'react-native'
-import ChatMessage, { margin, profileRowHeight } from "./ChatMessage.js";
+import ChatMessage, { leftMargin, margin, profileRowHeight, rightMargin } from "./ChatMessage.js";
 import type {MessageSQL} from '../../schema/Message/MessageSchema.mjs'
 import chatStore from "../../stores/ChatStore.js";
 
@@ -207,8 +207,8 @@ const MessageList = ({
           automaticallyAdjustsScrollIndicatorInsets={false}
           ListFooterComponent={<View style={{height: paddingFooter}} />}
           contentContainerStyle={{
-            paddingLeft: 18,
-            paddingRight: 17,
+            paddingLeft: leftMargin + 8,
+            paddingRight: rightMargin,
             paddingTop: paddingHeader,
             // paddingBottom: paddingFooter,
           }}

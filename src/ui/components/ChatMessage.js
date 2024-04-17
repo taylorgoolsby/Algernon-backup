@@ -32,6 +32,8 @@ import ProfilePic from './ProfilePic.js'
 import {observer} from 'mobx-react'
 import {BlurView} from '@react-native-community/blur'
 
+export const leftMargin = 9
+export const rightMargin = 10
 export const margin = 12
 export const profileRowHeight = 42
 
@@ -150,7 +152,7 @@ const ChatMessage: ChatMessageProps => any = observer(
                 right: 0,
                 bottom: 0,
               }}
-              blurType={darkMode ? 'light' : 'light'}
+              blurType={darkMode ? 'dark' : 'light'}
               blurAmount={70}
             />
           ) : null}
@@ -422,11 +424,11 @@ const styles = StyleSheet.create({
   },
   userMessageWrap: {
     marginLeft: 11,
-    marginRight: 10,
+    marginRight: 9,
   },
   aiMessageWrap: {
     marginLeft: 11,
-    marginRight: 9,
+    marginRight: 8,
   },
   userMessageText: {
     color: userText,
