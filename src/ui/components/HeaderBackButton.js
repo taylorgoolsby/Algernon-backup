@@ -15,7 +15,7 @@ const HeaderBackButton = (): any => {
       style={styles.button}
       onPress={() => navigation.goBack()}
     >
-      <Icon style={styles.icon} name="chevron-back-outline" size={24} color={Colors.settingsText} />
+      <Icon style={styles.icon} name="chevron-back-outline" size={22} color={Colors.settingsText} />
       <Text style={styles.text}>Back</Text>
     </TouchableOpacity>
   );
@@ -26,12 +26,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     // marginLeft: 10,
-    transform: [{translateY: 0}],
+    transform: [{translateY: 1.5}],
   },
   text: {
     marginLeft: 5,
     color: Colors.settingsText,
-    fontSize: Colors.fontSize * 18/16
+    fontSize: Colors.fontSize
   },
 });
 

@@ -131,7 +131,8 @@ const AppNavigator: any = withIAPContext(
           <Stack.Navigator screenOptions={{
             headerTitleStyle: {
               fontFamily: Colors.fontFamily,
-              fontSize: Colors.fontSize * 18/16,
+              fontSize: Colors.fontSize,
+              fontWeight: '700',
             },
             headerLeft: HeaderBackButton
           }}>

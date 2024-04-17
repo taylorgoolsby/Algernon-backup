@@ -30,6 +30,10 @@
 		8C9AAF8D2BAB2B4100FF60EF /* NativeTokenizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C9AAF8C2BAB2B4100FF60EF /* NativeTokenizer.m */; };
 		8C9AAF8F2BAB2C7300FF60EF /* NativeTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C9AAF8E2BAB2C7300FF60EF /* NativeTokenizer.swift */; };
 		8CA26A152BCF9B33009563A5 /* Poppins-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CA26A142BCF9B33009563A5 /* Poppins-Medium.ttf */; };
+		8CA26A172BCFA34C009563A5 /* Poppins-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CA26A162BCFA34C009563A5 /* Poppins-Regular.ttf */; };
+		8CA26A1A2BCFA3EA009563A5 /* Poppins-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CA26A182BCFA3EA009563A5 /* Poppins-Black.ttf */; };
+		8CA26A1B2BCFA3EA009563A5 /* Poppins-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CA26A192BCFA3EA009563A5 /* Poppins-Bold.ttf */; };
+		8CA26A1D2BCFA4BC009563A5 /* Poppins-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CA26A1C2BCFA4BC009563A5 /* Poppins-ExtraBold.ttf */; };
 		8CACCE4F2BA29DD2004643C2 /* Evaluate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE472BA29DD2004643C2 /* Evaluate.swift */; };
 		8CACCE502BA29DD2004643C2 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE482BA29DD2004643C2 /* Configuration.swift */; };
 		8CACCE512BA29DD2004643C2 /* Load.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE4A2BA29DD2004643C2 /* Load.swift */; };
@@ -101,6 +105,10 @@
 		8C9AAF8C2BAB2B4100FF60EF /* NativeTokenizer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NativeTokenizer.m; sourceTree = "<group>"; };
 		8C9AAF8E2BAB2C7300FF60EF /* NativeTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeTokenizer.swift; sourceTree = "<group>"; };
 		8CA26A142BCF9B33009563A5 /* Poppins-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Poppins-Medium.ttf"; path = "../../assets/fonts/Poppins-Medium.ttf"; sourceTree = "<group>"; };
+		8CA26A162BCFA34C009563A5 /* Poppins-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Poppins-Regular.ttf"; path = "../../assets/fonts/Poppins-Regular.ttf"; sourceTree = "<group>"; };
+		8CA26A182BCFA3EA009563A5 /* Poppins-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Poppins-Black.ttf"; path = "../../assets/fonts/Poppins-Black.ttf"; sourceTree = "<group>"; };
+		8CA26A192BCFA3EA009563A5 /* Poppins-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Poppins-Bold.ttf"; path = "../../assets/fonts/Poppins-Bold.ttf"; sourceTree = "<group>"; };
+		8CA26A1C2BCFA4BC009563A5 /* Poppins-ExtraBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Poppins-ExtraBold.ttf"; path = "../../assets/fonts/Poppins-ExtraBold.ttf"; sourceTree = "<group>"; };
 		8CACCE472BA29DD2004643C2 /* Evaluate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Evaluate.swift; sourceTree = "<group>"; };
 		8CACCE482BA29DD2004643C2 /* Configuration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		8CACCE4A2BA29DD2004643C2 /* Load.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Load.swift; sourceTree = "<group>"; };
@@ -252,6 +260,10 @@
 				8CFAFCF92BC854FF00AF4869 /* DMMono-Light.ttf */,
 				8CFAFCFA2BC854FF00AF4869 /* Poppins-Light.ttf */,
 				8CA26A142BCF9B33009563A5 /* Poppins-Medium.ttf */,
+				8CA26A162BCFA34C009563A5 /* Poppins-Regular.ttf */,
+				8CA26A1C2BCFA4BC009563A5 /* Poppins-ExtraBold.ttf */,
+				8CA26A182BCFA3EA009563A5 /* Poppins-Black.ttf */,
+				8CA26A192BCFA3EA009563A5 /* Poppins-Bold.ttf */,
 				8CC308292BB378F800D70C69 /* Nunito-VariableFont_wght.ttf */,
 				8CFAFD0E2BC86BB800AF4869 /* Figtree-VariableFont_wght.ttf */,
 				8C99CED82BACA4E600400086 /* Ionicons.ttf */,
@@ -418,13 +430,17 @@
 			files = (
 				8C33BC392BA42DD40023A2D9 /* MiniLM-vocab.txt in Resources */,
 				8CA26A152BCF9B33009563A5 /* Poppins-Medium.ttf in Resources */,
+				8CA26A172BCFA34C009563A5 /* Poppins-Regular.ttf in Resources */,
 				8CFAFD0C2BC854FF00AF4869 /* Poppins-Light.ttf in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				8CC3082D2BB378F900D70C69 /* Nunito-VariableFont_wght.ttf in Resources */,
 				8CFAFD0B2BC854FF00AF4869 /* DMMono-Light.ttf in Resources */,
+				8CA26A1B2BCFA3EA009563A5 /* Poppins-Bold.ttf in Resources */,
 				8C99CED92BACA4E600400086 /* Ionicons.ttf in Resources */,
 				8C022CE02BB5D67900CBB95A /* SyncedProducts.storekit in Resources */,
 				8C097E672BB19BE70078CE31 /* CodeGen-vocab.json in Resources */,
+				8CA26A1A2BCFA3EA009563A5 /* Poppins-Black.ttf in Resources */,
+				8CA26A1D2BCFA4BC009563A5 /* Poppins-ExtraBold.ttf in Resources */,
 				8CFAFD0F2BC86BB800AF4869 /* Figtree-VariableFont_wght.ttf in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				8C097E662BB19BE70078CE31 /* CodeGen-merges.txt in Resources */,
