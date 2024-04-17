@@ -9,6 +9,7 @@ import Colors from '../../Colors.js'
 const Bullet = (props: any) => {
   return (
     <Text
+      selectable
       style={{
         top: -2,
         marginRight: Colors.fontSize / 2,
@@ -158,35 +159,41 @@ const MarkdownText = (props: any): any => {
     return <View style={style} onLayout={onLayout} />
   }
 
-  function renderChildren(children: Array<any>, displayType: any, actualType: any): Array<any> {
+  function renderChildren(children: Array<any>, parentDisplayType: any, parentActualType: any): Array<any> {
     const margins = getMargins(children)
 
     return children.map((child, index) => {
       if (typeof child === 'string') {
-        return (
-          <Text
-            key={index}
-            style={[
-              ...textStyle,
-              margins[index],
-              displayType === Code
-                ? {
+        if (parentDisplayType === Text) {
+          return child
+        } else {
+          return (
+            <Text
+              key={index}
+              selectable
+              style={[
+                ...textStyle,
+                margins[index],
+                parentActualType === Code
+                  ? {
                     fontFamily: 'DM Mono',
                     fontSize: 14,
                     fontWeight: 400,
                     letterSpacing: 0.0,
                   }
-                : {},
-            ]}>
-            {child}
-          </Text>
-        )
+                  : {},
+              ]}>
+              {child}
+            </Text>
+          )
+        }
       }
 
       if (child.type === H1) {
         return (
           <Text
             key={index}
+            selectable
             style={[
               ...textStyle,
               {
@@ -205,6 +212,7 @@ const MarkdownText = (props: any): any => {
         return (
           <Text
             key={index}
+            selectable
             style={[
               ...textStyle,
               {
@@ -223,6 +231,7 @@ const MarkdownText = (props: any): any => {
         return (
           <Text
             key={index}
+            selectable
             style={[
               ...textStyle,
               {
@@ -238,11 +247,12 @@ const MarkdownText = (props: any): any => {
       }
 
       if (child.type === P) {
-        if (displayType === Text) {
+        if (parentDisplayType === Text) {
           // a View cannot be placed inside of a Text
           return (
             <Text
               key={index}
+              selectable
               style={{
                 ...margins[index], // Text inside of Text does not support margin.
               }}>
@@ -253,6 +263,7 @@ const MarkdownText = (props: any): any => {
           return (
             <Text
               key={index}
+              selectable
               style={{
                 ...margins[index],
               }}>
@@ -277,7 +288,7 @@ const MarkdownText = (props: any): any => {
       if (child.type === LI) {
         return (
           <View key={index} style={[textStyle, {flexDirection: 'row'}]}>
-            {actualType === OL ? <Text style={{top: -1}}>{`${index + 1}. `}</Text> : <Bullet />}
+            {parentActualType === OL ? <Text selectable style={{top: -1, marginRight: 5}}>{`${index + 1}. `}</Text> : <Bullet />}
             <View style={{flex: 1}}>
               {renderChildren(child.props.children, View)}
             </View>
@@ -289,7 +300,8 @@ const MarkdownText = (props: any): any => {
         return (
           <Text
             key={index}
-            style={[...textStyle, {...margins[index], fontWeight: 600}]}>
+            selectable
+            style={[...textStyle, {...margins[index], fontWeight: 500}]}>
             {renderChildren(child.props.children, Text)}
           </Text>
         )
@@ -299,6 +311,7 @@ const MarkdownText = (props: any): any => {
         return (
           <Text
             key={index}
+            selectable
             style={[...textStyle, {...margins[index], color: Colors.blue}]}>
             {renderChildren(child.props.children, Text)}
           </Text>
@@ -308,8 +321,8 @@ const MarkdownText = (props: any): any => {
       if (child.type === Code) {
         // todo: monospace font
         return (
-          <Text key={index} style={[...textStyle, {...margins[index]}]}>
-            {renderChildren(child.props.children, Code)}
+          <Text key={index} selectable style={[...textStyle, {...margins[index]}]}>
+            {renderChildren(child.props.children, Text, Code)}
           </Text>
         )
       }

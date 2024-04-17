@@ -43,7 +43,7 @@ export default class {
   static gradient4: string = 'rgba(62, 56, 225, 1)'
   static gradient5: string = 'rgba(120, 201, 251, 1)'
 
-  static fontWeight: string = '400'
+  static fontWeight: number = 300
   static fontSize: number = 14
   static letterSpacing: number = 0.07
   static fontFamily: string = 'Poppins'

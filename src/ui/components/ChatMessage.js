@@ -369,7 +369,7 @@ const ProfileRow: any = ({
           marginTop: 0,
           marginLeft: 10,
           paddingRight: 14,
-          fontSize: Colors.fontSize + 2
+          fontSize: Colors.fontSize
         }}>
         {message.role === MessageRole.USER ? 'Charlie' : 'Algernon'}
       </Text>
