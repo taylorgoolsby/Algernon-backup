@@ -35,9 +35,12 @@ export class ChatStore {
 
   inputRef: ?HTMLInputElement = null
 
+  // All items in optionsMessageIds hover, but only the optionsTarget has the options menu.
   optionsMessageIds: Array<number> = []
   optionsMessageIdFadeOuts: {[string]: boolean} = {}
   optionsMeasures: {[string]: {x: number, y: number, width: number, height: number}} = {}
+  optionsTarget: ?number = null // The messageId to show the options for.
+  optionsPannings: {[string]: number} = {} // The y-offset of a hovering option.
 
   constructor() {
     makeObservable(this, {
@@ -47,9 +50,15 @@ export class ChatStore {
       optionsMessageIds: observable,
       optionsMeasures: observable,
       optionsMessageIdFadeOuts: observable,
+      optionsTarget: observable,
+      optionsPannings: observable,
       openOptions: action.bound,
       closeOptions: action.bound,
-      closeAllOptions: action.bound
+      closeAllOptions: action.bound,
+      startOptionFadeOut: action.bound,
+      onOptionFadeOut: action.bound,
+      setOptionsTarget: action.bound,
+      deselectOptionsTarget: action.bound,
     })
 
     this.fetchEarlierMessages = debounce(this.fetchEarlierMessages, 250, {leading: true, trailing: false}).bind(this)
@@ -143,6 +152,7 @@ export class ChatStore {
     this.optionsMessageIds.push(messageId)
     this.optionsMeasures[messageId.toString()] = {x, y, width, height}
     delete this.optionsMessageIdFadeOuts[messageId.toString()]
+    this.setOptionsTarget(messageId)
   }
 
   closeOptions: (number) => void = (messageId: number) => {
@@ -164,6 +174,14 @@ export class ChatStore {
     this.optionsMessageIds = this.optionsMessageIds.filter(id => id !== messageId)
     delete this.optionsMeasures[messageId.toString()]
     delete this.optionsMessageIdFadeOuts[messageId.toString()]
+  }
+
+  setOptionsTarget: (number) => void = (messageId: number) => {
+    this.optionsTarget = messageId
+  }
+
+  deselectOptionsTarget: () => void = () => {
+    this.optionsTarget = null
   }
 }
 

@@ -1,7 +1,14 @@
 // @flow
 
 import React, {useState, useRef, useEffect} from 'react'
-import { View, StyleSheet, TouchableOpacity, Animated, TouchableWithoutFeedback } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Animated,
+  PanResponder,
+  TouchableWithoutFeedback,
+} from 'react-native'
 import type {MessageSQL} from '../../schema/Message/MessageSchema.mjs'
 import {MessageRole} from '../../schema/Message/MessageSchema.mjs'
 import Spinner from './Spinner.js'
@@ -9,12 +16,13 @@ import Colors, {
   aiChat,
   aiText,
   aiText2,
-  aiText2Active, darkMode,
+  aiText2Active,
+  darkMode,
   userChat,
   userText,
   userText2,
   userText2Active,
-} from "../../Colors.js";
+} from '../../Colors.js'
 import Text from './Text.js'
 import MarkdownText from './MarkdownText.js'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -22,25 +30,28 @@ import modalStore from '../../stores/ModalStore.js'
 import chatStore from '../../stores/ChatStore.js'
 import ProfilePic from './ProfilePic.js'
 import {observer} from 'mobx-react'
-import { BlurView } from "@react-native-community/blur";
+import {BlurView} from '@react-native-community/blur'
 
 export const margin = 12
+export const profileRowHeight = 42
 
 type ChatMessageProps = {
   messageId: string,
   isActive: boolean,
   onMessageLayout: (any, MessageSQL) => void,
-  isOptionActive?: ?boolean,
+  isFloating?: ?boolean,
 }
 
-const ChatMessage: (ChatMessageProps) => any = observer(
+const ChatMessage: ChatMessageProps => any = observer(
   ({
     messageId,
-    isActive,
+    isActive, // whether or not this is the last message in the chat.
     onMessageLayout,
-    isOptionActive,
+     isFloating, // whether or not this is being rendered as a floating message.
   }: ChatMessageProps): any => {
     const message = chatStore.messages[messageId]
+
+    console.log("render messageId", messageId);
 
     const messageRef = useRef<any>(null)
     const [isConfirming, setIsConfirming] = useState(false)
@@ -57,7 +68,15 @@ const ChatMessage: (ChatMessageProps) => any = observer(
     function openOptions() {
       messageRef?.current?.measure((fx, fy, width, height, px, py) => {
         if (chatStore.optionsMessageIds.includes(message.messageId)) {
-          chatStore.closeOptions(message.messageId)
+          if (
+            isFloating
+              ? chatStore.optionsTarget !== message.messageId
+              : null
+          ) {
+            chatStore.setOptionsTarget(message.messageId)
+          } else {
+            chatStore.closeOptions(message.messageId)
+          }
         } else {
           // $FlowFixMe
           chatStore.openOptions(message.messageId, px, py, width, height)
@@ -73,49 +92,106 @@ const ChatMessage: (ChatMessageProps) => any = observer(
       if (onMessageLayout) onMessageLayout(event, message)
     }
 
+    const isOptionTarget = chatStore.optionsTarget === message?.messageId
+
+    const backgroundColorAnim = useRef(new Animated.Value(0)).current
+    useEffect(() => {
+      if (isOptionTarget) {
+        Animated.timing(backgroundColorAnim, {
+          toValue: 1,
+          duration: 120,
+          useNativeDriver: false,
+        }).start()
+      } else {
+        Animated.timing(backgroundColorAnim, {
+          toValue: 0,
+          duration: 120,
+          useNativeDriver: false,
+        }).start()
+      }
+    }, [isOptionTarget])
+
     if (!message) {
       return null
     }
 
-    return (
-      <TouchableWithoutFeedback onPress={() => {
-        // chatStore.closeOptions()
-        chatStore.inputRef?.blur()
-      }}>
-        <View style={{alignSelf: 'stretch'}}>
-          <View
-            ref={messageRef}
-            style={[
-              message.role === MessageRole.USER
-                ? styles.userMessage
-                : styles.aiMessage,
-              isOptionActive ? {backgroundColor: message.role === MessageRole.USER  ? 'rgba(112, 163, 255, 0.5)' : 'rgba(255, 255, 255, 0)'} : {}
-            ]}
-            onLayout={handleInitialLayout}>
-            {isOptionActive ? <BlurView
-              style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
-              blurType={darkMode ? 'dark' : 'light'}
-              blurAmount={70}/> : null}
+    const body = (
+      <View style={{alignSelf: 'stretch'}}>
+        <Animated.View
+          ref={messageRef}
+          style={[
+            message.role === MessageRole.USER
+              ? styles.userMessage
+              : styles.aiMessage,
+            isFloating
+              ? {
+                // backgroundColor:
+                // isOptionTarget ?
+                //   () : 'rgba(255, 255, 255, 0)',
+                backgroundColor: backgroundColorAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [
+                    'rgba(255, 255, 255, 0)',
+                    'rgba(112, 163, 255, 0.5)',
+                  ],
+                }),
+              }
+              : null,
+          ]}
+          onLayout={handleInitialLayout}>
+          {isFloating ? (
+            <BlurView
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+              }}
+              blurType={darkMode ? 'light' : 'light'}
+              blurAmount={70}
+            />
+          ) : null}
 
-            <ProfileRow
+          <ProfileRow
+            message={message}
+            initialLayout={initialLayout}
+            isActive={isActive}
+            isFloating={isFloating}
+            onPress={openOptions}
+          />
+          <MainText
+            message={message}
+            initialLayout={initialLayout}
+            isFloating={isFloating}
+          />
+          {!message.deleted ? (
+            <DeleteButton
               message={message}
               initialLayout={initialLayout}
-              isActive={isActive}
-              onPress={openOptions}
+              handleDeleteMessage={handleDeleteMessage}
+              isConfirming={isConfirming}
             />
-            <MainText message={message} initialLayout={initialLayout} />
-            {!message.deleted ? (
-              <DeleteButton
-                message={message}
-                initialLayout={initialLayout}
-                handleDeleteMessage={handleDeleteMessage}
-                isConfirming={isConfirming}
-              />
-            ) : null}
-          </View>
-        </View>
-      </TouchableWithoutFeedback>
+          ) : null}
+        </Animated.View>
+      </View>
     )
+
+    if (!isFloating) {
+      return (
+        <TouchableWithoutFeedback
+          onPress={() => {
+            // chatStore.closeOptions()
+            chatStore.inputRef?.blur()
+            chatStore.deselectOptionsTarget()
+          }}
+        >
+          {body}
+        </TouchableWithoutFeedback>
+      )
+    } else {
+      return body
+    }
   },
 )
 
@@ -178,9 +254,11 @@ const DeleteButton: any = ({
 const MainText: any = ({
   message,
   initialLayout,
+                         isFloating,
 }: {
   message: MessageSQL,
   initialLayout: any,
+  isFloating: boolean,
 }) => {
   const [fullLayout, setFullLayout] = useState(null)
   const handleLayout = (event: any) => {
@@ -225,11 +303,14 @@ const MainText: any = ({
       onLayout={handleLayout}>
       {!!message.text ? (
         <MarkdownText
-          textStyle={
+          textStyle={[
             message.role === MessageRole.USER
               ? styles.userMessageText
-              : styles.aiMessageText
-          }>
+              : styles.aiMessageText,
+            isFloating ? {
+              color: aiText
+            } : null
+          ]}>
           {message.text.trim()}
         </MarkdownText>
       ) : (
@@ -243,11 +324,13 @@ const ProfileRow: any = ({
   message,
   initialLayout,
   isActive,
+                           isFloating,
   onPress,
 }: {
   message: MessageSQL,
   initialLayout: any,
   isActive: boolean,
+  isFloating: boolean,
   onPress: () => void,
 }) => {
   const [timeWidth, setTimeWidth] = useState(0)
@@ -256,13 +339,16 @@ const ProfileRow: any = ({
     setTimeWidth(width)
   }
 
+  const isUser = message.role === MessageRole.USER
+
   return (
     <TouchableOpacity
       style={[
         styles.profileRow,
         {
           flexDirection: 'row',
-          alignSelf: 'flex-start',
+          alignSelf: isUser ? 'flex-end' : 'flex-start',
+          //flexDirection: isUser ? 'row-reverse' : 'row',
           marginLeft: 9,
           marginTop: 9,
           marginBottom: 9,
@@ -272,7 +358,11 @@ const ProfileRow: any = ({
       <ProfilePic message={message} isActive={isActive} />
       <Text
         style={{
-          color: message.role === MessageRole.USER ? userText : aiText,
+          color: isFloating
+            ? aiText
+            : message.role === MessageRole.USER
+            ? userText
+            : aiText,
           marginTop: 0,
           marginLeft: 10,
           paddingRight: 14,
@@ -280,7 +370,7 @@ const ProfileRow: any = ({
         {message.role === MessageRole.USER ? 'Charlie' : 'Algernon'}
       </Text>
       {/*{!initialLayout || message.deleted ? (*/}
-      {/*  <View style={{width: 42, hieght: 42}} />*/}
+      {/*  <View style={{width: profileRowHeight, hieght: profileRowHeight}} />*/}
       {/*) : null}*/}
     </TouchableOpacity>
   )

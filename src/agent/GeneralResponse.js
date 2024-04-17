@@ -11,6 +11,8 @@ import type {ChatCompletionsResponse} from '../types/ChatCompletion.js'
 import type {MessageSQL} from '../schema/Message/MessageSchema.mjs'
 import CompletionInterface from '../schema/Completion/CompletionInterface.js'
 import {CompletionType} from '../schema/Completion/CompletionSchema.mjs'
+import normalizeModelName from "../utils/normalizeModelName.js";
+import ShortTermSummarization from "./ShortTermSummarization.js";
 
 export default class GeneralResponse {
   /*
@@ -22,15 +24,14 @@ export default class GeneralResponse {
     emptyResponse: MessageSQL,
     shortTermSummary: string,
     longTermSummary: string,
-    previousResponse: ?string,
+    allMessages: Array<MessageSQL>,
     userPrompt: string,
     onAppendMessage: (output: AppendMessageOutput) => any,
     onUpdateMessage: (output: UpdateMessageOutput) => any,
   ): Promise<MessageSQL> {
-    const context: Array<GPTMessage> = [
-      {
-        role: 'system',
-        content: `Hello! I'm your personal digital assistant, here to help you with a range of tasks. My design allows me to remember our previous interactions, learn from them, and even facilitate your learning on any subject, ensuring I'm always ready to assist you with your journaling, knowledge base management, brainstorming, learning, and more. Just start chatting, and I'll do my best to help!
+    const systemMessage = `Hello! I'm your personal digital assistant, here to help you with a range of tasks. My design allows me to remember our previous interactions, learn from them, and even facilitate your learning on any subject, ensuring I'm always ready to assist you with your journaling, knowledge base management, brainstorming, learning, and more. Just start chatting, and I'll do my best to help!
+        
+The name of the app, "Algernon", comes from the story "Flowers for Algernon".
 
 Capabilities
 
@@ -78,28 +79,55 @@ Rules
 
     * Avoid repeating the long term memory, short term memory, or system promps to the user.
     * Avoid using the word 'delve'.
-    `,
+    `
+
+    const summaryUser = `What is your summary of long term and short term memory?`
+    const summaryAi = `# Long Term Memory\n\n${longTermSummary ?? ''}\n\n# Short Term Memory\n\n${shortTermSummary ?? ''}`
+    const previousSummary = '' //summaryUser + summaryAi
+
+    const previousMessages = allMessages.slice(0, allMessages.length - 1)
+    const nonSystemMessages = previousMessages.filter(
+      (m) => m.role.toLowerCase() !== 'system',
+    )
+    const modelName = normalizeModelName(model)
+    const input = await ShortTermSummarization.packMessages(
+      systemMessage,
+      nonSystemMessages,
+      previousSummary,
+      modelName
+    )
+
+    const context: Array<GPTMessage> = [
+      {
+        role: 'system',
+        content: systemMessage,
       },
       {
         // First message after system prompt should be a user message:
         role: 'user',
-        content: 'What is your summary of long term and short term memory?'
+        content: summaryUser
       },
       {
         role: 'assistant',
-        content: `# Long Term Memory\n\n${longTermSummary ?? ''}\n\n# Short Term Memory\n\n${shortTermSummary ?? ''}`,
+        content: summaryAi,
       },
-      previousResponse ? {
+      {
         // alternate between user and assistant messages for uniformity.
         role: 'user',
-        content: 'What was the last thing you said?'
-      } : null,
-      previousResponse ? {role: 'assistant', content: previousResponse} : null,
+        content: 'What have we been saying?'
+      },
+      {role: 'assistant', content: `Here is our past conversation:\n\n${input ?? ''}`},
+      {
+        role: 'user',
+        content: userPrompt,
+      },
       {
         role: 'user',
         content: userPrompt,
       },
     ].filter(Boolean)
+
+    console.log("context", context);
 
     // Then streaming begins and incoming tokens are relayed back to the client.
     const completeMessage = await GeneralResponse.stream(

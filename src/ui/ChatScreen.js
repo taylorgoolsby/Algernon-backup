@@ -545,6 +545,7 @@ const ChatScreen: any = observer(({navigation}) => {
             messageId={messageId}
             headerHeight={headerHeight - innerHeaderHeight}
             footerHeight={safeAreaFooterHeight - footerHeight}
+            safeAreaFooterHeight={safeAreaFooterHeight}
           />
         )
       })}
@@ -647,7 +648,7 @@ const styles = StyleSheet.create({
   clearInputButton: {
     padding: 0,
     paddingLeft: 25,
-    paddingRight: 12,
+    paddingRight: 7,
     alignSelf: 'stretch',
     justifyContent: 'center',
     alignItems: 'center',

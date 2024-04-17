@@ -13,7 +13,7 @@ import normalizeModelName from "../utils/normalizeModelName.js";
 
 const { NativeTokenizer } = NativeModules;
 
-const SHORT_TERM_SUMMARY_TOKEN_SIZE = (2048 * 1.5) / 7
+const SHORT_TERM_SUMMARY_TOKEN_SIZE = (4048 * 1.5) / 7
 // The number of tokens for a single short term memory completion call:
 const SHORT_TERM_COMPLETION_TOKEN_LIMIT = 2048 - SHORT_TERM_SUMMARY_TOKEN_SIZE
 
@@ -151,14 +151,13 @@ Output 2: "Planning a trip to Japan, visiting Tokyo and Kyoto. Unique activities
     )
 
     const modelName = normalizeModelName(model)
-    console.log("modelName", modelName);
-    const input = await NativeTokenizer.processMessages(
+    const input = await ShortTermSummarization.packMessages(
       systemMessage,
       nonSystemMessages,
       previousSummary,
       modelName,
       SHORT_TERM_COMPLETION_TOKEN_LIMIT
-    );
+    )
 
     // Finally, the previous summary should be in the input string:
     // input += `previous summary: ${previousSummary}` // don't forget to update token counting
@@ -187,5 +186,31 @@ Output 2: "Planning a trip to Japan, visiting Tokyo and Kyoto. Unique activities
     )
 
     return nextSummary
+  }
+
+  /*
+
+  Returns a string of what can fit in this completion call:
+
+  const context = [
+    {
+      role: 'system',
+      content: systemMessage,
+    },
+    {
+      role: 'user',
+      content: input,
+    },
+  ]
+
+  * */
+  static async packMessages(systemMessage: string, nonSystemMessages: Array<MessageSQL>, previousSummary: string, modelName: string, limit?: ?number): Promise<string> {
+    return await NativeTokenizer.processMessages(
+      systemMessage,
+      nonSystemMessages,
+      previousSummary,
+      modelName,
+      limit || SHORT_TERM_COMPLETION_TOKEN_LIMIT
+    );
   }
 }

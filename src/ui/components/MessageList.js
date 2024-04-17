@@ -9,8 +9,9 @@ import {
   Platform,
   Animated,
   Dimensions,
+  PanResponder
 } from 'react-native'
-import ChatMessage, { margin } from "./ChatMessage.js";
+import ChatMessage, { margin, profileRowHeight } from "./ChatMessage.js";
 import type {MessageSQL} from '../../schema/Message/MessageSchema.mjs'
 import chatStore from "../../stores/ChatStore.js";
 
@@ -113,6 +114,8 @@ const MessageList = ({
     if (scrollOffset.current < 250 && scrollOffset.current - prevScrollOffset < 0) {
       chatStore.fetchEarlierMessages()
     }
+
+    // chatStore.deselectOptionsTarget()
   }
 
   const paddingHeader = keyboardHeight
@@ -146,6 +149,29 @@ const MessageList = ({
     }
   }, [keyboardHeight])
 
+  // const pan = useRef(new Animated.ValueXY()).current
+  // const panResponder = useRef(
+  //   PanResponder.create({
+  //     onStartShouldSetPanResponder: () => true,
+  //     onPanResponderGrant: (e, gestureState) => {
+  //       chatStore.deselectOptionsTarget()
+  //     },
+  //     onPanResponderMove: (e, gestureState) => {
+  //
+  //       // if (gestureState.dy > maxDy) {
+  //       //   pan.setValue({x: 0, y: maxDy})
+  //       // } else {
+  //         Animated.event([null, {dy: pan.y}], {
+  //           useNativeDriver: false,
+  //         })(e, gestureState)
+  //       // }
+  //     },
+  //     onPanResponderRelease: (e, gestureState) => {
+  //       pan.extractOffset()
+  //     },
+  //   }),
+  // ).current
+
   return (
     <Animated.View
       style={{
@@ -153,7 +179,8 @@ const MessageList = ({
         opacity: opacityAnim,
         // paddingLeft: 18,
         // paddingRight: 17,
-      }}>
+      }}
+    >
       <KeyboardAvoidingView
         style={{
           position: 'absolute',
@@ -169,6 +196,9 @@ const MessageList = ({
           style={styles.flatList}
           ref={flatListRef}
           scrollsToTop={false}
+          onScrollBeginDrag={() => {
+            chatStore.deselectOptionsTarget()
+          }}
           onScroll={onScroll}
           onContentSizeChange={onContentSizeChange}
           onViewableItemsChanged={onViewableItemsChanged}
@@ -192,7 +222,7 @@ const MessageList = ({
             const messageId = item.item
             return (
               <ChatMessage
-                messageId={messageId}
+                messageId={messageId.toString()}
                 isActive={item.index === 0}
                 onMessageLayout={onMessageLayout}
               />

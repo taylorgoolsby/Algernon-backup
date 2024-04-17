@@ -65,7 +65,7 @@ export default class ChatIteration {
           emptyResponse,
           shortTermSummary,
           longTermSummary,
-          lastAgentMessage?.text,
+          allMessages,
           userPrompt,
           onAppendMessage,
           onUpdateMessage,

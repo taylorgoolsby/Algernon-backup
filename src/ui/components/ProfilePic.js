@@ -7,18 +7,24 @@ import { View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons.js";
 import Colors from "../../Colors.js";
 import { BlurView } from "@react-native-community/blur";
+import { observer } from "mobx-react";
+import { observable } from "mobx";
 
-export const ProfilePic = ({
-  message,
-  noBorder,
-  isActive,
-  tenX,
-}: {
+type ProfilePicProps = {
   message: MessageSQL,
   noBorder?: boolean,
   isActive?: boolean,
   tenX?: boolean,
-}): any => {
+}
+
+const InnerProfilePic = (props: ProfilePicProps): any => {
+  const {
+    message,
+    noBorder,
+    isActive,
+    tenX,
+  } = props
+
   if (!message) return null
 
   const t = tenX ? 10 : 1
@@ -82,7 +88,8 @@ export const ProfilePic = ({
     // 3. Update the position of each dot
     // 4. Repeat
     const k = 0.1
-    const dt = (Math.min(Date.now() - time, 1000) * 0.001) / 2
+    // const dt = (Math.min(Date.now() - time, 1000) * 0.001) / 2
+    const dt = 0
     setTime(Date.now())
     const n = 5
 
@@ -292,5 +299,27 @@ export const ProfilePic = ({
     )
   }
 }
+
+const profilePicCache: {value: {[number]: any}} = observable({
+  value: {}
+})
+const ProfilePic: (props: ProfilePicProps) => any = observer((props: ProfilePicProps): any => {
+  const messageId = props.message.messageId
+
+  console.log("Object.keys(profilePicCache.value)", Object.keys(profilePicCache.value));
+  console.log("profilePic messageId", messageId);
+
+  useEffect(() => {
+    if (!profilePicCache.value[messageId]) {
+      console.log('initializing profile pic')
+      profilePicCache.value[messageId] = <InnerProfilePic {...props} />
+    }
+    // return () => {
+    //   delete profilePicCache[messageId]
+    // }
+  }, [messageId])
+
+  return profilePicCache.value[messageId]
+})
 
 export default ProfilePic

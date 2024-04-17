@@ -1,7 +1,14 @@
 // @flow
 
 import React, {useRef, useState, useEffect} from 'react'
-import {View, StyleSheet, TouchableOpacity, Animated} from 'react-native'
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Animated,
+  PanResponder,
+  Dimensions,
+} from 'react-native'
 import chatStore from '../../stores/ChatStore.js'
 import {observer} from 'mobx-react'
 import {BlurView} from '@react-native-community/blur'
@@ -9,7 +16,7 @@ import Colors, {darkMode} from '../../Colors.js'
 import {MessageRole} from '../../schema/Message/MessageSchema.mjs'
 import Text from './Text.js'
 import modalStore from '../../stores/ModalStore.js'
-import ChatMessage from './ChatMessage.js'
+import ChatMessage, {margin, profileRowHeight} from './ChatMessage.js'
 
 // There is only one MessageOptions component open at a time.
 // It is positioned absolutely using the onLayout event of the ChatMessage component to
@@ -23,12 +30,15 @@ type MessageOptionsProps = {
   messageId: number,
   headerHeight: number,
   footerHeight: number,
+  safeAreaFooterHeight: number,
 }
 
 const easingTime = 280
+const screenHeight = Dimensions.get('window').height
 
 const MessageOptions: any = observer((props: MessageOptionsProps): any => {
-  const {style, messageId, headerHeight, footerHeight} = props
+  const {style, messageId, headerHeight, footerHeight, safeAreaFooterHeight} =
+    props
 
   const measure = chatStore.optionsMeasures[messageId.toString()]
   const fadeOut = !!chatStore.optionsMessageIdFadeOuts[messageId.toString()]
@@ -74,12 +84,120 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     }
   }, [fadeOut, unmount, layout])
 
+  const message = chatStore.messages[messageId?.toString() ?? '']
+  const isUser = message?.role === MessageRole.USER
+
+  let top = (measure?.y ?? 0) - (layout?.height ?? 0) - margin / 2
+  // let top = (measure?.y ?? 0) - 36
+  if (top < headerHeight) {
+    top = headerHeight
+  }
+
+  const startPanningTop = useRef(measure?.y ?? 0)
+  const pan = useRef(new Animated.ValueXY()).current
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderGrant: (e, gestureState) => {
+        // startPanningTop.current = (measure?.y ?? 0) + lastPanY.current
+        chatStore.setOptionsTarget(messageId)
+      },
+      onPanResponderMove: (e, gestureState) => {
+        const previousMessageId =
+          chatStore.optionsMessageIds[
+            chatStore.optionsMessageIds.indexOf(messageId) - 1
+          ]
+        const previousMessageMeasure = previousMessageId
+          ? chatStore.optionsMeasures[previousMessageId?.toString()]
+          : null
+        const previousMessageTop =
+          (previousMessageMeasure?.y ?? 0) +
+          (chatStore.optionsPannings[previousMessageId?.toString()] ?? 0)
+        let lowerBoundary = !previousMessageMeasure
+          ? screenHeight - safeAreaFooterHeight
+          : previousMessageTop
+        lowerBoundary += -profileRowHeight
+        const maxDy = lowerBoundary - startPanningTop.current
+
+        if (gestureState.dy > maxDy) {
+          pan.setValue({x: 0, y: maxDy})
+        } else {
+          Animated.event([null, {dy: pan.y}], {
+            useNativeDriver: false,
+          })(e, gestureState)
+        }
+      },
+      onPanResponderRelease: (e, gestureState) => {
+        const previousMessageId =
+          chatStore.optionsMessageIds[
+            chatStore.optionsMessageIds.indexOf(messageId) - 1
+          ]
+        const previousMessageMeasure = previousMessageId
+          ? chatStore.optionsMeasures[previousMessageId?.toString()]
+          : null
+        const previousMessageTop =
+          (previousMessageMeasure?.y ?? 0) +
+          (chatStore.optionsPannings[previousMessageId?.toString()] ?? 0)
+        let lowerBoundary = !previousMessageMeasure
+          ? screenHeight - safeAreaFooterHeight
+          : previousMessageTop
+        lowerBoundary += -profileRowHeight
+        startPanningTop.current = Math.min(
+          startPanningTop.current + gestureState.dy,
+          lowerBoundary,
+        )
+        chatStore.optionsPannings[messageId.toString()] =
+          startPanningTop.current -
+          chatStore.optionsMeasures[messageId.toString()].y
+        pan.extractOffset()
+
+        // // Start a decay animation to simulate momentum
+        // Animated.decay(pan, {
+        //   velocity: {x: 0, y: gestureState.vy}, // Use the vertical velocity that the user ended with
+        //   deceleration: 0.997,
+        //   useNativeDriver: true,
+        // }).start(() => {
+        //   pan.y.extractOffset(); // Prepare for measuring the current value
+        //   pan.y.setValue(0); // Reset to start tracking new movement
+        //   pan.y.flattenOffset(); // Apply the total movement
+        //
+        //   pan.y.addListener((position) => {
+        //     if (position.value > lowerBoundary) {
+        //       // If the boundary is exceeded, spring back to the boundary
+        //       Animated.spring(pan.y, {
+        //         toValue: lowerBoundary,
+        //         friction: 5, // Adjust the friction for the bounce effect
+        //         useNativeDriver: true,
+        //       }).start();
+        //     }
+        //   });
+        // });
+      },
+    }),
+  ).current
+
+  const isOptionTarget = chatStore.optionsTarget === messageId
+
+  const backgroundColorAnim = useRef(new Animated.Value(0)).current
+  useEffect(() => {
+    if (isOptionTarget) {
+      Animated.timing(backgroundColorAnim, {
+        toValue: 1,
+        duration: 180,
+        useNativeDriver: false,
+      }).start()
+    } else {
+      Animated.timing(backgroundColorAnim, {
+        toValue: 0,
+        duration: 180,
+        useNativeDriver: false,
+      }).start()
+    }
+  }, [isOptionTarget])
+
   if (unmount) {
     return null
   }
-
-  const message = chatStore.messages[messageId?.toString() ?? '']
-  const isUser = message?.role === MessageRole.USER
 
   const onLayout = (event: any) => {
     setLayout(event.nativeEvent.layout)
@@ -96,43 +214,80 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     }
   }
 
-  let top = (measure?.y ?? 0) - (layout?.height ?? 0) - 6
-  if (top < headerHeight) {
-    top = headerHeight
-  }
-
   return (
     <>
-      <Animated.View
-        style={[
-          styles.container,
-          {
-            top,
-            opacity: opacityAnim,
-          },
-          isUser ? {left: (measure?.x ?? 0) + ((measure?.width ?? 0) - (layout?.width ?? 0))} : { left: (measure?.x ?? 0) },
-          style
-        ]}
-        onLayout={onLayout}>
-        <BlurView
-          style={styles.blurView}
-          blurType={darkMode ? 'dark' : 'light'}
-          blurAmount={70}>
-          {isUser ? (
-            <>
-              <OptionRow label="Customize" onPress={handleCustomize} />
-              {/*<OptionRow label="Publish" onPress={handlePublish}/>*/}
-              <OptionRow label="Delete" onPress={handleDelete} />
-            </>
-          ) : (
-            <>
-              {/*<OptionRow label="Think Harder" onPress={handleThinkHarder}/>*/}
-              <OptionRow label="Regenerate" onPress={handleRegenerate} />
-              <OptionRow label="Delete" onPress={handleDelete} />
-            </>
-          )}
-        </BlurView>
-      </Animated.View>
+      {isOptionTarget ? (
+        <Animated.View
+          style={[
+            styles.container,
+            {
+              top,
+              // height: (measure?.height ?? 0),
+              opacity: opacityAnim,
+              transform: [{translateY: pan.y}],
+            },
+            isUser
+              ? {
+                  // left:
+                  //   (measure?.x ?? 0) +
+                  //   ((measure?.width ?? 0) - (layout?.width ?? 0)) -
+                  //   0,
+                left: (measure?.x ?? 0) + 0
+                }
+              : {
+                  // left:
+                  //   (measure?.x ?? 0) +
+                  //   ((measure?.width ?? 0) - (layout?.width ?? 0)) -
+                  //   0,
+                  left: (measure?.x ?? 0) + 0
+                },
+            style,
+            {
+              shadowColor: 'rgba(0, 0, 0, 0.2)',
+              shadowOffset: {width: 0, height: 1},
+              shadowOpacity: 0.5,
+              shadowRadius: 1,
+              elevation: 1,
+            },
+            {
+              borderRadius: 24,
+              backgroundColor: 'rgba(112, 163, 255, 0.5)',
+              // backgroundColor: backgroundColorAnim.interpolate({
+              //   inputRange: [0, 1],
+              //   outputRange: [
+              //     'rgba(255, 255, 255, 0)',
+              //     message.role === MessageRole.USER
+              //       ? 'rgba(112, 163, 255, 0.5)'
+              //       : 'rgba(255, 255, 255, 0)',
+              //   ],
+              // }),
+            },
+          ]}
+          onLayout={onLayout}
+          {...panResponder.panHandlers}>
+          <BlurView
+            style={[
+              styles.blurView,
+
+            ]}
+            blurType={darkMode ? 'dark' : 'light'}
+            blurAmount={70}>
+            {isUser ? (
+              <>
+                <OptionRow label="Customize" onPress={handleCustomize} />
+                {/*<OptionRow label="Publish" onPress={handlePublish}/>*/}
+                <OptionRow label="Delete" onPress={handleDelete} />
+              </>
+            ) : (
+              <>
+                {/*<OptionRow label="Think Harder" onPress={handleThinkHarder}/>*/}
+                <OptionRow label="Regenerate" onPress={handleRegenerate} />
+                <OptionRow label="Delete" onPress={handleDelete} />
+              </>
+            )}
+          </BlurView>
+        </Animated.View>
+      ) : null}
 
       <Animated.View
         style={[
@@ -142,15 +297,24 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
             left: measure?.x ?? 0,
             opacity: opacityAnim,
             width: measure?.width ?? 0,
+            transform: [{translateY: pan.y}],
           },
-          style
+          style,
+          {
+            shadowColor: 'rgba(0, 0, 0, 0.2)',
+            shadowOffset: {width: 0, height: 1},
+            shadowOpacity: 0.5,
+            shadowRadius: 1,
+            elevation: 1,
+          },
         ]}
-        onLayout={onLayout}>
+        onLayout={onLayout}
+        {...panResponder.panHandlers}>
         <ChatMessage
           messageId={messageId.toString()}
           isActive={true}
           onMessageLayout={() => {}}
-          isOptionActive
+          isFloating
         />
       </Animated.View>
     </>
@@ -174,14 +338,14 @@ const styles = StyleSheet.create({
   },
   blurView: {
     flex: 1,
-    borderRadius: 10,
+    borderRadius: 16,
   },
   optionRow: {
     flexDirection: 'row',
     alignSelf: 'stretch',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 38,
+    height: 34,
     paddingLeft: 24,
     paddingRight: 24,
   },

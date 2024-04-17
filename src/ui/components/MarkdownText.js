@@ -42,7 +42,10 @@ const A = () => {}
 const Code = () => {}
 
 const MarkdownText = (props: any): any => {
-  const {style, textStyle, children, onLayout} = props
+  const textStyle = Array.isArray(props.textStyle)
+    ? props.textStyle
+    : [props.textStyle]
+  const {style, children, onLayout} = props
 
   const [compiledChildren, setCompiledChildren] = useState<Array<any>>([])
 
@@ -127,12 +130,12 @@ const MarkdownText = (props: any): any => {
     }
   }, [children])
 
-  function getMargins(children: Array<any>) {
+  function getMargins(children: Array<any>): Array<{[string]: number}> {
     return children.map((child, index) => {
       const isFirst = index === 0
       const isLast = index === compiledChildren.length - 1
 
-      let result: any = {}
+      let result: {[string]: number} = {}
 
       if (child.type === P || child.type === UL || child.type === OL) {
         result = {
@@ -163,7 +166,8 @@ const MarkdownText = (props: any): any => {
           <Text
             key={index}
             style={[
-              {...textStyle, ...margins[index]},
+              ...textStyle,
+              margins[index],
               parentType === Code
                 ? {
                     fontFamily: 'DM Mono',
@@ -182,13 +186,15 @@ const MarkdownText = (props: any): any => {
         return (
           <Text
             key={index}
-            style={{
+            style={[
               ...textStyle,
-              ...margins[index],
-              fontSize: Colors.fontSize * 2,
-              lineHeight: Colors.fontSize * 2 * 1.5,
-              fontWeight: '700',
-            }}>
+              {
+                ...margins[index],
+                fontSize: Colors.fontSize * 2,
+                lineHeight: Colors.fontSize * 2 * 1.5,
+                fontWeight: '700',
+              },
+            ]}>
             {renderChildren(child.props.children, Text)}
           </Text>
         )
@@ -198,13 +204,15 @@ const MarkdownText = (props: any): any => {
         return (
           <Text
             key={index}
-            style={{
+            style={[
               ...textStyle,
-              ...margins[index],
-              fontSize: Colors.fontSize * 1.5,
-              lineHeight: Colors.fontSize * 1.5 * 1.5,
-              fontWeight: '700',
-            }}>
+              {
+                ...margins[index],
+                fontSize: Colors.fontSize * 1.5,
+                lineHeight: Colors.fontSize * 1.5 * 1.5,
+                fontWeight: '700',
+              },
+            ]}>
             {renderChildren(child.props.children, Text)}
           </Text>
         )
@@ -214,13 +222,15 @@ const MarkdownText = (props: any): any => {
         return (
           <Text
             key={index}
-            style={{
+            style={[
               ...textStyle,
-              ...margins[index],
-              fontSize: Colors.fontSize * 1.25,
-              lineHeight: Colors.fontSize * 1.25 * 1.5,
-              fontWeight: '600',
-            }}>
+              {
+                ...margins[index],
+                fontSize: Colors.fontSize * 1.25,
+                lineHeight: Colors.fontSize * 1.25 * 1.5,
+                fontWeight: '600',
+              },
+            ]}>
             {renderChildren(child.props.children, Text)}
           </Text>
         )
@@ -276,7 +286,7 @@ const MarkdownText = (props: any): any => {
         return (
           <Text
             key={index}
-            style={{...textStyle, ...margins[index], fontWeight: 600}}>
+            style={[...textStyle, {...margins[index], fontWeight: 600}]}>
             {renderChildren(child.props.children, Text)}
           </Text>
         )
@@ -286,7 +296,7 @@ const MarkdownText = (props: any): any => {
         return (
           <Text
             key={index}
-            style={{...textStyle, ...margins[index], color: Colors.blue}}>
+            style={[...textStyle, {...margins[index], color: Colors.blue}]}>
             {renderChildren(child.props.children, Text)}
           </Text>
         )
@@ -295,7 +305,7 @@ const MarkdownText = (props: any): any => {
       if (child.type === Code) {
         // todo: monospace font
         return (
-          <Text key={index} style={{...textStyle, ...margins[index]}}>
+          <Text key={index} style={[...textStyle, {...margins[index]}]}>
             {renderChildren(child.props.children, Code)}
           </Text>
         )
