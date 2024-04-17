@@ -358,7 +358,7 @@ const ChatScreen: any = observer(({navigation}) => {
           position: 'absolute',
           top: 0,
           left: 0,
-          zIndex: 502,
+          zIndex: 500,
         }}>
         <SafeAreaView>
           <TouchableOpacity
@@ -539,9 +539,7 @@ const ChatScreen: any = observer(({navigation}) => {
         return (
           <MessageOptions
             key={messageId}
-            style={{
-              zIndex: 500 - i - 1
-            }}
+            zIndexOffset={i + 1}
             messageId={messageId}
             headerHeight={headerHeight - innerHeaderHeight}
             footerHeight={safeAreaFooterHeight - footerHeight}

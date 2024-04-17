@@ -168,7 +168,7 @@ const MarkdownText = (props: any): any => {
 
     return children.map((child, index) => {
       if (typeof child === 'string') {
-        if (parentDisplayType === Text) {
+        if (parentDisplayType === Text && parentActualType !== Code) {
           return child
         } else {
           return (
@@ -267,6 +267,7 @@ const MarkdownText = (props: any): any => {
           return (
             <Text
               key={index}
+              selectable
               style={{
                 ...margins[index],
                 flexDirection: 'row'
@@ -323,12 +324,19 @@ const MarkdownText = (props: any): any => {
       }
 
       if (child.type === Code) {
-        // todo: monospace font
-        return (
-          <Text key={index} selectable style={[...textStyle, {...margins[index]}]}>
-            {renderChildren(child.props.children, Text, child.type)}
-          </Text>
-        )
+        if (parentDisplayType === Text) {
+          return (
+            <Text key={index} selectable style={[...textStyle, {...margins[index]}]}>
+              {renderChildren(child.props.children, Text, child.type)}
+            </Text>
+          )
+        } else {
+          return (
+            <View key={index} style={[...textStyle, {...margins[index]}]}>
+              {renderChildren(child.props.children, View, child.type)}
+            </View>
+          )
+        }
       }
     })
   }

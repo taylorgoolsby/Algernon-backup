@@ -59,11 +59,15 @@ const ChatMessage: ChatMessageProps => any = observer(
     const [isConfirming, setIsConfirming] = useState(false)
 
     async function handleDeleteMessage() {
-      setIsConfirming(true)
-      const confirmed = await modalStore.confirm('Delete Message?', null)
-      setIsConfirming(false)
-      if (confirmed) {
-        await chatStore.deleteMessage(message.messageId)
+      if (!isFloating) {
+        setIsConfirming(true)
+        const confirmed = await modalStore.confirm('Delete Message?', null)
+        setIsConfirming(false)
+        if (confirmed) {
+          await chatStore.deleteMessage(message.messageId)
+        }
+      } else {
+        chatStore.closeOptions(message.messageId)
       }
     }
 

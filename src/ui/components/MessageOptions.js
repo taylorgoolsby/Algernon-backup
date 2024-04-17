@@ -27,6 +27,7 @@ import ChatMessage, {margin, profileRowHeight} from './ChatMessage.js'
 
 type MessageOptionsProps = {
   style: any,
+  zIndexOffset: number,
   messageId: number,
   headerHeight: number,
   footerHeight: number,
@@ -37,7 +38,7 @@ const easingTime = 280
 const screenHeight = Dimensions.get('window').height
 
 const MessageOptions: any = observer((props: MessageOptionsProps): any => {
-  const {style, messageId, headerHeight, footerHeight, safeAreaFooterHeight} =
+  const {style, messageId, headerHeight, footerHeight, zIndexOffset, safeAreaFooterHeight} =
     props
 
   const measure = chatStore.optionsMeasures[messageId.toString()]
@@ -226,6 +227,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
               // height: (measure?.height ?? 0),
               opacity: opacityAnim,
               transform: [{translateY: pan.y}],
+              zIndex: 500 + zIndexOffset
             },
             isUser
               ? {
@@ -299,6 +301,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
             opacity: opacityAnim,
             width: measure?.width ?? 0,
             transform: [{translateY: pan.y}],
+            zIndex: 500 - zIndexOffset
           },
           style,
           {
