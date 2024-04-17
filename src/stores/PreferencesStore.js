@@ -27,12 +27,12 @@ export type EditableModelConfig = {
 const path = `${RNFS.DocumentDirectoryPath}/preferences.json`
 
 const defaultModels: Array<EditableModelConfig> = [
-  // {
-  //   title: 'Mixtral 8x7b',
-  //   apiBase: 'https://api.mistral.ai',
-  //   apiKey: Config.mistralApiKey,
-  //   completionOptions: [{name: 'model', value: 'open-mixtral-8x7b'}],
-  // },
+  {
+    title: 'Mixtral 8x7b',
+    apiBase: 'https://api.mistral.ai',
+    apiKey: Config.mistralApiKey,
+    completionOptions: [{name: 'model', value: 'open-mixtral-8x7b'}],
+  },
   // {
   //   title: 'Claude 3 Haiku',
   //   apiBase: 'https://api.anthropic.com',
