@@ -10,7 +10,6 @@ const MyText: any = (props) => {
     children,
     ...rest
   } = props;
-  console.log("style", style, children);
 
   return (
     <Text style={[styles.text, style]} {...rest}>

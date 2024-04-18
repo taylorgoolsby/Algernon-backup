@@ -76,6 +76,7 @@ Rules
 
     * Avoid repeating the long term memory, short term memory, or system promps to the user.
     * Avoid using the word 'delve'.
+    * When asked what model are you, respond ${model.title}.
     `
 
     const summaryUser = `What is your summary of long term and short term memory?`
@@ -114,10 +115,6 @@ Rules
         content: 'What have we been saying?'
       },
       {role: 'assistant', content: `Here is our past conversation:\n\n${input ?? ''}`},
-      {
-        role: 'user',
-        content: userPrompt,
-      },
       {
         role: 'user',
         content: userPrompt,
@@ -181,87 +178,93 @@ Rules
         model,
         context,
         (res: ChatCompletionsResponse) => {
-          if (stop) {
-            return
+          try {
+            if (stop) {
+              return;
+            }
+            startTimeout();
+
+            console.log("res", res);
+
+            // console.log("res.choices[0]", res.choices[0]);
+
+            // Check the finish_reason:
+            const finishReason = res.choices[0]?.finish_reason;
+
+            if (finishReason === "length") {
+              const error = new Error("The maximum number of tokens was reached.");
+              reject(error);
+              throw error;
+            } else if (finishReason === "content_filter") {
+              const error = new Error("A content filter flag was raised.");
+              reject(error);
+              throw error;
+            } else if (finishReason === "tool_calls") {
+              const error = new Error("Tool calls are not yet implemented.");
+              reject(error);
+              throw error;
+            } else if (finishReason !== "stop" && finishReason !== null) {
+              const error = new Error("Unknown finish reason.");
+              reject(error);
+              throw error;
+            }
+
+            // todo: check if finish_reason=stop always has an empty delta.
+            //  Do not send a token update if it does as this would be redundant.
+
+            const text = res?.choices[0]?.delta?.content || "";
+
+            buffer += text;
+
+            // Used for JSON mode:
+            // if (buffer.length < intro.length) {
+            //   // The buffer is not long enough to contain the intro.
+            //   return
+            // }
+            // const autocompletion = JSON.stringify(parseIncompleteJSON(buffer))
+
+            const autocompletion = buffer;
+
+            const messageChanged = autocompletion !== previousAutocompletion;
+            previousAutocompletion = autocompletion;
+
+            if (!messageChanged && finishReason !== "stop") {
+              // console.debug('Autocompletion matched delta, no change.')
+              return;
+            }
+
+            if (finishReason === "stop") {
+              // todo: If stop reached but autocompletion.text is empty still,
+              //  then retry after sending system message trying to correct.
+
+              stop = true;
+              response.completed = true;
+              Promise.resolve()
+                .then(async () => {
+                  // console.debug('saving complete message: ', finalText)
+                  await MessageInterface.completeData(
+                    response.messageId,
+                    autocompletion,
+                  );
+                })
+                .catch(err => {
+                  console.error(err);
+                  reject(err);
+                });
+
+              resolve(response);
+            }
+
+            // send:
+            response.text = autocompletion;
+            const output: UpdateMessageOutput = {
+              windowId,
+              message: response,
+            };
+            onUpdateMessage(output);
+          } catch (err) {
+            console.error(err);
           }
-          startTimeout()
-
-          // console.log("res.choices[0]", res.choices[0]);
-
-          // Check the finish_reason:
-          const finishReason = res.choices[0]?.finish_reason
-
-          if (finishReason === 'length') {
-            const error = new Error('The maximum number of tokens was reached.')
-            reject(error)
-            throw error
-          } else if (finishReason === 'content_filter') {
-            const error = new Error('A content filter flag was raised.')
-            reject(error)
-            throw error
-          } else if (finishReason === 'tool_calls') {
-            const error = new Error('Tool calls are not yet implemented.')
-            reject(error)
-            throw error
-          } else if (finishReason !== 'stop' && finishReason !== null) {
-            const error = new Error('Unknown finish reason.')
-            reject(error)
-            throw error
-          }
-
-          // todo: check if finish_reason=stop always has an empty delta.
-          //  Do not send a token update if it does as this would be redundant.
-
-          const text = res?.choices[0]?.delta?.content || ''
-
-          buffer += text
-
-          // Used for JSON mode:
-          // if (buffer.length < intro.length) {
-          //   // The buffer is not long enough to contain the intro.
-          //   return
-          // }
-          // const autocompletion = JSON.stringify(parseIncompleteJSON(buffer))
-
-          const autocompletion = buffer
-
-          const messageChanged = autocompletion !== previousAutocompletion
-          previousAutocompletion = autocompletion
-
-          if (!messageChanged && finishReason !== 'stop') {
-            // console.debug('Autocompletion matched delta, no change.')
-            return
-          }
-
-          if (finishReason === 'stop') {
-            // todo: If stop reached but autocompletion.text is empty still,
-            //  then retry after sending system message trying to correct.
-
-            stop = true
-            response.completed = true
-            Promise.resolve()
-              .then(async () => {
-                // console.debug('saving complete message: ', finalText)
-                await MessageInterface.completeData(
-                  response.messageId,
-                  autocompletion,
-                )
-              })
-              .catch(err => {
-                console.error(err)
-                reject(err)
-              })
-
-            resolve(response)
-          }
-
-          // send:
-          response.text = autocompletion
-          const output: UpdateMessageOutput = {
-            windowId,
-            message: response,
-          }
-          onUpdateMessage(output)
         },
         (error?: ?Error) => {
           if (error) {

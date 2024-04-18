@@ -32,8 +32,8 @@ import ProfilePic from './ProfilePic.js'
 import {observer} from 'mobx-react'
 import {BlurView} from '@react-native-community/blur'
 
-export const leftMargin = 9
-export const rightMargin = 10
+export const leftMargin = 10
+export const rightMargin = 11
 export const margin = 12
 export const profileRowMinHeight = 38
 
@@ -61,7 +61,7 @@ const ChatMessage: ChatMessageProps => any = observer(
     async function handleDeleteMessage() {
       if (!isFloating) {
         setIsConfirming(true)
-        const confirmed = await modalStore.confirm('Delete Message?', null)
+        const confirmed = await modalStore.confirm('Delete Message?', 'It will be gone forever.')
         setIsConfirming(false)
         if (confirmed) {
           await chatStore.deleteMessage(message.messageId)
