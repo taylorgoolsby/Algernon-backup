@@ -53,8 +53,6 @@ const ChatMessage: ChatMessageProps => any = observer(
   }: ChatMessageProps): any => {
     const message = chatStore.messages[messageId]
 
-    console.log("render messageId", messageId);
-
     const messageRef = useRef<any>(null)
     const [isConfirming, setIsConfirming] = useState(false)
 
@@ -382,7 +380,7 @@ const ProfileRow: any = ({
           fontSize: Colors.fontSize,
           fontWeight: '700'
         }}>
-        {message.role === MessageRole.USER ? 'Taylor G' : 'Flow'}
+        {message.role === MessageRole.USER ? 'Taylor G' : 'AI'}
       </Text>
       {/*{!initialLayout || message.deleted ? (*/}
       {/*  <View style={{width: profileRowHeight, hieght: profileRowHeight}} />*/}

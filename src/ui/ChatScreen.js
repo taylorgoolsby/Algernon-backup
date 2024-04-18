@@ -544,6 +544,7 @@ const ChatScreen: any = observer(({navigation}) => {
             headerHeight={headerHeight - innerHeaderHeight}
             footerHeight={safeAreaFooterHeight - footerHeight}
             safeAreaFooterHeight={safeAreaFooterHeight}
+            safeAreaHeaderHeight={headerHeight}
           />
         )
       })}

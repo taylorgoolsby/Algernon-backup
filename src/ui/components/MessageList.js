@@ -207,7 +207,7 @@ const MessageList = ({
           automaticallyAdjustsScrollIndicatorInsets={false}
           ListFooterComponent={<View style={{height: paddingFooter}} />}
           contentContainerStyle={{
-            paddingLeft: leftMargin + 8,
+            paddingLeft: leftMargin + 5,
             paddingRight: rightMargin,
             paddingTop: paddingHeader,
             // paddingBottom: paddingFooter,

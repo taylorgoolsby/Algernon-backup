@@ -340,8 +340,6 @@ const MarkdownText = (props: any): any => {
     })
   }
 
-  console.log("compiledChildren", compiledChildren);
-
   return (
     <View style={style} onLayout={onLayout}>
       {renderChildren(compiledChildren)}
