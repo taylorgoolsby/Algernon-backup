@@ -85,7 +85,7 @@ const SettingsScreen: any = observer((props: any) => {
       )}
 
       <View style={styles.row}>
-        <Text style={{flex: 1, color: Colors.settingsText}}>Inference Model</Text>
+        <Text style={{flex: 1, color: Colors.settingsText}}>Language Model</Text>
         <Picker
           style={{marginRight: 3}}
           selectedItem={

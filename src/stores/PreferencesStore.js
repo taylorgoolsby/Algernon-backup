@@ -28,7 +28,7 @@ const path = `${RNFS.DocumentDirectoryPath}/preferences.json`
 
 const defaultModels: Array<EditableModelConfig> = [
   {
-    title: 'Mixtral 8x7b',
+    title: 'Mistral Small',
     apiBase: 'https://api.mistral.ai',
     apiKey: Config.mistralApiKey,
     completionOptions: [{name: 'model', value: 'mistral-small-latest'}],
