@@ -316,6 +316,11 @@ export class ChatStore {
   deselectOptionsColorTarget: () => void = () => {
     this.optionsColorTarget = null
   }
+
+  moveFloatingToTop: (messageId: number) => void = (messageId: number): void => {
+    const index = this.optionsMessageIds.indexOf(messageId)
+    this.optionsMessageIds = [this.optionsMessageIds[index], ...this.optionsMessageIds.slice(0, index), ...this.optionsMessageIds.slice(index + 1)]
+  }
 }
 
 const chatStore: ChatStore = new ChatStore()

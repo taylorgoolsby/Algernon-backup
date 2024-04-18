@@ -39,7 +39,7 @@ const easingTime = fadeTime
 const screenHeight = Dimensions.get('window').height
 
 const MessageOptions: any = observer((props: MessageOptionsProps): any => {
-  const {style, messageId, headerHeight, footerHeight, zIndexOffset, safeAreaHeaderHeight, safeAreaFooterHeight} =
+  const {style, messageId, headerHeight, footerHeight, safeAreaHeaderHeight, safeAreaFooterHeight} =
     props
 
   const measure = chatStore.optionsMeasures[messageId.toString()] ?? {x: 0, y: 0, width: 0, height: 0}
@@ -153,6 +153,11 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     // : previousMessageTop
     lower += -profileRowMinHeight
 
+    if (chatStore.optionsTarget === messageId) {
+      // When an item is selected, the lower boundary is raised to show the first sentence of text.
+      lower -= 27
+    }
+
     // The upper boundary is either the bottom of the header or the bottom of the next message
     const nextMessageId =
       chatStore.optionsMessageIds[
@@ -174,7 +179,38 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     return {lower, upper}
   }
 
+  useEffect(() => {
+    const {lower, upper} = getScreenBoundaries()
+    const maxDy = lower - (measure?.y ?? 0)
+    const minDy = upper - (measure?.y ?? 0)
+    console.log("animMode.current", animMode.current);
+    if (animMode.current === 'spring') {
+      if (springMode.current === 'footer') {
+        if (lastY.current !== maxDy) {
+          Animated.spring(anim.y, {
+            velocity: 0,
+            toValue: maxDy,
+            friction: 7, // Adjust the friction for the bounce effect
+            // tension: 1,
+            useNativeDriver: true,
+          }).start();
+        }
+      } else {
+        if (lastY.current !== minDy) {
+          Animated.spring(anim.y, {
+            velocity: 0,
+            toValue: minDy,
+            friction: 7, // Adjust the friction for the bounce effect
+            // tension: 1,
+            useNativeDriver: true,
+          }).start();
+        }
+      }
+    }
+  }, [chatStore.optionsTarget])
+
   const animMode = useRef<'pan' | 'slide' | 'spring'>('pan')
+  const springMode = useRef<'footer' | 'header'>('footer')
   const startSliding = useRef<any>(null)
   const currentTop = useRef(measure?.y ?? 0)
   const anim = useRef(new Animated.ValueXY()).current
@@ -199,6 +235,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
             const velocity = predictFutureVelocity(startSliding.current.v0, 0.9983)
             if (position.value > maxDy) {
               animMode.current = 'spring'
+              springMode.current = 'footer'
               // If the boundary is exceeded, spring back to the boundary
               Animated.spring(anim.y, {
                 velocity: velocity,
@@ -210,6 +247,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
             }
             else if (position.value < minDy) {
               animMode.current = 'spring'
+              springMode.current = 'header'
               // If the boundary is exceeded, spring back to the boundary
               Animated.spring(anim.y, {
                 velocity: velocity,
@@ -240,6 +278,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
         // if (!isOptionColorTarget) {
         chatStore.setOptionsColorTarget(messageId)
         chatStore.setOptionsTarget(messageId)
+        // chatStore.moveFloatingToTop(messageId)
         // }
         anim.extractOffset()
 
@@ -288,6 +327,8 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
         // }
 
         const {lower, upper} = getScreenBoundaries()
+        const maxDy = lower - (measure?.y ?? 0)
+        const minDy = upper - (measure?.y ?? 0)
 
         currentTop.current = Math.max(Math.min(
           currentTop.current + gestureState.dy,
@@ -297,23 +338,54 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
           currentTop.current -
           chatStore.optionsMeasures[messageId.toString()].y
         anim.flattenOffset()
-        // anim.extractOffset()
 
-        animMode.current = 'slide'
-        startSliding.current = {x0: currentTop.current -
-            chatStore.optionsMeasures[messageId.toString()].y, v0: gestureState.vy, time: Date.now()}
+        console.log("maxDy", maxDy);
+        console.log("anim.y._value", anim.y._value);
+        console.log("anim.y._offset", anim.y._offset);
+        if (gestureState.vy === 0 && (isPixelEqual(anim.y._value, maxDy) || isPixelEqual(anim.y._value, minDy))) {
+          if (isPixelEqual(anim.y._value, maxDy)) {
+            animMode.current = 'spring'
+            springMode.current = 'footer'
+            Animated.spring(anim.y, {
+              velocity: 0,
+              toValue: maxDy,
+              friction: 7, // Adjust the friction for the bounce effect
+              // tension: 1,
+              useNativeDriver: true,
+            }).start();
+          } else {
+            animMode.current = 'spring'
+            springMode.current = 'header'
+            Animated.spring(anim.y, {
+              velocity: 0,
+              toValue: minDy,
+              friction: 7, // Adjust the friction for the bounce effect
+              // tension: 1,
+              useNativeDriver: true,
+            }).start();
+          }
+        } else {
+          animMode.current = 'slide'
+          startSliding.current = {x0: currentTop.current -
+              chatStore.optionsMeasures[messageId.toString()].y, v0: gestureState.vy, time: Date.now()}
 
-        // Start a decay animation to simulate momentum
-        Animated.decay(anim, {
-          velocity: {x: 0, y: gestureState.vy}, // Use the vertical velocity that the user ended with
-          deceleration: 0.9983,
-          useNativeDriver: true,
-        }).start()
+          // Start a decay animation to simulate momentum
+          Animated.decay(anim, {
+            velocity: {x: 0, y: gestureState.vy}, // Use the vertical velocity that the user ended with
+            deceleration: 0.9983,
+            useNativeDriver: true,
+          }).start()
+        }
       },
     }),
   ).current
 
-  const optionsAnim = useRef(Animated.diffClamp(anim.y, -(measure?.y ?? 0), screenHeight - (measure?.y ?? 0))).current
+  // const optionsAnim = useRef(Animated.diffClamp(anim.y, -(measure?.y ?? 0), screenHeight - (measure?.y ?? 0))).current
+
+  let zIndexOffset = chatStore.optionsTarget !== null ? props.zIndexOffset + 1 : props.zIndexOffset
+  if (chatStore.optionsTarget === messageId) {
+    zIndexOffset = 1
+  }
 
   if (unmount) {
     return null
@@ -630,6 +702,10 @@ const OptionRow: any = (props: any) => {
       <Text style={styles.optionText}>{label}</Text>
     </TouchableOpacity>
   )
+}
+
+function isPixelEqual(a: number, b: number): boolean {
+  return Math.round(a) === Math.round(b)
 }
 
 const styles = StyleSheet.create({
