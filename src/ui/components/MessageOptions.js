@@ -90,12 +90,6 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
   const isUser = message?.role === MessageRole.USER
 
   let top = (measure?.y ?? 0) - (layout?.height ?? 0) - margin / 2
-  // let top = (measure?.y ?? 0) - 36
-  // if (top < headerHeight) {
-  //   top = headerHeight
-  // }
-
-
 
   const isOptionTarget = chatStore.optionsTarget === messageId
 
@@ -144,9 +138,9 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     const previousMessageMeasure = previousMessageId
       ? chatStore.optionsMeasures[previousMessageId?.toString()]
       : null
-    const previousMessageTop =
-      (previousMessageMeasure?.y ?? 0) +
-      (chatStore.optionsPannings[previousMessageId?.toString()] ?? 0) // acount for panning in the previous message
+    // const previousMessageTop =
+    //   (previousMessageMeasure?.y ?? 0) +
+    //   (chatStore.optionsPannings[previousMessageId?.toString()] ?? 0) // acount for panning in the previous message
     let lower = !previousMessageMeasure
       ? screenHeight - safeAreaFooterHeight
       : screenHeight - safeAreaFooterHeight
@@ -166,9 +160,9 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     const nextMessageMeasure = nextMessageId
       ? chatStore.optionsMeasures[nextMessageId?.toString()]
       : null
-    const nextMessageTop =
-      (nextMessageMeasure?.y ?? 0) +
-      (chatStore.optionsPannings[nextMessageId?.toString()] ?? 0) // acount for panning in the next message
+    // const nextMessageTop =
+    //   (nextMessageMeasure?.y ?? 0) +
+    //   (chatStore.optionsPannings[nextMessageId?.toString()] ?? 0) // acount for panning in the next message
     let upper = !nextMessageMeasure
       ? safeAreaHeaderHeight
       : safeAreaHeaderHeight
@@ -183,7 +177,6 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     const {lower, upper} = getScreenBoundaries()
     const maxDy = lower - (measure?.y ?? 0)
     const minDy = upper - (measure?.y ?? 0)
-    console.log("animMode.current", animMode.current);
     if (animMode.current === 'spring') {
       if (springMode.current === 'footer') {
         if (lastY.current !== maxDy) {
@@ -261,11 +254,6 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
         }
       }
       anim.y.addListener(listener)
-
-      return () => {
-        // $FlowFixMe
-        anim.y.removeAllListeners()
-      }
     }
   }, [])
   const panResponder = useRef(
@@ -273,13 +261,8 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
       onStartShouldSetPanResponder: () => true,
       onPanResponderGrant: (e, gestureState) => {
         animMode.current = 'pan'
-        // chatStore.deselectOptionsTarget()
-        // const isOptionColorTarget = chatStore.optionsColorTarget === messageId
-        // if (!isOptionColorTarget) {
         chatStore.setOptionsColorTarget(messageId)
         chatStore.setOptionsTarget(messageId)
-        // chatStore.moveFloatingToTop(messageId)
-        // }
         anim.extractOffset()
 
         const {lower, upper} = getScreenBoundaries()
@@ -313,19 +296,6 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
         }
       },
       onPanResponderRelease: (e, gestureState) => {
-        // const isOptionColorTarget = chatStore.optionsColorTarget === messageId
-        // if (gestureState.dy === 0) {
-        //   if (isOptionColorTarget) {
-        //     chatStore.deselectOptionsColorTarget()
-        //   }
-        //   // else {
-        //   //   chatStore.setOptionsColorTarget(messageId)
-        //   //   chatStore.setOptionsTarget(messageId)
-        //   // }
-        // } else {
-        //   chatStore.deselectOptionsColorTarget()
-        // }
-
         const {lower, upper} = getScreenBoundaries()
         const maxDy = lower - (measure?.y ?? 0)
         const minDy = upper - (measure?.y ?? 0)
@@ -339,9 +309,6 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
           chatStore.optionsMeasures[messageId.toString()].y
         anim.flattenOffset()
 
-        console.log("maxDy", maxDy);
-        console.log("anim.y._value", anim.y._value);
-        console.log("anim.y._offset", anim.y._offset);
         if (gestureState.vy === 0 && (isPixelEqual(anim.y._value, maxDy) || isPixelEqual(anim.y._value, minDy))) {
           if (isPixelEqual(anim.y._value, maxDy)) {
             animMode.current = 'spring'
@@ -488,211 +455,6 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     </>
   )
 })
-
-const FloatingOption: any = (props) => {
-  const {
-    style,
-    messageId,
-    measure,
-    safeHeaderHeight,
-    safeFooterHeight,
-    zIndexOffset,
-    opacityAnim,
-    render,
-    onLayout,
-  } = props;
-
-  const predictFutureVelocity = (velocity: number, deceleration: number) => {
-    return velocity / (1 - deceleration)
-  }
-
-  const getScreenBoundaries = (): {lower: number, upper: number} => {
-    // The lower boundary is either the top of the footer or the top of the previous message
-    const previousMessageId =
-      chatStore.optionsMessageIds[
-      chatStore.optionsMessageIds.indexOf(messageId) - 1
-        ]
-    const previousMessageMeasure = previousMessageId
-      ? chatStore.optionsMeasures[previousMessageId?.toString()]
-      : null
-    const previousMessageTop =
-      (previousMessageMeasure?.y ?? 0) +
-      (chatStore.optionsPannings[previousMessageId?.toString()] ?? 0) // acount for panning in the previous message
-    let lower = !previousMessageMeasure
-      ? screenHeight - safeFooterHeight
-      : screenHeight - safeFooterHeight
-    // : previousMessageTop
-    lower += -profileRowMinHeight
-
-    // The upper boundary is either the bottom of the header or the bottom of the next message
-    const nextMessageId =
-      chatStore.optionsMessageIds[
-      chatStore.optionsMessageIds.indexOf(messageId) + 1
-        ]
-    const nextMessageMeasure = nextMessageId
-      ? chatStore.optionsMeasures[nextMessageId?.toString()]
-      : null
-    const nextMessageTop =
-      (nextMessageMeasure?.y ?? 0) +
-      (chatStore.optionsPannings[nextMessageId?.toString()] ?? 0) // acount for panning in the next message
-    let upper = !nextMessageMeasure
-      ? safeHeaderHeight
-      : safeHeaderHeight
-    // : nextMessageTop
-    upper += profileRowMinHeight
-    upper -= chatStore.optionsMeasures[messageId?.toString()]?.height ?? 0
-
-    return {lower, upper}
-  }
-
-  const animMode = useRef<'pan' | 'slide' | 'spring'>('pan')
-  const startSliding = useRef<any>(null)
-  const currentTop = useRef(measure?.y ?? 0)
-  const anim = useRef(new Animated.ValueXY()).current
-  const lastTime = useRef(0)
-  const lastY = useRef(0)
-  anim.y.addListener((position) => {
-    const diffY = position.value - lastY.current
-    lastY.current = position.value
-
-    const diffTime = Date.now() - lastTime.current
-    lastTime.current = Date.now()
-
-    if (diffTime > 0) {
-      if (animMode.current === 'slide') {
-        const {lower, upper} = getScreenBoundaries()
-        const maxDy = lower - (measure?.y ?? 0)
-        const minDy = upper - (measure?.y ?? 0)
-        const velocity = predictFutureVelocity(startSliding.current.v0, 0.9983)
-        if (position.value > maxDy) {
-          animMode.current = 'spring'
-          // If the boundary is exceeded, spring back to the boundary
-          Animated.spring(anim.y, {
-            velocity: velocity,
-            toValue: maxDy,
-            friction: 7, // Adjust the friction for the bounce effect
-            // tension: 1,
-            useNativeDriver: true,
-          }).start();
-        }
-        else if (position.value < minDy) {
-          animMode.current = 'spring'
-          // If the boundary is exceeded, spring back to the boundary
-          Animated.spring(anim.y, {
-            velocity: velocity,
-            toValue: minDy,
-            friction: 7, // Adjust the friction for the bounce effect
-            // tension: 1,
-            useNativeDriver: true,
-          }).start();
-        }
-      }
-    }
-  });
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onPanResponderGrant: (e, gestureState) => {
-        animMode.current = 'pan'
-        // chatStore.deselectOptionsTarget()
-        // const isOptionColorTarget = chatStore.optionsColorTarget === messageId
-        // if (!isOptionColorTarget) {
-        chatStore.setOptionsColorTarget(messageId)
-        chatStore.setOptionsTarget(messageId)
-        // }
-        anim.extractOffset()
-
-        const {lower, upper} = getScreenBoundaries()
-        currentTop.current = Math.max(Math.min(
-          (measure?.y ?? 0) + anim.y._offset,
-          lower,
-        ), upper)
-
-        anim.y.setValue(0) // stops any animations
-      },
-      onPanResponderMove: (e, gestureState) => {
-        const isOptionColorTarget = chatStore.optionsColorTarget === messageId
-        if (isOptionColorTarget) {
-          chatStore.deselectOptionsColorTarget()
-        }
-
-        const {lower, upper} = getScreenBoundaries()
-        const maxDy = lower - currentTop.current
-        const minDy = upper - currentTop.current
-
-        if (gestureState.dy > maxDy) {
-          anim.setValue({x: 0, y: maxDy})
-        }
-        else if (gestureState.dy < minDy) {
-          anim.setValue({x: 0, y: minDy})
-        }
-        else {
-          Animated.event([null, {dy: anim.y}], {
-            useNativeDriver: false,
-          })(e, gestureState)
-        }
-      },
-      onPanResponderRelease: (e, gestureState) => {
-        // const isOptionColorTarget = chatStore.optionsColorTarget === messageId
-        // if (gestureState.dy === 0) {
-        //   if (isOptionColorTarget) {
-        //     chatStore.deselectOptionsColorTarget()
-        //   }
-        //   // else {
-        //   //   chatStore.setOptionsColorTarget(messageId)
-        //   //   chatStore.setOptionsTarget(messageId)
-        //   // }
-        // } else {
-        //   chatStore.deselectOptionsColorTarget()
-        // }
-
-        const {lower, upper} = getScreenBoundaries()
-
-        currentTop.current = Math.max(Math.min(
-          currentTop.current + gestureState.dy,
-          lower,
-        ), upper)
-        chatStore.optionsPannings[messageId.toString()] =
-          currentTop.current -
-          chatStore.optionsMeasures[messageId.toString()].y
-        anim.flattenOffset()
-        // anim.extractOffset()
-
-        animMode.current = 'slide'
-        startSliding.current = {x0: currentTop.current -
-            chatStore.optionsMeasures[messageId.toString()].y, v0: gestureState.vy, time: Date.now()}
-
-        // Start a decay animation to simulate momentum
-        Animated.decay(anim, {
-          velocity: {x: 0, y: gestureState.vy}, // Use the vertical velocity that the user ended with
-          deceleration: 0.9983,
-          useNativeDriver: true,
-        }).start()
-      },
-    }),
-  ).current
-
-  return (
-    <Animated.View
-      style={[
-        styles.container,
-        {
-          top: measure?.y ?? 0,
-          left: measure?.x ?? 0,
-          opacity: opacityAnim,
-          width: measure?.width ?? 0,
-          transform: [{translateY: anim.y}],
-          zIndex: 500 - zIndexOffset
-        },
-        style,
-        shadow,
-      ]}
-      onLayout={onLayout}
-      {...panResponder.panHandlers}>
-      {render()}
-    </Animated.View>
-  )
-}
 
 const OptionRow: any = (props: any) => {
   const {label, onPress} = props
