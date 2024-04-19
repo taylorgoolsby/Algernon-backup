@@ -2,7 +2,6 @@
 
 import React, {useRef, useState, useEffect} from 'react'
 import {
-  View,
   StyleSheet,
   TouchableOpacity,
   Animated,
@@ -12,7 +11,7 @@ import {
 import chatStore from '../../stores/ChatStore.js'
 import {observer} from 'mobx-react'
 import {BlurView} from '@react-native-community/blur'
-import Colors, { darkMode, fadeTime, shadow } from "../../Colors.js";
+import Colors, {darkMode, fadeTime, shadow} from '../../Colors.js'
 import {MessageRole} from '../../schema/Message/MessageSchema.mjs'
 import Text from './Text.js'
 import modalStore from '../../stores/ModalStore.js'
@@ -39,10 +38,21 @@ const easingTime = fadeTime
 const screenHeight = Dimensions.get('window').height
 
 const MessageOptions: any = observer((props: MessageOptionsProps): any => {
-  const {style, messageId, headerHeight, footerHeight, safeAreaHeaderHeight, safeAreaFooterHeight} =
-    props
+  const {
+    style,
+    messageId,
+    headerHeight,
+    footerHeight,
+    safeAreaHeaderHeight,
+    safeAreaFooterHeight,
+  } = props
 
-  const measure = chatStore.optionsMeasures[messageId.toString()] ?? {x: 0, y: 0, width: 0, height: 0}
+  const measure = chatStore.optionsMeasures[messageId.toString()] ?? {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  }
   const fadeOut = !!chatStore.optionsMessageIdFadeOuts[messageId.toString()]
   const prevFadeOut = useRef(fadeOut)
   const unmountTimeout = useRef<any>(null)
@@ -133,8 +143,8 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     // The lower boundary is either the top of the footer or the top of the previous message
     const previousMessageId =
       chatStore.optionsMessageIds[
-      chatStore.optionsMessageIds.indexOf(messageId) - 1
-        ]
+        chatStore.optionsMessageIds.indexOf(messageId) - 1
+      ]
     const previousMessageMeasure = previousMessageId
       ? chatStore.optionsMeasures[previousMessageId?.toString()]
       : null
@@ -155,8 +165,8 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     // The upper boundary is either the bottom of the header or the bottom of the next message
     const nextMessageId =
       chatStore.optionsMessageIds[
-      chatStore.optionsMessageIds.indexOf(messageId) + 1
-        ]
+        chatStore.optionsMessageIds.indexOf(messageId) + 1
+      ]
     const nextMessageMeasure = nextMessageId
       ? chatStore.optionsMeasures[nextMessageId?.toString()]
       : null
@@ -186,7 +196,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
             friction: 7, // Adjust the friction for the bounce effect
             // tension: 1,
             useNativeDriver: true,
-          }).start();
+          }).start()
         }
       } else {
         if (lastY.current !== minDy) {
@@ -196,7 +206,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
             friction: 7, // Adjust the friction for the bounce effect
             // tension: 1,
             useNativeDriver: true,
-          }).start();
+          }).start()
         }
       }
     }
@@ -225,7 +235,10 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
             const {lower, upper} = getScreenBoundaries()
             const maxDy = lower - (measure?.y ?? 0)
             const minDy = upper - (measure?.y ?? 0)
-            const velocity = predictFutureVelocity(startSliding.current.v0, 0.9983)
+            const velocity = predictFutureVelocity(
+              startSliding.current.v0,
+              0.9983,
+            )
             if (position.value > maxDy) {
               animMode.current = 'spring'
               springMode.current = 'footer'
@@ -236,9 +249,8 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
                 friction: 7, // Adjust the friction for the bounce effect
                 // tension: 1,
                 useNativeDriver: true,
-              }).start();
-            }
-            else if (position.value < minDy) {
+              }).start()
+            } else if (position.value < minDy) {
               animMode.current = 'spring'
               springMode.current = 'header'
               // If the boundary is exceeded, spring back to the boundary
@@ -248,7 +260,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
                 friction: 7, // Adjust the friction for the bounce effect
                 // tension: 1,
                 useNativeDriver: true,
-              }).start();
+              }).start()
             }
           }
         }
@@ -266,10 +278,10 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
         anim.extractOffset()
 
         const {lower, upper} = getScreenBoundaries()
-        currentTop.current = Math.max(Math.min(
-          (measure?.y ?? 0) + anim.y._offset,
-          lower,
-        ), upper)
+        currentTop.current = Math.max(
+          Math.min((measure?.y ?? 0) + anim.y._offset, lower),
+          upper,
+        )
 
         anim.y.setValue(0) // stops any animations
       },
@@ -285,11 +297,9 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
 
         if (gestureState.dy > maxDy) {
           anim.setValue({x: 0, y: maxDy})
-        }
-        else if (gestureState.dy < minDy) {
+        } else if (gestureState.dy < minDy) {
           anim.setValue({x: 0, y: minDy})
-        }
-        else {
+        } else {
           Animated.event([null, {dy: anim.y}], {
             useNativeDriver: false,
           })(e, gestureState)
@@ -300,16 +310,19 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
         const maxDy = lower - (measure?.y ?? 0)
         const minDy = upper - (measure?.y ?? 0)
 
-        currentTop.current = Math.max(Math.min(
-          currentTop.current + gestureState.dy,
-          lower,
-        ), upper)
+        currentTop.current = Math.max(
+          Math.min(currentTop.current + gestureState.dy, lower),
+          upper,
+        )
         chatStore.optionsPannings[messageId.toString()] =
-          currentTop.current -
-          chatStore.optionsMeasures[messageId.toString()].y
+          currentTop.current - chatStore.optionsMeasures[messageId.toString()].y
         anim.flattenOffset()
 
-        if (gestureState.vy === 0 && (isPixelEqual(anim.y._value, maxDy) || isPixelEqual(anim.y._value, minDy))) {
+        if (
+          gestureState.vy === 0 &&
+          (isPixelEqual(anim.y._value, maxDy) ||
+            isPixelEqual(anim.y._value, minDy))
+        ) {
           if (isPixelEqual(anim.y._value, maxDy)) {
             animMode.current = 'spring'
             springMode.current = 'footer'
@@ -319,7 +332,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
               friction: 7, // Adjust the friction for the bounce effect
               // tension: 1,
               useNativeDriver: true,
-            }).start();
+            }).start()
           } else {
             animMode.current = 'spring'
             springMode.current = 'header'
@@ -329,12 +342,17 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
               friction: 7, // Adjust the friction for the bounce effect
               // tension: 1,
               useNativeDriver: true,
-            }).start();
+            }).start()
           }
         } else {
           animMode.current = 'slide'
-          startSliding.current = {x0: currentTop.current -
-              chatStore.optionsMeasures[messageId.toString()].y, v0: gestureState.vy, time: Date.now()}
+          startSliding.current = {
+            x0:
+              currentTop.current -
+              chatStore.optionsMeasures[messageId.toString()].y,
+            v0: gestureState.vy,
+            time: Date.now(),
+          }
 
           // Start a decay animation to simulate momentum
           Animated.decay(anim, {
@@ -349,7 +367,10 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
 
   // const optionsAnim = useRef(Animated.diffClamp(anim.y, -(measure?.y ?? 0), screenHeight - (measure?.y ?? 0))).current
 
-  let zIndexOffset = chatStore.optionsTarget !== null ? props.zIndexOffset + 1 : props.zIndexOffset
+  let zIndexOffset =
+    chatStore.optionsTarget !== null
+      ? props.zIndexOffset + 1
+      : props.zIndexOffset
   if (chatStore.optionsTarget === messageId) {
     zIndexOffset = 1
   }
@@ -370,7 +391,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
               opacity: opacityAnim,
               transform: [{translateY: anim.y}],
               // zIndex: 500 + zIndexOffset
-              zIndex: 500 - zIndexOffset
+              zIndex: 500 - zIndexOffset,
             },
             isUser
               ? {
@@ -378,14 +399,14 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
                     (measure?.x ?? 0) +
                     ((measure?.width ?? 0) - (layout?.width ?? 0)) -
                     0,
-                // left: (measure?.x ?? 0) + 0
+                  // left: (measure?.x ?? 0) + 0
                 }
               : {
                   // left:
                   //   (measure?.x ?? 0) +
                   //   ((measure?.width ?? 0) - (layout?.width ?? 0)) -
                   //   0,
-                  left: (measure?.x ?? 0) + 0
+                  left: (measure?.x ?? 0) + 0,
                 },
             style,
             shadow,
@@ -406,10 +427,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
           onLayout={onLayout}
           {...panResponder.panHandlers}>
           <BlurView
-            style={[
-              styles.blurView,
-
-            ]}
+            style={[styles.blurView]}
             blurType={darkMode ? 'dark' : 'light'}
             blurAmount={70}>
             {isUser ? (
@@ -438,7 +456,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
             opacity: opacityAnim,
             width: measure?.width ?? 0,
             transform: [{translateY: anim.y}],
-            zIndex: 500 - zIndexOffset
+            zIndex: 500 - zIndexOffset,
           },
           style,
           shadow,
