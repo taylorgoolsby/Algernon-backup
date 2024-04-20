@@ -36,6 +36,8 @@ type MessageOptionsProps = {
 
 const easingTime = fadeTime
 const screenHeight = Dimensions.get('window').height
+const rate = 0.999
+const friction = 9
 
 const MessageOptions: any = observer((props: MessageOptionsProps): any => {
   const {
@@ -201,16 +203,18 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
   }
 
   useEffect(() => {
+    console.log("chatStore.optionsDocked", chatStore.optionsDocked);
     const {lower, upper} = getScreenBoundaries()
     const maxDy = lower - (measure?.y ?? 0)
     const minDy = upper - (measure?.y ?? 0)
     if (animMode.current === 'spring') {
       if (springMode.current === 'footer') {
+        console.log("maxDy", maxDy);
         if (lastY.current !== maxDy) {
           Animated.spring(anim.y, {
             velocity: 0,
             toValue: maxDy,
-            friction: 7, // Adjust the friction for the bounce effect
+            friction: friction,
             // tension: 1,
             useNativeDriver: true,
           }).start()
@@ -220,14 +224,14 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
           Animated.spring(anim.y, {
             velocity: 0,
             toValue: minDy,
-            friction: 7, // Adjust the friction for the bounce effect
+            friction: friction,
             // tension: 1,
             useNativeDriver: true,
           }).start()
         }
       }
     }
-  }, [chatStore.optionsTarget])
+  }, [chatStore.optionsTarget, chatStore.optionsDocked])
 
   const animMode = useRef<'pan' | 'slide' | 'spring'>('pan')
   const springMode = useRef<'footer' | 'header'>('footer')
@@ -256,7 +260,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
             const minDy = upper - (measure?.y ?? 0)
             const velocity = getDockVelocity(
               startSliding.current.v0,
-              0.9983
+              rate
             )
             if (position.value > maxDy) {
               animMode.current = 'spring'
@@ -265,18 +269,18 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
               Animated.spring(anim.y, {
                 velocity: velocity,
                 toValue: maxDy,
-                friction: 7, // Adjust the friction for the bounce effect
+                friction: friction,
                 // tension: 1,
                 useNativeDriver: true,
               }).start()
             } else if (position.value < minDy) {
               animMode.current = 'spring'
               springMode.current = 'header'
-              // If the boundary is exceeded, spring back to the boundary
+              chatStore.dockOption(messageId, 'header')
               Animated.spring(anim.y, {
                 velocity: velocity,
                 toValue: minDy,
-                friction: 7, // Adjust the friction for the bounce effect
+                friction: friction,
                 // tension: 1,
                 useNativeDriver: true,
               }).start()
@@ -364,7 +368,6 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
           (isPixelEqual(anim.y._value, maxDy) ||
             isPixelEqual(anim.y._value, minDy))
         ) {
-          console.log('into spring')
           if (isPixelEqual(anim.y._value, maxDy)) {
             animMode.current = 'spring'
             springMode.current = 'footer'
@@ -372,7 +375,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
             Animated.spring(anim.y, {
               velocity: 0,
               toValue: maxDy,
-              friction: 7, // Adjust the friction for the bounce effect
+              friction: friction,
               // tension: 1,
               useNativeDriver: true,
             }).start()
@@ -382,7 +385,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
             Animated.spring(anim.y, {
               velocity: 0,
               toValue: minDy,
-              friction: 7, // Adjust the friction for the bounce effect
+              friction: friction,
               // tension: 1,
               useNativeDriver: true,
             }).start()
@@ -400,7 +403,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
           // Start a decay animation to simulate momentum
           Animated.decay(anim, {
             velocity: {x: 0, y: gestureState.vy}, // Use the vertical velocity that the user ended with
-            deceleration: 0.9983,
+            deceleration: rate,
             useNativeDriver: true,
           }).start()
         }
@@ -592,7 +595,7 @@ const OptionRow: any = (props: any) => {
 }
 
 function isPixelEqual(a: number, b: number): boolean {
-  return Math.round(a) === Math.round(b)
+  return Math.round(a) === Math.round(b) || Math.abs(Math.round(a) - Math.round(b)) === 1
 }
 
 const styles = StyleSheet.create({

@@ -320,12 +320,18 @@ const ChatScreen: any = observer(({navigation}) => {
         />
       ) : null}
 
+
       <BlurView
         style={styles.header}
         blurType={Colors.chatHeaderBlurType}
         blurAmount={70} //
         onLayout={onLayoutHeader} //
       >
+        <TouchableWithoutFeedback onPress={() => {
+          chatStore.deselectOptionsColorTarget()
+          chatStore.deselectOptionsTarget()
+          inputRef.current?.blur()
+        }}>
         <SafeAreaView style={styles.safeArea}>
           <View
             style={{
@@ -351,6 +357,7 @@ const ChatScreen: any = observer(({navigation}) => {
             </TouchableOpacity>
           </View>
         </SafeAreaView>
+        </TouchableWithoutFeedback>
       </BlurView>
 
       <View
@@ -358,7 +365,7 @@ const ChatScreen: any = observer(({navigation}) => {
           position: 'absolute',
           top: 0,
           left: 0,
-          zIndex: 500,
+          zIndex: 1000,
         }}>
         <SafeAreaView>
           <TouchableOpacity
