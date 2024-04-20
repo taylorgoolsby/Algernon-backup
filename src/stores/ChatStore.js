@@ -324,11 +324,14 @@ export class ChatStore {
   }
 
   dockOption: (number, 'footer' | 'header') => void = (messageId: number, type: 'footer' | 'header') => {
-    this.optionsDocked[messageId.toString()] = type
+    // $FlowFixMe
+    this.optionsDocked = {...this.optionsDocked, [messageId.toString()]: type}
   }
 
   unDockOption: (number) => void = (messageId: number) => {
-    delete this.optionsDocked[messageId.toString()]
+    const next = {...this.optionsDocked}
+    delete next[messageId.toString()]
+    this.optionsDocked = next
   }
 
   bringOptionToBack: (number) => void = (messageId: number) => {

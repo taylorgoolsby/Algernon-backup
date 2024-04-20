@@ -206,14 +206,25 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     return {lower, upper}
   }
 
+  const dockingSpringHandled = useRef(false)
   useEffect(() => {
-    console.log('update')
+    console.log('update spring')
+
+    if (dockingSpringHandled.current) {
+      // when docking happens, and spring is set, and the docking state changes
+      // which causes this effect to run,
+      // but in the case where the docking state changes at the same time as the spring is set,
+      // then no spring should be set here as that would be redundant.
+      dockingSpringHandled.current = false
+      return
+    }
+
     const {lower, upper} = getScreenBoundaries()
     const maxDy = lower - (measure?.y ?? 0)
     const minDy = upper - (measure?.y ?? 0)
     if (animMode.current === 'spring') {
       if (springMode.current === 'footer') {
-        if (lastY.current !== maxDy) {
+        if (!isPixelEqual(lastY.current, maxDy)) {
           anim.y.stopAnimation(() => {
             Animated.spring(anim.y, {
               velocity: 0,
@@ -225,7 +236,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
           })
         }
       } else {
-        if (lastY.current !== minDy) {
+        if (!isPixelEqual(lastY.current, minDy)) {
           anim.y.stopAnimation(() => {
             Animated.spring(anim.y, {
               velocity: 0,
@@ -273,6 +284,8 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
               animMode.current = 'spring'
               springMode.current = 'footer'
               chatStore.dockOption(messageId, 'footer')
+              console.log('dock footer')
+              console.log("maxDy", maxDy);
               Animated.spring(anim.y, {
                 velocity: velocity,
                 toValue: maxDy,
@@ -280,6 +293,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
                 // tension: 1,
                 useNativeDriver: true,
               }).start()
+              dockingSpringHandled.current = true
             } else if (position.value < minDy) {
               animMode.current = 'spring'
               springMode.current = 'header'
@@ -291,12 +305,19 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
                 // tension: 1,
                 useNativeDriver: true,
               }).start()
+              dockingSpringHandled.current = true
             }
           }
         }
 
-        // todo: optimize by avoiding setOptionsAnim call if there has not been a boundary violation.
-        setOptionsAnim(Animated.diffClamp(anim.y, getOptionsTopBoundary(), screenHeight - (measure?.y ?? 0)))
+        const nextBoundaryViolation = position.value <= getOptionsTopBoundary() || position.value >= screenHeight - (measure?.y ?? 0)
+        if (boundaryViolationRef.current !== nextBoundaryViolation) {
+          setBoundaryViolation(nextBoundaryViolation)
+          boundaryViolationRef.current = nextBoundaryViolation
+        }
+        if (nextBoundaryViolation) {
+          setOptionsAnim(Animated.diffClamp(anim.y, getOptionsTopBoundary(), screenHeight - (measure?.y ?? 0)))
+        }
       }
       anim.y.addListener(listener)
     }
@@ -305,12 +326,11 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => {
-
+        // Needed in order to make panning on the ProfileRow button cancel the onPress event.
         return true
       },
       onPanResponderGrant: (e, gestureState) => {
         animMode.current = 'pan'
-        console.log("animMode.current", animMode.current);
         anim.extractOffset()
 
         const {lower, upper} = getScreenBoundaries()
@@ -330,13 +350,24 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
           chatStore.setOptionsTarget(messageId)
         }
 
-        const {lower, upper} = getScreenBoundaries()
-        const maxDy = lower - currentTop.current
-        const minDy = upper - currentTop.current
+        // const {lower, upper} = getScreenBoundaries()
+        // const maxDy = lower - currentTop.current
+        // const minDy = upper - currentTop.current
 
         if (chatStore.optionsDocked[messageId.toString()] === 'footer' && gestureState.dy < 0) {
           // undock if paning moves away from the docked position
           chatStore.unDockOption(messageId)
+        }
+
+        const startingOffset = currentTop.current - (measure?.y ?? 0)
+
+        const nextBoundaryViolation = !(getOptionsTopBoundary() <= gestureState.dy + startingOffset  && gestureState.dy + startingOffset <= screenHeight - (measure?.y ?? 0))
+        if (boundaryViolationRef.current !== nextBoundaryViolation) {
+          setBoundaryViolation(nextBoundaryViolation)
+          boundaryViolationRef.current = nextBoundaryViolation
+        }
+        if (nextBoundaryViolation) {
+          setOptionsAnim(Animated.diffClamp(anim.y, getOptionsTopBoundary(), screenHeight - (measure?.y ?? 0)))
         }
 
         Animated.event([null, {dy: anim.y}], {
@@ -418,13 +449,20 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
   ).current
 
   const getOptionsTopBoundary = () => {
-    return -(measure?.y ?? 0) + (layout?.height ?? 0) + margin / 2 + safeAreaHeaderHeight + footerHeight
+    return (margin / 2 + safeAreaHeaderHeight + footerHeight) - (measure?.y ?? 0)
   }
+
+  const [updateBoundaryViolation, setUpdateBoundaryViolation] = useState(Date.now())
+  const [boundaryViolation, setBoundaryViolation] = useState(false)
+  const boundaryViolationRef = useRef(boundaryViolation)
   const [optionsAnim, setOptionsAnim] = useState(Animated.diffClamp(anim.y, getOptionsTopBoundary(), screenHeight - (measure?.y ?? 0)))
   useEffect(() => {
-    setOptionsAnim(Animated.diffClamp(anim.y, getOptionsTopBoundary(), screenHeight - (measure?.y ?? 0)))
-  }, [layout])
-  // const optionsAnim = useRef(Animated.diffClamp(anim.y, -(measure?.y ?? 0) + 2 * (layout?.height ?? 0) + margin / 2, screenHeight - (measure?.y ?? 0))).current
+    if (boundaryViolation) {
+      setOptionsAnim(Animated.diffClamp(anim.y, getOptionsTopBoundary(), screenHeight - (measure?.y ?? 0)))
+    } else {
+      setOptionsAnim(Animated.diffClamp(anim.y, getOptionsTopBoundary(), screenHeight - (measure?.y ?? 0)))
+    }
+  }, [measure, boundaryViolation, updateBoundaryViolation])
   const isDocked = chatStore.optionsDocked[messageId.toString()] === 'footer'
   let nUserDocked = 0
   let nAiDocked = 0
