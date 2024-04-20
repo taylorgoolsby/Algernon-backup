@@ -350,13 +350,19 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
           chatStore.setOptionsTarget(messageId)
         }
 
-        // const {lower, upper} = getScreenBoundaries()
-        // const maxDy = lower - currentTop.current
-        // const minDy = upper - currentTop.current
+        const {lower, upper} = getScreenBoundaries()
+        const maxDy = lower - currentTop.current
+        const minDy = upper - currentTop.current
 
         if (chatStore.optionsDocked[messageId.toString()] === 'footer' && gestureState.dy < 0) {
           // undock if paning moves away from the docked position
           chatStore.unDockOption(messageId)
+        } else if (!chatStore.optionsDocked[messageId.toString()]) {
+          if (gestureState.dy > maxDy) {
+            chatStore.dockOption(messageId, 'footer')
+          } else if (gestureState.dy < minDy) {
+            chatStore.dockOption(messageId, 'header')
+          }
         }
 
         const startingOffset = currentTop.current - (measure?.y ?? 0)
