@@ -86,9 +86,11 @@ const ListSlider = (props: any): any => {
 
   const initialSafeAreaFooterHeight = useRef(safeAreaFooterHeight)
   useEffect(() => {
-    if (footerHeight === 50 && keyboardHeight === 0) {
-      if (safeAreaFooterHeight > initialSafeAreaFooterHeight.current) {
-        initialSafeAreaFooterHeight.current = safeAreaFooterHeight
+    if (!initialized.current) {
+      if (footerHeight === 50 && keyboardHeight === 0) {
+        if (safeAreaFooterHeight > initialSafeAreaFooterHeight.current) {
+          initialSafeAreaFooterHeight.current = safeAreaFooterHeight
+        }
       }
     }
   }, [footerHeight, safeAreaFooterHeight, keyboardHeight])

@@ -18,7 +18,7 @@ import {
 } from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Text from './components/Text.js'
-import ChatMessage, { leftMargin, rightMargin } from "./components/ChatMessage.js";
+import ChatMessage, {leftMargin, rightMargin} from './components/ChatMessage.js'
 import ProfilePic from './components/ProfilePic.js'
 import ChatIteration from '../agent/ChatIteration.js'
 import {observer} from 'mobx-react'
@@ -30,8 +30,9 @@ import Colors, {
   footerInactive,
   headerLeft,
   headerRight,
-  searchActive, shadow,
-} from "../Colors.js";
+  searchActive,
+  shadow,
+} from '../Colors.js'
 import modalStore from '../stores/ModalStore.js'
 import Voice from '@react-native-voice/voice'
 import {
@@ -161,7 +162,7 @@ const ChatScreen: any = observer(({navigation}) => {
         Voice.onSpeechError = e => {
           console.log(e.error)
           stopSpeechToText()
-          modalStore.showError('Speech recognition had to stop.')
+          modalStore.showError('Speech recognition stopped')
         }
       })
     }
@@ -319,11 +320,12 @@ const ChatScreen: any = observer(({navigation}) => {
         />
       ) : null}
 
-      <TouchableWithoutFeedback onPress={() => {
-        chatStore.deselectOptionsColorTarget()
-        chatStore.deselectOptionsTarget()
-        inputRef.current?.blur()
-      }}>
+      <TouchableWithoutFeedback
+        onPress={() => {
+          chatStore.deselectOptionsColorTarget()
+          chatStore.deselectOptionsTarget()
+          inputRef.current?.blur()
+        }}>
         <View style={styles.header}>
           <BlurView
             style={{flex: 1}}
@@ -423,107 +425,115 @@ const ChatScreen: any = observer(({navigation}) => {
         </BlurView>
       </Modal>
 
-      <TouchableWithoutFeedback onPress={() => {
-        chatStore.deselectOptionsColorTarget()
-        chatStore.deselectOptionsTarget()
-        inputRef.current?.blur()
-
-      }}>
-      <KeyboardAvoidingView
-        style={[styles.footer, shadow]}
-        behavior={Platform.OS === 'ios' ? 'position' : null}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} //
-      >
-        <BlurView
-          style={styles.footerBlur}
-          blurType={Colors.chatFooterBlurType}
-          blurAmount={70}
-          onLayout={onLayoutSafeAreaFooter}>
-          <SafeAreaView style={styles.inputSafeArea}>
-            <TouchableWithoutFeedback onPress={focusInput}>
-              <View style={styles.inputBar} onLayout={onLayoutFooter}>
-                <TouchableOpacity
-                  style={styles.clearInputButton}
-                  onPress={() => {
-                    if (searchMode) {
-                      exitSearchMode()
-                    } else if (!!input) {
-                      setInput('')
-                    } else {
-                      enterSearchMode()
+      <TouchableWithoutFeedback
+        onPress={() => {
+          chatStore.deselectOptionsColorTarget()
+          chatStore.deselectOptionsTarget()
+          inputRef.current?.blur()
+        }}>
+        <KeyboardAvoidingView
+          style={[styles.footer, shadow]}
+          behavior={Platform.OS === 'ios' ? 'position' : null}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} //
+        >
+          <BlurView
+            style={styles.footerBlur}
+            blurType={Colors.chatFooterBlurType}
+            blurAmount={70}
+            onLayout={onLayoutSafeAreaFooter}>
+            <SafeAreaView style={styles.inputSafeArea}>
+              <TouchableWithoutFeedback onPress={focusInput}>
+                <View style={styles.inputBar} onLayout={onLayoutFooter}>
+                  <TouchableOpacity
+                    style={styles.clearInputButton}
+                    onPress={() => {
+                      if (searchMode) {
+                        exitSearchMode()
+                      } else if (!!input) {
+                        setInput('')
+                      } else {
+                        enterSearchMode()
+                      }
+                    }}>
+                    <AnimatedIcon
+                      name={
+                        !!input && !searchMode
+                          ? 'close-circle'
+                          : 'search-circle'
+                      }
+                      size={!!input && !searchMode ? 28 : 30}
+                      style={{marginLeft: !!input && !searchMode ? 0 : -1}}
+                      color={clearColor.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [
+                          footerInactive,
+                          searchMode ? searchActive : footerActive,
+                        ],
+                      })}
+                    />
+                  </TouchableOpacity>
+                  {/*$FlowFixMe*/}
+                  <TextInput
+                    ref={setInputRef}
+                    style={styles.input}
+                    multiline
+                    onFocus={onFocus}
+                    onBlur={onBlur}
+                    value={searchMode ? searchInput : input}
+                    onChangeText={
+                      searchMode ? onSearchInputValueChange : onInputValueChange
                     }
-                  }}>
-                  <AnimatedIcon
-                    name={
-                      !!input && !searchMode ? 'close-circle' : 'search-circle'
-                    }
-                    size={!!input && !searchMode ? 28 : 30}
-                    style={{marginLeft: !!input && !searchMode ? 0 : -1}}
-                    color={clearColor.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [
-                        footerInactive,
-                        searchMode ? searchActive : footerActive,
-                      ],
-                    })}
+                    placeholder={searchMode ? 'Search' : 'Message'}
+                    placeholderTextColor={Colors.sendIconDisabledBg}
                   />
-                </TouchableOpacity>
-                {/*$FlowFixMe*/}
-                <TextInput
-                  ref={setInputRef}
-                  style={styles.input}
-                  multiline
-                  onFocus={onFocus}
-                  onBlur={onBlur}
-                  value={searchMode ? searchInput : input}
-                  onChangeText={
-                    searchMode ? onSearchInputValueChange : onInputValueChange
-                  }
-                  placeholder={searchMode ? 'Search' : 'Message'}
-                  placeholderTextColor={Colors.sendIconDisabledBg}
-                />
-                <TouchableOpacity
-                  style={styles.sendButton}
-                  onPress={
-                    (input.trim() && !isRecording) || searchMode
-                      ? submit
-                      : isRecording
-                      ? stopSpeechToText
-                      : startSpeechToText
-                  }
-                  disabled={!!input.trim() && !isRecording && !canPost}>
-                  <AnimatedIcon
-                    name={
+                  <TouchableOpacity
+                    style={[styles.sendButton, {marginRight: isRecording ? -1 : 0}]}
+                    onPress={
                       (input.trim() && !isRecording) || searchMode
-                        ? 'arrow-up-circle'
+                        ? submit
                         : isRecording
-                        ? 'stop-circle'
-                        : 'mic'
+                        ? stopSpeechToText
+                        : startSpeechToText
                     }
-                    size={
-                      !(input.trim() && !isRecording) && !isRecording ? 26 : 28
-                    }
-                    color={submitColor.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [footerInactive, footerActive],
-                    })}
-                  />
-                </TouchableOpacity>
-              </View>
-            </TouchableWithoutFeedback>
-            {isRecording ? (
-              <TouchableOpacity
-                style={styles.recordingContainer}
-                onPress={stopSpeechToText}>
-                <Icon name={'stop-circle-outline'} size={28} color={'white'} />
-                <Text style={styles.recordingText}>
-                  {' Tap to stop recording.'}
-                </Text>
-              </TouchableOpacity>
-            ) : null}
-          </SafeAreaView>
-        </BlurView>
-      </KeyboardAvoidingView>
+                    disabled={!!input.trim() && !isRecording && !canPost}>
+                    <AnimatedIcon
+                      name={
+                        (input.trim() && !isRecording) || searchMode
+                          ? 'arrow-up-circle'
+                          : isRecording
+                          ? 'stop-circle'
+                          : 'mic'
+                      }
+                      size={
+                        !(input.trim() && !isRecording) && !isRecording
+                          ? 26
+                          : 28
+                      }
+                      color={submitColor.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [footerInactive, footerActive],
+                      })}
+                    />
+                  </TouchableOpacity>
+                  {/*{isRecording ? (*/}
+                  {/*  <TouchableOpacity*/}
+                  {/*    style={styles.recordingContainer}*/}
+                  {/*    onPress={stopSpeechToText}>*/}
+                  {/*    <Icon*/}
+                  {/*      name={'stop-circle-outline'}*/}
+                  {/*      size={28}*/}
+                  {/*      color={'white'}*/}
+                  {/*    />*/}
+                  {/*    <Text style={styles.recordingText}>*/}
+                  {/*      {' Tap to stop recording.'}*/}
+                  {/*    </Text>*/}
+                  {/*  </TouchableOpacity>*/}
+                  {/*) : null}*/}
+                </View>
+              </TouchableWithoutFeedback>
+            </SafeAreaView>
+          </BlurView>
+        </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
 
       {showFlipSide ? (
@@ -676,7 +686,7 @@ const styles = StyleSheet.create({
     letterSpacing: Colors.letterSpacing,
     fontSize: Colors.fontSize,
     fontFamily: Colors.fontFamily,
-    fontWeight: '300'
+    fontWeight: '300',
   },
   sendButton: {
     padding: 0,

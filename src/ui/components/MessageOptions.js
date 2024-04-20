@@ -296,11 +296,13 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => {
+
+        return true
+      },
       onPanResponderGrant: (e, gestureState) => {
         animMode.current = 'pan'
-        // chatStore.unDockOption(messageId)
-        // chatStore.setOptionsColorTarget(messageId)
-        // chatStore.setOptionsTarget(messageId)
+        console.log("animMode.current", animMode.current);
         anim.extractOffset()
 
         const {lower, upper} = getScreenBoundaries()

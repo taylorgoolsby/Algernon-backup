@@ -59,7 +59,7 @@ const ChatMessage: ChatMessageProps => any = observer(
 
     // todo: Use a Set instead of an array
     const hasFloatingCounterpart =
-      !isFloating && chatStore.optionsMessageIds.includes(parseInt(messageId))
+      !isFloating && chatStore.optionsMessageIds.includes(parseInt(messageId)) //&& !chatStore.optionsMessageIdFadeOuts[messageId.toString()]
 
     async function handleDeleteMessage() {
       if (!isFloating) {
@@ -79,18 +79,24 @@ const ChatMessage: ChatMessageProps => any = observer(
 
     function openOptions() {
       messageRef?.current?.measure((fx, fy, width, height, px, py) => {
-        if (chatStore.optionsMessageIds.includes(message.messageId)) {
-          if (
-            isFloating ? chatStore.optionsTarget !== message.messageId : null
-          ) {
-            chatStore.setOptionsTarget(message.messageId)
-            chatStore.setOptionsColorTarget(message.messageId)
-          } else {
-            chatStore.closeOptions(message.messageId)
-          }
+        if (hasFloatingCounterpart && chatStore.optionsTarget !== message.messageId) {
+          chatStore.setOptionsTarget(message.messageId)
+          chatStore.setOptionsColorTarget(message.messageId)
         } else {
-          // $FlowFixMe
-          chatStore.openOptions(message.messageId, px, py, width, height)
+          // Open or close options:
+          if (chatStore.optionsMessageIds.includes(message.messageId)) {
+            if (
+              isFloating ? chatStore.optionsTarget !== message.messageId : null
+            ) {
+              chatStore.setOptionsTarget(message.messageId)
+              chatStore.setOptionsColorTarget(message.messageId)
+            } else {
+              chatStore.closeOptions(message.messageId)
+            }
+          } else {
+            // $FlowFixMe
+            chatStore.openOptions(message.messageId, px, py, width, height)
+          }
         }
       })
     }
@@ -124,6 +130,24 @@ const ChatMessage: ChatMessageProps => any = observer(
       }
     }, [isOptionTarget, isOptionColorTarget])
 
+    const opacityAnim = useRef(new Animated.Value(1)).current
+    useEffect(() => {
+
+      if (hasFloatingCounterpart) {
+        Animated.timing(opacityAnim, {
+          toValue: 0.5,
+          duration: fadeTime,
+          useNativeDriver: false,
+        }).start()
+      } else {
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: fadeTime,
+          useNativeDriver: false,
+        }).start()
+      }
+    }, [hasFloatingCounterpart])
+
     if (!message) {
       return null
     }
@@ -132,6 +156,9 @@ const ChatMessage: ChatMessageProps => any = observer(
       <Animated.View
         ref={messageRef}
         style={[
+          {
+            opacity: opacityAnim,
+          },
           message.role === MessageRole.USER
             ? styles.userMessage
             : styles.aiMessage,
@@ -154,11 +181,11 @@ const ChatMessage: ChatMessageProps => any = observer(
                 alignSelf: 'stretch',
               }
             : null,
-          hasFloatingCounterpart
-            ? {
-                opacity: 0.5,
-              }
-            : {},
+          // hasFloatingCounterpart
+          //   ? {
+          //       opacity: 0.5,
+          //     }
+          //   : {},
         ]}
         onLayout={handleInitialLayout}>
         {isFloating ? (

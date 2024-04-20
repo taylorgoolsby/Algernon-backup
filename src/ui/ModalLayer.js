@@ -76,8 +76,8 @@ const ModalLayer: any = observer(props => {
 
 const styles = StyleSheet.create({
   errorBox: {
-    paddingTop: 8,
-    paddingBottom: 10,
+    paddingTop: 11,
+    paddingBottom: 11,
     paddingLeft: 20,
     paddingRight: 25,
     marginLeft: 41,
