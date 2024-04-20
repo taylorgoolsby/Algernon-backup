@@ -58,6 +58,7 @@ export class ChatStore {
   optionsTarget: ?number = null // The messageId to show the options for.
   optionsPannings: {[string]: number} = {} // The y-offset of a hovering option.
   optionsColorTarget: ?number = null // This message has a highlighted color.
+  optionsDocked: {[string]: 'footer' | 'header'} = {} // Whether an option is docked to the footer.
 
   constructor() {
     makeObservable(this, {
@@ -70,6 +71,7 @@ export class ChatStore {
       optionsTarget: observable,
       optionsPannings: observable,
       optionsColorTarget: observable,
+      optionsDocked: observable,
       openOptions: action.bound,
       closeOptions: action.bound,
       closeAllOptions: action.bound,
@@ -79,6 +81,8 @@ export class ChatStore {
       deselectOptionsTarget: action.bound,
       setOptionsColorTarget: action.bound,
       deselectOptionsColorTarget: action.bound,
+      dockOption: action.bound,
+      unDockOption: action.bound,
     })
 
     this.fetchEarlierMessages = debounce(this.fetchEarlierMessages, 250, {leading: true, trailing: false}).bind(this)
@@ -317,9 +321,17 @@ export class ChatStore {
     this.optionsColorTarget = null
   }
 
-  moveFloatingToTop: (messageId: number) => void = (messageId: number): void => {
-    const index = this.optionsMessageIds.indexOf(messageId)
-    this.optionsMessageIds = [this.optionsMessageIds[index], ...this.optionsMessageIds.slice(0, index), ...this.optionsMessageIds.slice(index + 1)]
+  dockOption: (number, 'footer' | 'header') => void = (messageId: number, type: 'footer' | 'header') => {
+    this.optionsDocked[messageId.toString()] = type
+  }
+
+  unDockOption: (number) => void = (messageId: number) => {
+    delete this.optionsDocked[messageId.toString()]
+  }
+
+  bringOptionToBack: (number) => void = (messageId: number) => {
+    this.optionsMessageIds = this.optionsMessageIds.filter(id => id !== messageId)
+    this.optionsMessageIds.push(messageId)
   }
 }
 

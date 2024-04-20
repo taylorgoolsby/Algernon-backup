@@ -68,6 +68,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
         setUnmount(true)
         setLayout(null)
         chatStore.onOptionFadeOut(messageId)
+        chatStore.unDockOption(messageId)
       }, easingTime)
     } else if (!fadeOut) {
       clearTimeout(unmountTimeout.current)
@@ -135,27 +136,43 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     }
   }
 
-  const predictFutureVelocity = (velocity: number, deceleration: number) => {
+  const getDockVelocity = (velocity: number, deceleration: number) => {
     return velocity / (1 - deceleration)
   }
 
   const getScreenBoundaries = (): {lower: number, upper: number} => {
     // The lower boundary is either the top of the footer or the top of the previous message
-    const previousMessageId =
-      chatStore.optionsMessageIds[
-        chatStore.optionsMessageIds.indexOf(messageId) - 1
-      ]
-    const previousMessageMeasure = previousMessageId
-      ? chatStore.optionsMeasures[previousMessageId?.toString()]
-      : null
+    // const previousMessageId =
+    //   chatStore.optionsMessageIds[
+    //     chatStore.optionsMessageIds.indexOf(messageId) - 1
+    //   ]
+    // const previousMessageMeasure = previousMessageId
+    //   ? chatStore.optionsMeasures[previousMessageId?.toString()]
+    //   : null
     // const previousMessageTop =
     //   (previousMessageMeasure?.y ?? 0) +
     //   (chatStore.optionsPannings[previousMessageId?.toString()] ?? 0) // acount for panning in the previous message
-    let lower = !previousMessageMeasure
-      ? screenHeight - safeAreaFooterHeight
-      : screenHeight - safeAreaFooterHeight
+    // let lower = !previousMessageMeasure
+    //   ? screenHeight - safeAreaFooterHeight
+    //   // : screenHeight - safeAreaFooterHeight
     // : previousMessageTop
-    lower += -profileRowMinHeight
+    // lower += -profileRowMinHeight
+
+    let nUserDocked = 0
+    let nAiDocked = 0
+    for (const id of chatStore.optionsMessageIds) {
+      if (messageId === id) {
+        break
+      }
+      const message = chatStore.messages[id.toString()]
+      if (message.role === MessageRole.USER) {
+        nUserDocked += chatStore.optionsDocked[id.toString()] === 'footer' ? 1 : 0
+      } else {
+        nAiDocked += chatStore.optionsDocked[id.toString()] === 'footer' ? 1 : 0
+      }
+    }
+    const nItemsDocked = message.role === MessageRole.USER ? nUserDocked : nAiDocked
+    let lower = screenHeight - safeAreaFooterHeight - profileRowMinHeight - nItemsDocked * profileRowMinHeight
 
     if (chatStore.optionsTarget === messageId) {
       // When an item is selected, the lower boundary is raised to show the first sentence of text.
@@ -230,19 +247,21 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
         const diffTime = Date.now() - lastTime.current
         lastTime.current = Date.now()
 
+        chatStore.optionsPannings[messageId.toString()] = lastY.current
+
         if (diffTime > 0) {
           if (animMode.current === 'slide') {
             const {lower, upper} = getScreenBoundaries()
             const maxDy = lower - (measure?.y ?? 0)
             const minDy = upper - (measure?.y ?? 0)
-            const velocity = predictFutureVelocity(
+            const velocity = getDockVelocity(
               startSliding.current.v0,
-              0.9983,
+              0.9983
             )
             if (position.value > maxDy) {
               animMode.current = 'spring'
               springMode.current = 'footer'
-              // If the boundary is exceeded, spring back to the boundary
+              chatStore.dockOption(messageId, 'footer')
               Animated.spring(anim.y, {
                 velocity: velocity,
                 toValue: maxDy,
@@ -273,8 +292,9 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
       onStartShouldSetPanResponder: () => true,
       onPanResponderGrant: (e, gestureState) => {
         animMode.current = 'pan'
-        chatStore.setOptionsColorTarget(messageId)
-        chatStore.setOptionsTarget(messageId)
+        // chatStore.unDockOption(messageId)
+        // chatStore.setOptionsColorTarget(messageId)
+        // chatStore.setOptionsTarget(messageId)
         anim.extractOffset()
 
         const {lower, upper} = getScreenBoundaries()
@@ -286,14 +306,22 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
         anim.y.setValue(0) // stops any animations
       },
       onPanResponderMove: (e, gestureState) => {
-        const isOptionColorTarget = chatStore.optionsColorTarget === messageId
-        if (isOptionColorTarget) {
-          chatStore.deselectOptionsColorTarget()
+        // const isOptionColorTarget = chatStore.optionsColorTarget === messageId
+        const isOptionTarget = chatStore.optionsTarget === messageId
+        if (!isOptionTarget) {
+          // chatStore.deselectOptionsColorTarget()
+          chatStore.setOptionsColorTarget(messageId)
+          chatStore.setOptionsTarget(messageId)
         }
 
         const {lower, upper} = getScreenBoundaries()
         const maxDy = lower - currentTop.current
         const minDy = upper - currentTop.current
+
+        if (chatStore.optionsDocked[messageId.toString()] === 'footer' && gestureState.dy < 0) {
+          // undock if paning moves away from the docked position
+          chatStore.unDockOption(messageId)
+        }
 
         if (gestureState.dy > maxDy) {
           anim.setValue({x: 0, y: maxDy})
@@ -306,9 +334,22 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
         }
       },
       onPanResponderRelease: (e, gestureState) => {
+        // screenBoundaries must be computed before changing targets
         const {lower, upper} = getScreenBoundaries()
         const maxDy = lower - (measure?.y ?? 0)
         const minDy = upper - (measure?.y ?? 0)
+
+        if (gestureState.dy === 0) {
+          // When tapping (d = 0), on release, the message should be deselected
+          const isOptionTarget = chatStore.optionsTarget === messageId
+          if (!isOptionTarget) {
+            chatStore.setOptionsTarget(messageId)
+            chatStore.setOptionsColorTarget(messageId)
+          } else {
+            chatStore.deselectOptionsTarget()
+            chatStore.deselectOptionsColorTarget()
+          }
+        }
 
         currentTop.current = Math.max(
           Math.min(currentTop.current + gestureState.dy, lower),
@@ -323,9 +364,11 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
           (isPixelEqual(anim.y._value, maxDy) ||
             isPixelEqual(anim.y._value, minDy))
         ) {
+          console.log('into spring')
           if (isPixelEqual(anim.y._value, maxDy)) {
             animMode.current = 'spring'
             springMode.current = 'footer'
+            chatStore.dockOption(messageId, 'footer')
             Animated.spring(anim.y, {
               velocity: 0,
               toValue: maxDy,
@@ -366,14 +409,78 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
   ).current
 
   // const optionsAnim = useRef(Animated.diffClamp(anim.y, -(measure?.y ?? 0), screenHeight - (measure?.y ?? 0))).current
-
-  let zIndexOffset =
-    chatStore.optionsTarget !== null
-      ? props.zIndexOffset + 1
-      : props.zIndexOffset
-  if (chatStore.optionsTarget === messageId) {
-    zIndexOffset = 1
+  const isDocked = chatStore.optionsDocked[messageId.toString()] === 'footer'
+  let nUserDocked = 0
+  let nAiDocked = 0
+  for (const id of chatStore.optionsMessageIds) {
+    if (chatStore.optionsDocked[id.toString()] === 'footer') {
+      if (chatStore.messages[id.toString()].role === MessageRole.USER) {
+        nUserDocked++
+      } else {
+        nAiDocked++
+      }
+    }
   }
+  const nDockRows = Math.max(nUserDocked, nAiDocked)
+  let nUserDockedBelow = 0
+  let nAiDockedBelow = 0
+  for (const id of chatStore.optionsMessageIds) {
+    if (id === messageId) {
+      break
+    }
+    if (chatStore.optionsDocked[id.toString()] === 'footer') {
+      if (chatStore.messages[id.toString()].role === MessageRole.USER) {
+        nUserDockedBelow++
+      } else {
+        nAiDockedBelow++
+      }
+    }
+  }
+  let zIndexOffset = props.zIndexOffset
+
+  if (!isDocked) {
+    zIndexOffset += nDockRows * 2 // times 2 because each dock row has two zIndices for the two messages in it.
+
+    // User message is always above AI messages within the bulk.
+    if (!isUser) {
+      zIndexOffset += 100
+    }
+  } else {
+    const dockRow = message.role === MessageRole.USER ? nUserDockedBelow : nAiDockedBelow
+    zIndexOffset = dockRow * 2
+
+    // AI message is always below user message within the same dock row.
+    if (!isUser) {
+      zIndexOffset += 1
+    }
+  }
+
+  // Above zIndexOffset has been decided without considering a selected message.
+  // Now we will adjust the zIndexOffset if the message is selected.
+  if (chatStore.optionsTarget !== null) {
+    if (chatStore.optionsTarget === messageId) {
+      // If selected, it's zIndex should be where it would be if it were to be docked.
+      const dockRow = message.role === MessageRole.USER ? nUserDockedBelow : nAiDockedBelow
+      zIndexOffset = dockRow * 2
+
+      // AI message is always below user message within the same dock row.
+      if (!isUser) {
+        zIndexOffset += 1
+      }
+    }
+
+    // Then all other messages below it should be pushed down.
+    if (chatStore.optionsTarget !== messageId) {
+      const indexOfSelected = chatStore.optionsMessageIds.indexOf(chatStore.optionsTarget)
+      const myIndex = chatStore.optionsMessageIds.indexOf(messageId)
+      if (indexOfSelected < myIndex) {
+        zIndexOffset += 1
+      }
+    }
+  }
+
+
+
 
   if (unmount) {
     return null
