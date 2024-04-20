@@ -17,12 +17,13 @@ import Colors, {
   aiText,
   aiText2,
   aiText2Active,
-  darkMode, fadeTime,
+  darkMode,
+  fadeTime,
   userChat,
   userText,
   userText2,
   userText2Active,
-} from "../../Colors.js";
+} from '../../Colors.js'
 import Text from './Text.js'
 import MarkdownText from './MarkdownText.js'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -49,17 +50,24 @@ const ChatMessage: ChatMessageProps => any = observer(
     messageId,
     isActive, // whether or not this is the last message in the chat.
     onMessageLayout,
-     isFloating, // whether or not this is being rendered as a floating message.
+    isFloating, // whether or not this is being rendered as a floating message.
   }: ChatMessageProps): any => {
     const message = chatStore.messages[messageId]
 
     const messageRef = useRef<any>(null)
     const [isConfirming, setIsConfirming] = useState(false)
 
+    // todo: Use a Set instead of an array
+    const hasFloatingCounterpart =
+      !isFloating && chatStore.optionsMessageIds.includes(parseInt(messageId))
+
     async function handleDeleteMessage() {
       if (!isFloating) {
         setIsConfirming(true)
-        const confirmed = await modalStore.confirm('Delete Message?', 'It will be gone forever.')
+        const confirmed = await modalStore.confirm(
+          'Delete Message?',
+          'It will be gone forever.',
+        )
         setIsConfirming(false)
         if (confirmed) {
           await chatStore.deleteMessage(message.messageId)
@@ -73,9 +81,7 @@ const ChatMessage: ChatMessageProps => any = observer(
       messageRef?.current?.measure((fx, fy, width, height, px, py) => {
         if (chatStore.optionsMessageIds.includes(message.messageId)) {
           if (
-            isFloating
-              ? chatStore.optionsTarget !== message.messageId
-              : null
+            isFloating ? chatStore.optionsTarget !== message.messageId : null
           ) {
             chatStore.setOptionsTarget(message.messageId)
             chatStore.setOptionsColorTarget(message.messageId)
@@ -98,7 +104,8 @@ const ChatMessage: ChatMessageProps => any = observer(
     }
 
     const isOptionTarget = chatStore.optionsTarget === message?.messageId
-    const isOptionColorTarget = chatStore.optionsColorTarget === message?.messageId
+    const isOptionColorTarget =
+      chatStore.optionsColorTarget === message?.messageId
 
     const backgroundColorAnim = useRef(new Animated.Value(0)).current
     useEffect(() => {
@@ -122,15 +129,14 @@ const ChatMessage: ChatMessageProps => any = observer(
     }
 
     const body = (
-      <View style={{alignSelf: 'stretch'}}>
-        <Animated.View
-          ref={messageRef}
-          style={[
-            message.role === MessageRole.USER
-              ? styles.userMessage
-              : styles.aiMessage,
-            isFloating
-              ? {
+      <Animated.View
+        ref={messageRef}
+        style={[
+          message.role === MessageRole.USER
+            ? styles.userMessage
+            : styles.aiMessage,
+          isFloating
+            ? {
                 // backgroundColor:
                 // isOptionTarget ?
                 //   () : 'rgba(255, 255, 255, 0)',
@@ -142,62 +148,80 @@ const ChatMessage: ChatMessageProps => any = observer(
                   ],
                 }),
               }
-              : null,
-            isFloating ? {
-              alignSelf: 'stretch',
-            } : null
-          ]}
-          onLayout={handleInitialLayout}>
-          {isFloating ? (
-            <BlurView
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-              }}
-              blurType={darkMode ? 'dark' : 'light'}
-              blurAmount={70}
-            />
-          ) : null}
+            : null,
+          isFloating
+            ? {
+                alignSelf: 'stretch',
+              }
+            : null,
+          hasFloatingCounterpart
+            ? {
+                opacity: 0.5,
+              }
+            : {},
+        ]}
+        onLayout={handleInitialLayout}>
+        {isFloating ? (
+          <BlurView
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
+            blurType={darkMode ? 'dark' : 'light'}
+            blurAmount={70}
+          />
+        ) : null}
 
-          <ProfileRow
+        <ProfileRow
+          message={message}
+          initialLayout={initialLayout}
+          isActive={isActive}
+          isFloating={isFloating}
+          onPress={openOptions}
+        />
+        <MainText
+          message={message}
+          initialLayout={initialLayout}
+          isFloating={isFloating}
+        />
+        {!message.deleted ? (
+          <DeleteButton
             message={message}
             initialLayout={initialLayout}
-            isActive={isActive}
-            isFloating={isFloating}
-            onPress={openOptions}
+            handleDeleteMessage={handleDeleteMessage}
+            isConfirming={isConfirming}
           />
-          <MainText
-            message={message}
-            initialLayout={initialLayout}
-            isFloating={isFloating}
-          />
-          {!message.deleted ? (
-            <DeleteButton
-              message={message}
-              initialLayout={initialLayout}
-              handleDeleteMessage={handleDeleteMessage}
-              isConfirming={isConfirming}
-            />
-          ) : null}
-        </Animated.View>
-      </View>
+        ) : null}
+      </Animated.View>
     )
 
     if (!isFloating) {
       return (
-        <TouchableWithoutFeedback
-          onPress={() => {
-            // chatStore.closeOptions()
-            chatStore.inputRef?.blur()
-            chatStore.deselectOptionsTarget()
-            chatStore.deselectOptionsColorTarget()
-          }}
-        >
-          {body}
-        </TouchableWithoutFeedback>
+        <View style={{alignSelf: 'stretch'}}>
+          <TouchableWithoutFeedback
+            onPress={() => {
+              chatStore.inputRef?.blur()
+
+              if (hasFloatingCounterpart) {
+                const isOptionTarget = chatStore.optionsTarget === message.messageId
+                if (!isOptionTarget) {
+                  chatStore.setOptionsTarget(message.messageId)
+                  chatStore.setOptionsColorTarget(message.messageId)
+                } else {
+                  chatStore.deselectOptionsTarget()
+                  chatStore.deselectOptionsColorTarget()
+                }
+              } else {
+                chatStore.deselectOptionsTarget()
+                chatStore.deselectOptionsColorTarget()
+              }
+            }}>
+            {body}
+          </TouchableWithoutFeedback>
+        </View>
       )
     } else {
       return body
@@ -264,7 +288,7 @@ const DeleteButton: any = ({
 const MainText: any = ({
   message,
   initialLayout,
-                         isFloating,
+  isFloating,
 }: {
   message: MessageSQL,
   initialLayout: any,
@@ -317,9 +341,11 @@ const MainText: any = ({
             message.role === MessageRole.USER
               ? styles.userMessageText
               : styles.aiMessageText,
-            isFloating ? {
-              color: aiText
-            } : null
+            isFloating
+              ? {
+                  color: aiText,
+                }
+              : null,
           ]}>
           {message.text.trim()}
         </MarkdownText>
@@ -334,7 +360,7 @@ const ProfileRow: any = ({
   message,
   initialLayout,
   isActive,
-                           isFloating,
+  isFloating,
   onPress,
 }: {
   message: MessageSQL,
@@ -362,7 +388,9 @@ const ProfileRow: any = ({
           marginLeft: 9,
           marginTop: 9,
           marginBottom: 9,
-          top: -1, left: 1, paddingRight: 1,
+          top: -1,
+          left: 1,
+          paddingRight: 1,
         },
       ]}
       onPress={onPress}>
@@ -378,7 +406,7 @@ const ProfileRow: any = ({
           marginLeft: 10,
           paddingRight: 14,
           fontSize: Colors.fontSize,
-          fontWeight: '700'
+          fontWeight: '700',
         }}>
         {message.role === MessageRole.USER ? 'Taylor G' : 'AI'}
       </Text>

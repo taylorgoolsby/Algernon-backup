@@ -15,7 +15,8 @@ const ListSlider = (props: any): any => {
     headerHeight,
     footerHeight,
     safeAreaFooterHeight,
-    onEmptyAreaPress
+    onEmptyAreaPress,
+    inputRef
   } = props;
 
   const [visibleHeight, setVisibleHeight] = useState(0)

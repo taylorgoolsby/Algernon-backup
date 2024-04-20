@@ -37,7 +37,7 @@ type MessageOptionsProps = {
 const easingTime = fadeTime
 const screenHeight = Dimensions.get('window').height
 const rate = 0.999
-const friction = 9
+const friction = 7
 
 const MessageOptions: any = observer((props: MessageOptionsProps): any => {
   const {
@@ -178,7 +178,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
 
     if (chatStore.optionsTarget === messageId) {
       // When an item is selected, the lower boundary is raised to show the first sentence of text.
-      lower -= 27
+      lower -= 28
     }
 
     // The upper boundary is either the bottom of the header or the bottom of the next message
@@ -203,31 +203,33 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
   }
 
   useEffect(() => {
-    console.log("chatStore.optionsDocked", chatStore.optionsDocked);
     const {lower, upper} = getScreenBoundaries()
     const maxDy = lower - (measure?.y ?? 0)
     const minDy = upper - (measure?.y ?? 0)
     if (animMode.current === 'spring') {
       if (springMode.current === 'footer') {
-        console.log("maxDy", maxDy);
         if (lastY.current !== maxDy) {
-          Animated.spring(anim.y, {
-            velocity: 0,
-            toValue: maxDy,
-            friction: friction,
-            // tension: 1,
-            useNativeDriver: true,
-          }).start()
+          anim.y.stopAnimation(() => {
+            Animated.spring(anim.y, {
+              velocity: 0,
+              toValue: maxDy,
+              friction: friction,
+              // tension: 1,
+              useNativeDriver: true,
+            }).start()
+          })
         }
       } else {
         if (lastY.current !== minDy) {
-          Animated.spring(anim.y, {
-            velocity: 0,
-            toValue: minDy,
-            friction: friction,
-            // tension: 1,
-            useNativeDriver: true,
-          }).start()
+          anim.y.stopAnimation(() => {
+            Animated.spring(anim.y, {
+              velocity: 0,
+              toValue: minDy,
+              friction: friction,
+              // tension: 1,
+              useNativeDriver: true,
+            }).start()
+          })
         }
       }
     }
@@ -327,15 +329,9 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
           chatStore.unDockOption(messageId)
         }
 
-        if (gestureState.dy > maxDy) {
-          anim.setValue({x: 0, y: maxDy})
-        } else if (gestureState.dy < minDy) {
-          anim.setValue({x: 0, y: minDy})
-        } else {
-          Animated.event([null, {dy: anim.y}], {
-            useNativeDriver: false,
-          })(e, gestureState)
-        }
+        Animated.event([null, {dy: anim.y}], {
+          useNativeDriver: false,
+        })(e, gestureState)
       },
       onPanResponderRelease: (e, gestureState) => {
         // screenBoundaries must be computed before changing targets
@@ -481,9 +477,6 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
       }
     }
   }
-
-
-
 
   if (unmount) {
     return null

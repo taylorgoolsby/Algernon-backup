@@ -43,7 +43,6 @@ import {
 } from 'react-native-permissions'
 import type {MessageSQL} from '../schema/Message/MessageSchema.mjs'
 import LongTermAnnotation from '../agent/LongTermAnnotation.js'
-import MessageList from './components/MessageList.js'
 import {useDebounce} from 'use-debounce'
 import ListSlider from './components/ListSlider.js'
 import MessageOptions from './components/MessageOptions.js'
@@ -320,45 +319,46 @@ const ChatScreen: any = observer(({navigation}) => {
         />
       ) : null}
 
-
-      <BlurView
-        style={styles.header}
-        blurType={Colors.chatHeaderBlurType}
-        blurAmount={70} //
-        onLayout={onLayoutHeader} //
-      >
-        <TouchableWithoutFeedback onPress={() => {
-          chatStore.deselectOptionsColorTarget()
-          chatStore.deselectOptionsTarget()
-          inputRef.current?.blur()
-        }}>
-        <SafeAreaView style={styles.safeArea}>
-          <View
-            style={{
-              paddingBottom: 12,
-              flexDirection: 'row',
-              justifyContent: 'flex-end',
-              flex: 1,
-            }}
-            onLayout={onLayoutInnerHeader}>
-            <TouchableOpacity
-              style={[styles.sendButton, {paddingRight: 24, opacity: 0}]}
-              onPress={() => {
-                setShowFlipSide(!showFlipSide)
-              }}
-              disabled={true}>
-              <Icon
-                // name={'analytics-outline'}
-                name={'layers-outline'}
-                size={18}
-                color={headerRight}
-                opacity={0.3}
-              />
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-        </TouchableWithoutFeedback>
-      </BlurView>
+      <TouchableWithoutFeedback onPress={() => {
+        chatStore.deselectOptionsColorTarget()
+        chatStore.deselectOptionsTarget()
+        inputRef.current?.blur()
+      }}>
+        <View style={styles.header}>
+          <BlurView
+            style={{flex: 1}}
+            blurType={Colors.chatHeaderBlurType}
+            blurAmount={70} //
+            onLayout={onLayoutHeader} //
+          >
+            <SafeAreaView style={styles.safeArea}>
+              <View
+                style={{
+                  paddingBottom: 12,
+                  flexDirection: 'row',
+                  justifyContent: 'flex-end',
+                  flex: 1,
+                }}
+                onLayout={onLayoutInnerHeader}>
+                <TouchableOpacity
+                  style={[styles.sendButton, {paddingRight: 24, opacity: 0}]}
+                  onPress={() => {
+                    setShowFlipSide(!showFlipSide)
+                  }}
+                  disabled={true}>
+                  <Icon
+                    // name={'analytics-outline'}
+                    name={'layers-outline'}
+                    size={18}
+                    color={headerRight}
+                    opacity={0.3}
+                  />
+                </TouchableOpacity>
+              </View>
+            </SafeAreaView>
+          </BlurView>
+        </View>
+      </TouchableWithoutFeedback>
 
       <View
         style={{
@@ -423,6 +423,12 @@ const ChatScreen: any = observer(({navigation}) => {
         </BlurView>
       </Modal>
 
+      <TouchableWithoutFeedback onPress={() => {
+        chatStore.deselectOptionsColorTarget()
+        chatStore.deselectOptionsTarget()
+        inputRef.current?.blur()
+
+      }}>
       <KeyboardAvoidingView
         style={[styles.footer, shadow]}
         behavior={Platform.OS === 'ios' ? 'position' : null}
@@ -518,6 +524,7 @@ const ChatScreen: any = observer(({navigation}) => {
           </SafeAreaView>
         </BlurView>
       </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
 
       {showFlipSide ? (
         <View

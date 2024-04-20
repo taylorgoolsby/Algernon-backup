@@ -9,8 +9,8 @@ import {
   Platform,
   Animated,
   Dimensions,
-  PanResponder
-} from 'react-native'
+  PanResponder, TouchableWithoutFeedback,
+} from "react-native";
 import ChatMessage, { leftMargin, margin, profileRowMinHeight, rightMargin } from "./ChatMessage.js";
 import type {MessageSQL} from '../../schema/Message/MessageSchema.mjs'
 import chatStore from "../../stores/ChatStore.js";
@@ -218,7 +218,15 @@ const MessageList = ({
           }}
           data={messageIds}
           keyExtractor={messageId => messageId}
-          ItemSeparatorComponent={() => <View style={{height: margin * 2}} />}
+          ItemSeparatorComponent={() => (
+            <TouchableWithoutFeedback onPress={() => {
+              chatStore.deselectOptionsTarget()
+              chatStore.deselectOptionsColorTarget()
+              chatStore.inputRef?.blur()
+            }}>
+              <View style={{height: margin * 2}} />
+            </TouchableWithoutFeedback>
+          )}
           renderItem={item => {
             const messageId = item.item
             return (
