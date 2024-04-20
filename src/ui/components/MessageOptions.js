@@ -283,7 +283,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
             const maxDy = lower - (measure?.y ?? 0)
             const minDy = upper - (measure?.y ?? 0)
             const velocity = getDockVelocity(startSliding.current.v0, rate)
-            if (position.value > maxDy) {
+            if (position.value > maxDy && diffY > 0 && startSliding.current.v0 > 0) {
               animMode.current = 'spring'
               springMode.current = 'footer'
               chatStore.dockOption(messageId, 'footer')
@@ -297,7 +297,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
                 useNativeDriver: true,
               }).start()
               dockingSpringHandled.current = true
-            } else if (position.value < minDy) {
+            } else if (position.value < minDy && diffY < 0 && startSliding.current.v0 < 0) {
               animMode.current = 'spring'
               springMode.current = 'header'
               chatStore.dockOption(messageId, 'header')
@@ -359,12 +359,14 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
           chatStore.setOptionsTarget(messageId)
         }
 
-        const {lower, upper} = getScreenBoundaries()
+        let lower, upper
+        const screenBoundaries = getScreenBoundaries()
+        lower = screenBoundaries.lower
+        upper = screenBoundaries.upper
         const maxDy = lower - currentTop.current
         const minDy = upper - currentTop.current
 
         if (chatStore.optionsDocked[messageId.toString()] === 'header' && gestureState.dy > minDy) {
-          console.log('undock')
           chatStore.unDockOption(messageId)
         } else if (
           chatStore.optionsDocked[messageId.toString()] === 'footer' &&
@@ -379,31 +381,32 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
           // The sendBackThreshold is equal to the amount of card which sticks out when docked, which is profileRowHeight.
           // The undockThreshold is the same as the sendBackThreshold * nUserDocked for user messages.
           // The undockThreshold is the same as the sendBackThreshold * nAiDocked for AI messages.
-          const footerEdge = screenHeight - safeAreaFooterHeight
-          const {nAiDockedBelow, nUserDockedBelow, nAiDocked, nUserDocked, messageIdBelow} = countDockings()
-          const nDocked = isUser ? nUserDocked : nAiDocked
-          const nDockedBelow = isUser ? nUserDockedBelow : nAiDockedBelow
-          const sendBackThreshold = footerEdge - shuffleHeight * (nDockedBelow + 1)
-          const undockThreshold = footerEdge - profileRowMinHeight * (nDocked - 1)
+          let nAiDockedBelow, nUserDockedBelow, nAiDocked, nUserDocked, messageIdBelow
+          const dockingsResult = countDockings()
+          nAiDockedBelow = dockingsResult.nAiDockedBelow
+          nUserDockedBelow = dockingsResult.nUserDockedBelow
+          nAiDocked = dockingsResult.nAiDocked
+          nUserDocked = dockingsResult.nUserDocked
+          messageIdBelow = dockingsResult.messageIdBelow
+          let nDocked = isUser ? nUserDocked : nAiDocked
 
+          const sendBackThreshold = lower - shuffleHeight
           const bottomEdge =
-            currentTop.current + gestureState.dy + (measure?.height ?? 0)
+            currentTop.current + gestureState.dy
 
           if (nDocked > 1 && bottomEdge < sendBackThreshold && messageIdBelow?.toString()) {
-            console.log('putOptionBehind')
             // $FlowFixMe
             chatStore.putOptionBehind(messageId, messageIdBelow)
           }
-          if (bottomEdge < undockThreshold) {
-            console.log('unDockOption')
+
+          const undockThreshold = lower - profileRowMinHeight * (nDocked === 1 ? 0 : 1)
+          if (gestureState.dy + currentTop.current < undockThreshold) {
             chatStore.unDockOption(messageId)
           }
         } else if (!chatStore.optionsDocked[messageId.toString()]) {
           if (gestureState.dy > maxDy) {
-            console.log('dockOption')
             chatStore.dockOption(messageId, 'footer')
           } else if (gestureState.dy < minDy) {
-            console.log('dockOption')
             chatStore.dockOption(messageId, 'header')
           }
         }
@@ -419,7 +422,6 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
           boundaryViolationRef.current = nextBoundaryViolation
         }
         if (nextBoundaryViolation) {
-          console.log('setOptionsAnim')
           setOptionsAnim(
             Animated.diffClamp(
               anim.y,
