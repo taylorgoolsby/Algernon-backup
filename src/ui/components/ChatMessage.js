@@ -59,7 +59,7 @@ const ChatMessage: ChatMessageProps => any = observer(
 
     // todo: Use a Set instead of an array
     const hasFloatingCounterpart =
-      !isFloating && chatStore.optionsMessageIds.includes(parseInt(messageId)) //&& !chatStore.optionsMessageIdFadeOuts[messageId.toString()]
+      !isFloating && chatStore.optionsMessageIds.includes(parseInt(messageId)) && !chatStore.optionsMessageIdFadeOuts[messageId.toString()]
 
     async function handleDeleteMessage() {
       if (!isFloating) {
@@ -227,6 +227,11 @@ const ChatMessage: ChatMessageProps => any = observer(
 
     if (!isFloating) {
       return (
+        <TouchableWithoutFeedback onPress={() => {
+          chatStore.inputRef?.blur()
+          chatStore.deselectOptionsTarget()
+          chatStore.deselectOptionsColorTarget()
+        }}>
         <View style={{alignSelf: 'stretch'}}>
           <TouchableWithoutFeedback
             onPress={() => {
@@ -249,6 +254,7 @@ const ChatMessage: ChatMessageProps => any = observer(
             {body}
           </TouchableWithoutFeedback>
         </View>
+        </TouchableWithoutFeedback>
       )
     } else {
       return body

@@ -286,6 +286,8 @@ export class ChatStore {
 
   closeOptions: (number) => void = (messageId: number) => {
     this.startOptionFadeOut(messageId)
+    chatStore.deselectOptionsTarget()
+    chatStore.deselectOptionsColorTarget()
   }
 
   closeAllOptions: () => void = () => {

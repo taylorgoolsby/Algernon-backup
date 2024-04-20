@@ -71,6 +71,10 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
         setLayout(null)
         chatStore.onOptionFadeOut(messageId)
         chatStore.unDockOption(messageId)
+        // if (chatStore.optionsTarget === messageId) {
+        //   chatStore.deselectOptionsTarget()
+        //   chatStore.deselectOptionsColorTarget()
+        // }
       }, easingTime)
     } else if (!fadeOut) {
       clearTimeout(unmountTimeout.current)
@@ -203,6 +207,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
   }
 
   useEffect(() => {
+    console.log('update')
     const {lower, upper} = getScreenBoundaries()
     const maxDy = lower - (measure?.y ?? 0)
     const minDy = upper - (measure?.y ?? 0)
@@ -289,6 +294,9 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
             }
           }
         }
+
+        // todo: optimize by avoiding setOptionsAnim call if there has not been a boundary violation.
+        setOptionsAnim(Animated.diffClamp(anim.y, getOptionsTopBoundary(), screenHeight - (measure?.y ?? 0)))
       }
       anim.y.addListener(listener)
     }
@@ -409,7 +417,14 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     }),
   ).current
 
-  // const optionsAnim = useRef(Animated.diffClamp(anim.y, -(measure?.y ?? 0), screenHeight - (measure?.y ?? 0))).current
+  const getOptionsTopBoundary = () => {
+    return -(measure?.y ?? 0) + (layout?.height ?? 0) + margin / 2 + safeAreaHeaderHeight + footerHeight
+  }
+  const [optionsAnim, setOptionsAnim] = useState(Animated.diffClamp(anim.y, getOptionsTopBoundary(), screenHeight - (measure?.y ?? 0)))
+  useEffect(() => {
+    setOptionsAnim(Animated.diffClamp(anim.y, getOptionsTopBoundary(), screenHeight - (measure?.y ?? 0)))
+  }, [layout])
+  // const optionsAnim = useRef(Animated.diffClamp(anim.y, -(measure?.y ?? 0) + 2 * (layout?.height ?? 0) + margin / 2, screenHeight - (measure?.y ?? 0))).current
   const isDocked = chatStore.optionsDocked[messageId.toString()] === 'footer'
   let nUserDocked = 0
   let nAiDocked = 0
@@ -480,6 +495,8 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     }
   }
 
+  zIndexOffset++
+
   if (unmount) {
     return null
   }
@@ -494,9 +511,9 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
               top,
               // height: (measure?.height ?? 0),
               opacity: opacityAnim,
-              transform: [{translateY: anim.y}],
+              transform: [{translateY: optionsAnim}],
               // zIndex: 500 + zIndexOffset
-              zIndex: 500 - zIndexOffset,
+              zIndex: 500 + zIndexOffset,
             },
             isUser
               ? {
@@ -566,7 +583,6 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
           style,
           shadow,
         ]}
-        onLayout={onLayout}
         {...panResponder.panHandlers}>
         <ChatMessage
           messageId={messageId.toString()}

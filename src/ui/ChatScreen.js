@@ -611,14 +611,14 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    zIndex: 1000,
+    zIndex: 500,
   },
   footer: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 1000,
+    zIndex: 500,
   },
   footerBlur: {
     flex: 1,
