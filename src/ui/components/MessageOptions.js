@@ -15,7 +15,7 @@ import Colors, {darkMode, fadeTime, shadow} from '../../Colors.js'
 import {MessageRole} from '../../schema/Message/MessageSchema.mjs'
 import Text from './Text.js'
 import modalStore from '../../stores/ModalStore.js'
-import ChatMessage, {margin, profileRowMinHeight} from './ChatMessage.js'
+import ChatMessage, { margin, peekHeight, profileRowMinHeight, shuffleHeight } from "./ChatMessage.js";
 
 // There is only one MessageOptions component open at a time.
 // It is positioned absolutely using the onLayout event of the ChatMessage component to
@@ -172,17 +172,23 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
       }
       const message = chatStore.messages[id.toString()]
       if (message.role === MessageRole.USER) {
-        nUserDocked += chatStore.optionsDocked[id.toString()] === 'footer' ? 1 : 0
+        nUserDocked +=
+          chatStore.optionsDocked[id.toString()] === 'footer' ? 1 : 0
       } else {
         nAiDocked += chatStore.optionsDocked[id.toString()] === 'footer' ? 1 : 0
       }
     }
-    const nItemsDocked = message.role === MessageRole.USER ? nUserDocked : nAiDocked
-    let lower = screenHeight - safeAreaFooterHeight - profileRowMinHeight - nItemsDocked * profileRowMinHeight
+    const nItemsDocked =
+      message.role === MessageRole.USER ? nUserDocked : nAiDocked
+    let lower =
+      screenHeight -
+      safeAreaFooterHeight -
+      profileRowMinHeight -
+      nItemsDocked * profileRowMinHeight
 
     if (chatStore.optionsTarget === messageId) {
       // When an item is selected, the lower boundary is raised to show the first sentence of text.
-      lower -= 28
+      lower -= peekHeight
     }
 
     // The upper boundary is either the bottom of the header or the bottom of the next message
@@ -249,7 +255,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
         }
       }
     }
-  }, [chatStore.optionsTarget, chatStore.optionsDocked])
+  }, [chatStore.optionsTarget, chatStore.optionsDocked, chatStore.optionsMessageIds])
 
   const animMode = useRef<'pan' | 'slide' | 'spring'>('pan')
   const springMode = useRef<'footer' | 'header'>('footer')
@@ -276,16 +282,13 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
             const {lower, upper} = getScreenBoundaries()
             const maxDy = lower - (measure?.y ?? 0)
             const minDy = upper - (measure?.y ?? 0)
-            const velocity = getDockVelocity(
-              startSliding.current.v0,
-              rate
-            )
+            const velocity = getDockVelocity(startSliding.current.v0, rate)
             if (position.value > maxDy) {
               animMode.current = 'spring'
               springMode.current = 'footer'
               chatStore.dockOption(messageId, 'footer')
               console.log('dock footer')
-              console.log("maxDy", maxDy);
+              console.log('maxDy', maxDy)
               Animated.spring(anim.y, {
                 velocity: velocity,
                 toValue: maxDy,
@@ -310,13 +313,19 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
           }
         }
 
-        const nextBoundaryViolation = position.value <= getOptionsTopBoundary() || position.value >= screenHeight - (measure?.y ?? 0)
+        const nextBoundaryViolation = !(getOptionsTopBoundary() <= position.value && position.value <= screenHeight - (measure?.y ?? 0))
         if (boundaryViolationRef.current !== nextBoundaryViolation) {
           setBoundaryViolation(nextBoundaryViolation)
           boundaryViolationRef.current = nextBoundaryViolation
         }
         if (nextBoundaryViolation) {
-          setOptionsAnim(Animated.diffClamp(anim.y, getOptionsTopBoundary(), screenHeight - (measure?.y ?? 0)))
+          setOptionsAnim(
+            Animated.diffClamp(
+              anim.y,
+              getOptionsTopBoundary(),
+              screenHeight - (measure?.y ?? 0),
+            ),
+          )
         }
       }
       anim.y.addListener(listener)
@@ -354,26 +363,70 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
         const maxDy = lower - currentTop.current
         const minDy = upper - currentTop.current
 
-        if (chatStore.optionsDocked[messageId.toString()] === 'footer' && gestureState.dy < 0) {
-          // undock if paning moves away from the docked position
+        if (chatStore.optionsDocked[messageId.toString()] === 'header' && gestureState.dy > minDy) {
+          console.log('undock')
           chatStore.unDockOption(messageId)
+        } else if (
+          chatStore.optionsDocked[messageId.toString()] === 'footer' &&
+          gestureState.dy < maxDy
+        ) {
+          // // undock if paning moves away from the docked position
+          // chatStore.unDockOption(messageId)
+
+          // Check the bottom edge of the chat message.
+          // If it is beyond the sendBackThreshold, then chatStore.sendBackOption(messageId)
+          // If it is beyond the undockThreshold, then chatStore.unDockOption(messageId)
+          // The sendBackThreshold is equal to the amount of card which sticks out when docked, which is profileRowHeight.
+          // The undockThreshold is the same as the sendBackThreshold * nUserDocked for user messages.
+          // The undockThreshold is the same as the sendBackThreshold * nAiDocked for AI messages.
+          const footerEdge = screenHeight - safeAreaFooterHeight
+          const {nAiDockedBelow, nUserDockedBelow, nAiDocked, nUserDocked, messageIdBelow} = countDockings()
+          const nDocked = isUser ? nUserDocked : nAiDocked
+          const nDockedBelow = isUser ? nUserDockedBelow : nAiDockedBelow
+          const sendBackThreshold = footerEdge - shuffleHeight * (nDockedBelow + 1)
+          const undockThreshold = footerEdge - profileRowMinHeight * (nDocked - 1)
+
+          const bottomEdge =
+            currentTop.current + gestureState.dy + (measure?.height ?? 0)
+
+          if (nDocked > 1 && bottomEdge < sendBackThreshold && messageIdBelow?.toString()) {
+            console.log('putOptionBehind')
+            // $FlowFixMe
+            chatStore.putOptionBehind(messageId, messageIdBelow)
+          }
+          if (bottomEdge < undockThreshold) {
+            console.log('unDockOption')
+            chatStore.unDockOption(messageId)
+          }
         } else if (!chatStore.optionsDocked[messageId.toString()]) {
           if (gestureState.dy > maxDy) {
+            console.log('dockOption')
             chatStore.dockOption(messageId, 'footer')
           } else if (gestureState.dy < minDy) {
+            console.log('dockOption')
             chatStore.dockOption(messageId, 'header')
           }
         }
 
         const startingOffset = currentTop.current - (measure?.y ?? 0)
 
-        const nextBoundaryViolation = !(getOptionsTopBoundary() <= gestureState.dy + startingOffset  && gestureState.dy + startingOffset <= screenHeight - (measure?.y ?? 0))
+        const nextBoundaryViolation = !(
+          getOptionsTopBoundary() <= gestureState.dy + startingOffset &&
+          gestureState.dy + startingOffset <= screenHeight - (measure?.y ?? 0)
+        )
         if (boundaryViolationRef.current !== nextBoundaryViolation) {
           setBoundaryViolation(nextBoundaryViolation)
           boundaryViolationRef.current = nextBoundaryViolation
         }
         if (nextBoundaryViolation) {
-          setOptionsAnim(Animated.diffClamp(anim.y, getOptionsTopBoundary(), screenHeight - (measure?.y ?? 0)))
+          console.log('setOptionsAnim')
+          setOptionsAnim(
+            Animated.diffClamp(
+              anim.y,
+              getOptionsTopBoundary(),
+              screenHeight - (measure?.y ?? 0),
+            ),
+          )
         }
 
         Animated.event([null, {dy: anim.y}], {
@@ -406,33 +459,26 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
           currentTop.current - chatStore.optionsMeasures[messageId.toString()].y
         anim.flattenOffset()
 
-        if (
-          gestureState.vy === 0 &&
-          (isPixelEqual(anim.y._value, maxDy) ||
-            isPixelEqual(anim.y._value, minDy))
-        ) {
-          if (isPixelEqual(anim.y._value, maxDy)) {
-            animMode.current = 'spring'
-            springMode.current = 'footer'
-            chatStore.dockOption(messageId, 'footer')
-            Animated.spring(anim.y, {
-              velocity: 0,
-              toValue: maxDy,
-              friction: friction,
-              // tension: 1,
-              useNativeDriver: true,
-            }).start()
-          } else {
-            animMode.current = 'spring'
-            springMode.current = 'header'
-            Animated.spring(anim.y, {
-              velocity: 0,
-              toValue: minDy,
-              friction: friction,
-              // tension: 1,
-              useNativeDriver: true,
-            }).start()
-          }
+        if (chatStore.optionsDocked[messageId.toString()] === 'footer') {
+          animMode.current = 'spring'
+          springMode.current = 'footer'
+          Animated.spring(anim.y, {
+            velocity: 0,
+            toValue: maxDy,
+            friction: friction,
+            // tension: 1,
+            useNativeDriver: true,
+          }).start()
+        } else if (chatStore.optionsDocked[messageId.toString()] === 'header') {
+          animMode.current = 'spring'
+          springMode.current = 'header'
+          Animated.spring(anim.y, {
+            velocity: 0,
+            toValue: minDy,
+            friction: friction,
+            // tension: 1,
+            useNativeDriver: true,
+          }).start()
         } else {
           animMode.current = 'slide'
           startSliding.current = {
@@ -455,47 +501,103 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
   ).current
 
   const getOptionsTopBoundary = () => {
-    return (margin / 2 + safeAreaHeaderHeight + footerHeight) - (measure?.y ?? 0)
+    return margin / 2 + safeAreaHeaderHeight + footerHeight - (measure?.y ?? 0)
   }
 
-  const [updateBoundaryViolation, setUpdateBoundaryViolation] = useState(Date.now())
+  const [updateBoundaryViolation, setUpdateBoundaryViolation] = useState(
+    Date.now(),
+  )
   const [boundaryViolation, setBoundaryViolation] = useState(false)
   const boundaryViolationRef = useRef(boundaryViolation)
-  const [optionsAnim, setOptionsAnim] = useState(Animated.diffClamp(anim.y, getOptionsTopBoundary(), screenHeight - (measure?.y ?? 0)))
+  const [optionsAnim, setOptionsAnim] = useState(
+    Animated.diffClamp(
+      anim.y,
+      getOptionsTopBoundary(),
+      screenHeight - (measure?.y ?? 0),
+    ),
+  )
   useEffect(() => {
     if (boundaryViolation) {
-      setOptionsAnim(Animated.diffClamp(anim.y, getOptionsTopBoundary(), screenHeight - (measure?.y ?? 0)))
+      setOptionsAnim(
+        Animated.diffClamp(
+          anim.y,
+          getOptionsTopBoundary(),
+          screenHeight - (measure?.y ?? 0),
+        ),
+      )
     } else {
-      setOptionsAnim(Animated.diffClamp(anim.y, getOptionsTopBoundary(), screenHeight - (measure?.y ?? 0)))
+      setOptionsAnim(
+        Animated.diffClamp(
+          anim.y,
+          getOptionsTopBoundary(),
+          screenHeight - (measure?.y ?? 0),
+        ),
+      )
     }
   }, [measure, boundaryViolation, updateBoundaryViolation])
+
+  const countDockings = () => {
+    let nUserDocked = 0
+    let nAiDocked = 0
+    for (const id of chatStore.optionsMessageIds) {
+      if (chatStore.optionsDocked[id.toString()] === 'footer') {
+        if (chatStore.messages[id.toString()].role === MessageRole.USER) {
+          nUserDocked++
+        } else {
+          nAiDocked++
+        }
+      }
+    }
+    const nDockRows = Math.max(nUserDocked, nAiDocked)
+    let nUserDockedBelow = 0
+    let nAiDockedBelow = 0
+    let breakAtIndex = -1
+    for (let i = 0; i < chatStore.optionsMessageIds.length; i++) {
+      const id = chatStore.optionsMessageIds[i]
+      if (id === messageId) {
+        breakAtIndex = i
+        break
+      }
+      if (chatStore.optionsDocked[id.toString()] === 'footer') {
+        if (chatStore.messages[id.toString()].role === MessageRole.USER) {
+          nUserDockedBelow++
+        } else {
+          nAiDockedBelow++
+        }
+      }
+    }
+
+    let messageIdBelow = null
+    for (let i = breakAtIndex + 1; i < chatStore.optionsMessageIds.length; i++) {
+      const id = chatStore.optionsMessageIds[i]
+      if (chatStore.optionsDocked[id.toString()] === 'footer') {
+        if (isUser && chatStore.messages[id.toString()].role === MessageRole.USER) {
+          messageIdBelow = id
+          break
+        } else if (!isUser && chatStore.messages[id.toString()].role !== MessageRole.USER) {
+          messageIdBelow = id
+          break
+        }
+      }
+    }
+
+    return {
+      nUserDocked,
+      nAiDocked,
+      nDockRows,
+      nUserDockedBelow,
+      nAiDockedBelow,
+      messageIdBelow,
+    }
+  }
+
   const isDocked = chatStore.optionsDocked[messageId.toString()] === 'footer'
-  let nUserDocked = 0
-  let nAiDocked = 0
-  for (const id of chatStore.optionsMessageIds) {
-    if (chatStore.optionsDocked[id.toString()] === 'footer') {
-      if (chatStore.messages[id.toString()].role === MessageRole.USER) {
-        nUserDocked++
-      } else {
-        nAiDocked++
-      }
-    }
-  }
-  const nDockRows = Math.max(nUserDocked, nAiDocked)
-  let nUserDockedBelow = 0
-  let nAiDockedBelow = 0
-  for (const id of chatStore.optionsMessageIds) {
-    if (id === messageId) {
-      break
-    }
-    if (chatStore.optionsDocked[id.toString()] === 'footer') {
-      if (chatStore.messages[id.toString()].role === MessageRole.USER) {
-        nUserDockedBelow++
-      } else {
-        nAiDockedBelow++
-      }
-    }
-  }
+  const {
+    nDockRows,
+    nUserDockedBelow,
+    nAiDockedBelow,
+    nUserDocked
+  } = countDockings()
   let zIndexOffset = props.zIndexOffset
 
   if (!isDocked) {
@@ -506,7 +608,8 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
       zIndexOffset += 100
     }
   } else {
-    const dockRow = message.role === MessageRole.USER ? nUserDockedBelow : nAiDockedBelow
+    const dockRow =
+      message.role === MessageRole.USER ? nUserDockedBelow : nAiDockedBelow
     zIndexOffset = dockRow * 2
 
     // AI message is always below user message within the same dock row.
@@ -520,7 +623,8 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
   if (chatStore.optionsTarget !== null) {
     if (chatStore.optionsTarget === messageId) {
       // If selected, it's zIndex should be where it would be if it were to be docked.
-      const dockRow = message.role === MessageRole.USER ? nUserDockedBelow : nAiDockedBelow
+      const dockRow =
+        message.role === MessageRole.USER ? nUserDockedBelow : nAiDockedBelow
       zIndexOffset = dockRow * 2
 
       // AI message is always below user message within the same dock row.
@@ -531,7 +635,9 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
 
     // Then all other messages below it should be pushed down.
     if (chatStore.optionsTarget !== messageId) {
-      const indexOfSelected = chatStore.optionsMessageIds.indexOf(chatStore.optionsTarget)
+      const indexOfSelected = chatStore.optionsMessageIds.indexOf(
+        chatStore.optionsTarget,
+      )
       const myIndex = chatStore.optionsMessageIds.indexOf(messageId)
       if (indexOfSelected < myIndex) {
         zIndexOffset += 1
@@ -540,6 +646,11 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
   }
 
   zIndexOffset++
+
+  // todo: optimization when shuffling:
+  //  1. when shuffling, a re-render is required because of changes to zIndex.
+  //  2. A re-render is current expensive because of all this hooks code it has to run through to re-render.
+  //  3. Identify the bare minimum to recompute on shuffle and refactor code so that it is the only code that runs on shuffle.
 
   if (unmount) {
     return null
@@ -650,7 +761,10 @@ const OptionRow: any = (props: any) => {
 }
 
 function isPixelEqual(a: number, b: number): boolean {
-  return Math.round(a) === Math.round(b) || Math.abs(Math.round(a) - Math.round(b)) === 1
+  return (
+    Math.round(a) === Math.round(b) ||
+    Math.abs(Math.round(a) - Math.round(b)) === 1
+  )
 }
 
 const styles = StyleSheet.create({

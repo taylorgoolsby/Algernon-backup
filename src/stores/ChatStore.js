@@ -83,6 +83,7 @@ export class ChatStore {
       deselectOptionsColorTarget: action.bound,
       dockOption: action.bound,
       unDockOption: action.bound,
+      putOptionBehind: action.bound,
     })
 
     this.fetchEarlierMessages = debounce(this.fetchEarlierMessages, 250, {leading: true, trailing: false}).bind(this)
@@ -317,6 +318,22 @@ export class ChatStore {
 
   setOptionsColorTarget: (number) => void = (messageId: number) => {
     this.optionsColorTarget = messageId
+
+    // Put this option behind the last docked item of the same kind.
+    let lastDockedMessageId = null
+    for (let i = 0; i < this.optionsMessageIds.length; i++) {
+      const id = this.optionsMessageIds[i]
+      if (id === messageId) {
+        break
+      }
+      if (this.optionsDocked[id.toString()] === 'footer' && this.messages[id.toString()].role === this.messages[messageId.toString()].role) {
+        lastDockedMessageId = id
+      }
+    }
+    if (lastDockedMessageId?.toString()) {
+      // $FlowFixMe
+      this.putOptionBehind(messageId, lastDockedMessageId)
+    }
   }
 
   deselectOptionsColorTarget: () => void = () => {
@@ -334,6 +351,14 @@ export class ChatStore {
     this.optionsDocked = next
   }
 
+  // moves an option to be directly below another option.
+  putOptionBehind: (number, number) => void = (messageId: number, topMessageId: number) => {
+    this.optionsMessageIds = this.optionsMessageIds.filter(id => id !== messageId)
+    const index = this.optionsMessageIds.indexOf(topMessageId)
+    this.optionsMessageIds.splice(index + 1, 0, messageId)
+  }
+
+  // sends an option all the way to the back.
   bringOptionToBack: (number) => void = (messageId: number) => {
     this.optionsMessageIds = this.optionsMessageIds.filter(id => id !== messageId)
     this.optionsMessageIds.push(messageId)

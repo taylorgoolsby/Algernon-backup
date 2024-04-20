@@ -37,6 +37,8 @@ export const leftMargin = 10
 export const rightMargin = 11
 export const margin = 12
 export const profileRowMinHeight = 38
+export const peekHeight = 29
+export const shuffleHeight = 18
 
 type ChatMessageProps = {
   messageId: string,
