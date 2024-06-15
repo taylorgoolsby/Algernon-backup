@@ -567,8 +567,8 @@ const ChatScreen: any = observer(({navigation}) => {
             messageId={messageId}
             headerHeight={headerHeight - innerHeaderHeight}
             footerHeight={safeAreaFooterHeight - footerHeight}
-            safeAreaFooterHeight={safeAreaFooterHeight}
-            safeAreaHeaderHeight={headerHeight}
+            completeFooterHeight={safeAreaFooterHeight}
+            completeHeaderHeight={headerHeight}
           />
         )
       })}

@@ -358,10 +358,21 @@ export class ChatStore {
     this.optionsMessageIds.splice(index + 1, 0, messageId)
   }
 
+  putOptionAtPosition: (number, number) => void = (messageId: number, position: number) => {
+    this.optionsMessageIds = this.optionsMessageIds.filter(id => id !== messageId)
+    this.optionsMessageIds.splice(position, 0, messageId)
+  }
+
   // sends an option all the way to the back.
   bringOptionToBack: (number) => void = (messageId: number) => {
     this.optionsMessageIds = this.optionsMessageIds.filter(id => id !== messageId)
     this.optionsMessageIds.push(messageId)
+  }
+
+  // sends an option all the way to the front.
+  bringOptionToFront: (number) => void = (messageId: number) => {
+    this.optionsMessageIds = this.optionsMessageIds.filter(id => id !== messageId)
+    this.optionsMessageIds.unshift(messageId)
   }
 }
 

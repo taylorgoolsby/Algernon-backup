@@ -34,7 +34,9 @@ import {observer} from 'mobx-react'
 import {BlurView} from '@react-native-community/blur'
 
 export const leftMargin = 10
+// export const leftMargin = 0
 export const rightMargin = 11
+// export const rightMargin = 0
 export const margin = 12
 export const profileRowMinHeight = 38
 export const peekHeight = 29

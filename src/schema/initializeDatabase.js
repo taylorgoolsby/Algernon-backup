@@ -128,7 +128,6 @@ export async function truncateDatabase() {
   await AnnotationInterface.truncateTable()
   await CompletionInterface.truncateTable()
   await MessageInterface.truncateTable()
-  await MessageInterface.truncateTable()
   await ShortTermMemoryInterface.truncateTable()
   await query(sqltag`DELETE FROM sqlite_sequence;`)
   // The Version table does not get truncated.

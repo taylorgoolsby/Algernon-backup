@@ -30,8 +30,8 @@ type MessageOptionsProps = {
   messageId: number,
   headerHeight: number,
   footerHeight: number,
-  safeAreaHeaderHeight: number,
-  safeAreaFooterHeight: number,
+  completeHeaderHeight: number,
+  completeFooterHeight: number,
 }
 
 const easingTime = fadeTime
@@ -45,8 +45,8 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     messageId,
     headerHeight,
     footerHeight,
-    safeAreaHeaderHeight,
-    safeAreaFooterHeight,
+    completeHeaderHeight,
+    completeFooterHeight,
   } = props
 
   const measure = chatStore.optionsMeasures[messageId.toString()] ?? {
@@ -159,8 +159,8 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     //   (previousMessageMeasure?.y ?? 0) +
     //   (chatStore.optionsPannings[previousMessageId?.toString()] ?? 0) // acount for panning in the previous message
     // let lower = !previousMessageMeasure
-    //   ? screenHeight - safeAreaFooterHeight
-    //   // : screenHeight - safeAreaFooterHeight
+    //   ? screenHeight - completeFooterHeight
+    //   // : screenHeight - completeFooterHeight
     // : previousMessageTop
     // lower += -profileRowMinHeight
 
@@ -182,7 +182,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
       message.role === MessageRole.USER ? nUserDocked : nAiDocked
     let lower =
       screenHeight -
-      safeAreaFooterHeight -
+      completeFooterHeight -
       profileRowMinHeight -
       nItemsDocked * profileRowMinHeight
 
@@ -203,8 +203,8 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     //   (nextMessageMeasure?.y ?? 0) +
     //   (chatStore.optionsPannings[nextMessageId?.toString()] ?? 0) // acount for panning in the next message
     let upper = !nextMessageMeasure
-      ? safeAreaHeaderHeight
-      : safeAreaHeaderHeight
+      ? completeHeaderHeight
+      : completeHeaderHeight
     // : nextMessageTop
     upper += profileRowMinHeight
     upper -= chatStore.optionsMeasures[messageId?.toString()]?.height ?? 0
@@ -214,6 +214,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
 
   const dockingSpringHandled = useRef(false)
   useEffect(() => {
+    // This useEffect is for causing the item to peek when selected.
     console.log('update spring')
 
     if (dockingSpringHandled.current) {
@@ -266,6 +267,10 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
   const lastY = useRef(0)
   const animListenerAdded = useRef(false)
   useEffect(() => {
+    // This useEffect is for listening to the animation value,
+    // and handling the spring and slide animations when the item
+    // slides into a boundary
+
     if (!animListenerAdded.current) {
       animListenerAdded.current = true
       const listener = (position: {value: number}) => {
@@ -370,7 +375,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
           chatStore.unDockOption(messageId)
         } else if (
           chatStore.optionsDocked[messageId.toString()] === 'footer' &&
-          gestureState.dy < maxDy
+          gestureState.dy < (screenHeight - completeFooterHeight)
         ) {
           // // undock if paning moves away from the docked position
           // chatStore.unDockOption(messageId)
@@ -381,28 +386,62 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
           // The sendBackThreshold is equal to the amount of card which sticks out when docked, which is profileRowHeight.
           // The undockThreshold is the same as the sendBackThreshold * nUserDocked for user messages.
           // The undockThreshold is the same as the sendBackThreshold * nAiDocked for AI messages.
-          let nAiDockedBelow, nUserDockedBelow, nAiDocked, nUserDocked, messageIdBelow
-          const dockingsResult = countDockings()
-          nAiDockedBelow = dockingsResult.nAiDockedBelow
-          nUserDockedBelow = dockingsResult.nUserDockedBelow
-          nAiDocked = dockingsResult.nAiDocked
-          nUserDocked = dockingsResult.nUserDocked
-          messageIdBelow = dockingsResult.messageIdBelow
+          const {
+            nAiDockedBelow,
+            nUserDockedBelow,
+            nAiDocked,
+            userDockedColumn,
+            aiDockedColumn,
+            nUserDocked,
+            messageIdBelow,
+          } = countDockings()
+
           let nDocked = isUser ? nUserDocked : nAiDocked
 
           const sendBackThreshold = lower - shuffleHeight
           const bottomEdge =
             currentTop.current + gestureState.dy
 
-          if (nDocked > 1 && bottomEdge < sendBackThreshold && messageIdBelow?.toString()) {
-            // $FlowFixMe
-            chatStore.putOptionBehind(messageId, messageIdBelow)
+          // if (nDocked > 1 && bottomEdge < sendBackThreshold && messageIdBelow?.toString()) {
+          //   // $FlowFixMe
+          //   chatStore.putOptionBehind(messageId, messageIdBelow)
+          // }
+
+          // const undockThreshold = lower - profileRowMinHeight * (nDocked === 1 ? 0 : 1)
+          // if (gestureState.dy + currentTop.current < undockThreshold) {
+          //   chatStore.unDockOption(messageId)
+          // }
+
+          // If the item has moved far enough to undock, then it should be shuffled to the last,
+          // then shuffling can be short-cutted.
+          // At the end of a move, the item should be shuffled to the correct
+          // position for the correct zIndex calculation.
+          // This is done by taking the number of currently docked items,
+          // and then think of profileRowMinHeight * nDocked - 1 as the amount of space for shuffling.
+          // Now divide the shuffle space into a section for each item.
+          // When one item is docked, shuffle space is 0.
+          // When two items are docked, the suffle space is profileRowMinHeight.
+          // If you were to grab to top most item and move it back by profileRowMinHeight and then let go,
+          // it will stay put as it has been shuffled to the next snap position,
+          // and dragging it profileRowMinHeight distance away bring it to the next snap center.
+          // So it is after dragging for profileRowMinHeight / 2 distance that the shuffle happens.
+
+          const ssPosItemTop = currentTop.current + gestureState.dy
+          // shuffleSpacePos measures how far the dragged item's top is from the top of the footer.
+          const shuffleSpacePos = (screenHeight - completeFooterHeight) - ssPosItemTop
+          const shuffleIndex = Math.max(Math.floor((shuffleSpacePos - peekHeight - 9) / (profileRowMinHeight)), 0)
+          const dockedColumn = isUser ? userDockedColumn : aiDockedColumn
+
+          // Within the dockedColumn the item should be at the shuffleIndex position.
+          if (dockedColumn[shuffleIndex] !== messageId) {
+            if (shuffleIndex <= dockedColumn.length - 1) {
+              chatStore.putOptionAtPosition(messageId, shuffleIndex)
+            } else {
+              // This item should be undocked.
+              chatStore.unDockOption(messageId)
+            }
           }
 
-          const undockThreshold = lower - profileRowMinHeight * (nDocked === 1 ? 0 : 1)
-          if (gestureState.dy + currentTop.current < undockThreshold) {
-            chatStore.unDockOption(messageId)
-          }
         } else if (!chatStore.optionsDocked[messageId.toString()]) {
           if (gestureState.dy > maxDy) {
             chatStore.dockOption(messageId, 'footer')
@@ -503,7 +542,7 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
   ).current
 
   const getOptionsTopBoundary = () => {
-    return margin / 2 + safeAreaHeaderHeight + footerHeight - (measure?.y ?? 0)
+    return margin / 2 + completeHeaderHeight + footerHeight - (measure?.y ?? 0)
   }
 
   const [updateBoundaryViolation, setUpdateBoundaryViolation] = useState(
@@ -539,18 +578,18 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
   }, [measure, boundaryViolation, updateBoundaryViolation])
 
   const countDockings = () => {
-    let nUserDocked = 0
-    let nAiDocked = 0
+    let userDockedColumn = []
+    let aiDockedColumn = []
     for (const id of chatStore.optionsMessageIds) {
       if (chatStore.optionsDocked[id.toString()] === 'footer') {
         if (chatStore.messages[id.toString()].role === MessageRole.USER) {
-          nUserDocked++
+          userDockedColumn.push(id)
         } else {
-          nAiDocked++
+          aiDockedColumn.push(id)
         }
       }
     }
-    const nDockRows = Math.max(nUserDocked, nAiDocked)
+    const nDockRows = Math.max(userDockedColumn.length, aiDockedColumn.length)
     let nUserDockedBelow = 0
     let nAiDockedBelow = 0
     let breakAtIndex = -1
@@ -584,8 +623,10 @@ const MessageOptions: any = observer((props: MessageOptionsProps): any => {
     }
 
     return {
-      nUserDocked,
-      nAiDocked,
+      userDockedColumn,
+      aiDockedColumn,
+      nUserDocked: userDockedColumn.length,
+      nAiDocked: aiDockedColumn.length,
       nDockRows,
       nUserDockedBelow,
       nAiDockedBelow,
