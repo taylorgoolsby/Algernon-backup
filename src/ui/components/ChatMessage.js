@@ -152,6 +152,22 @@ const ChatMessage: ChatMessageProps => any = observer(
       }
     }, [hasFloatingCounterpart])
 
+    const longPressAnim = useRef(new Animated.Value(0)).current
+    function beginPress() {
+      Animated.timing(longPressAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: false,
+      }).start()
+    }
+    function endPress() {
+      Animated.timing(longPressAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: false,
+      }).start()
+    }
+
     if (!message) {
       return null
     }
@@ -190,6 +206,16 @@ const ChatMessage: ChatMessageProps => any = observer(
           //       opacity: 0.5,
           //     }
           //   : {},
+          !isFloating ? {
+            transform: [
+              {
+                translateY: longPressAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, -5],
+                }),
+              },
+            ],
+          } : null
         ]}
         onLayout={handleInitialLayout}>
         {isFloating ? (
@@ -254,7 +280,14 @@ const ChatMessage: ChatMessageProps => any = observer(
                 chatStore.deselectOptionsTarget()
                 chatStore.deselectOptionsColorTarget()
               }
-            }}>
+            }}
+            onLongPress={() => {
+              chatStore.inputRef?.blur()
+              openOptions()
+            }}
+            onPressIn={beginPress}
+            onPressOut={endPress}
+          >
             {body}
           </TouchableWithoutFeedback>
         </View>
