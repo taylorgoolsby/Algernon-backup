@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   Animated,
   PanResponder,
-  TouchableWithoutFeedback,
-} from 'react-native'
+  TouchableWithoutFeedback, Dimensions,
+} from "react-native";
 import type {MessageSQL} from '../../schema/Message/MessageSchema.mjs'
 import {MessageRole} from '../../schema/Message/MessageSchema.mjs'
 import Spinner from './Spinner.js'
@@ -33,6 +33,8 @@ import ProfilePic from './ProfilePic.js'
 import {observer} from 'mobx-react'
 import {BlurView} from '@react-native-community/blur'
 
+const screenWidth = Dimensions.get('window').width
+
 export const leftMargin = 10
 // export const leftMargin = 0
 export const rightMargin = 11
@@ -45,7 +47,7 @@ export const shuffleHeight = 18
 type ChatMessageProps = {
   messageId: string,
   isActive: boolean,
-  onMessageLayout: (any, MessageSQL) => void,
+  onMessageLayout?: (any, MessageSQL) => void,
   isFloating?: ?boolean,
 }
 
@@ -134,23 +136,31 @@ const ChatMessage: ChatMessageProps => any = observer(
       }
     }, [isOptionTarget, isOptionColorTarget])
 
-    const opacityAnim = useRef(new Animated.Value(1)).current
-    useEffect(() => {
-
-      if (hasFloatingCounterpart) {
-        Animated.timing(opacityAnim, {
-          toValue: 0.5,
-          duration: fadeTime,
-          useNativeDriver: false,
-        }).start()
-      } else {
-        Animated.timing(opacityAnim, {
-          toValue: 1,
-          duration: fadeTime,
-          useNativeDriver: false,
-        }).start()
+    const [markdownRendered, setMarkdownRendered] = useState(false)
+    function onMarkdownLayout(event: any) {
+      if (!markdownRendered) {
+        setMarkdownRendered(true)
       }
-    }, [hasFloatingCounterpart])
+    }
+
+    const opacityAnim = useRef(new Animated.Value(0)).current
+    useEffect(() => {
+      if (markdownRendered) {
+        if (hasFloatingCounterpart) {
+          Animated.timing(opacityAnim, {
+            toValue: 0.5,
+            duration: 500,
+            useNativeDriver: false,
+          }).start()
+        } else {
+          Animated.timing(opacityAnim, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: false,
+          }).start()
+        }
+      }
+    }, [hasFloatingCounterpart, markdownRendered])
 
     const longPressAnim = useRef(new Animated.Value(0)).current
     function beginPress() {
@@ -243,6 +253,7 @@ const ChatMessage: ChatMessageProps => any = observer(
           message={message}
           initialLayout={initialLayout}
           isFloating={isFloating}
+          onMarkdownLayout={onMarkdownLayout}
         />
         {!message.deleted ? (
           <DeleteButton
@@ -359,10 +370,12 @@ const MainText: any = ({
   message,
   initialLayout,
   isFloating,
+  onMarkdownLayout
 }: {
   message: MessageSQL,
   initialLayout: any,
   isFloating: boolean,
+  onMarkdownLayout: (any) => void
 }) => {
   const [fullLayout, setFullLayout] = useState(null)
   const handleLayout = (event: any) => {
@@ -416,7 +429,9 @@ const MainText: any = ({
                   color: aiText,
                 }
               : null,
-          ]}>
+          ]}
+          onLayout={onMarkdownLayout}
+        >
           {message.text.trim()}
         </MarkdownText>
       ) : (
@@ -501,6 +516,7 @@ const styles = StyleSheet.create({
     backgroundColor: userChat,
     borderRadius: 24,
     minWidth: 40,
+    maxWidth: screenWidth * 0.74,
     // marginTop: margin,
     // marginBottom: margin,
     // marginLeft: 20,

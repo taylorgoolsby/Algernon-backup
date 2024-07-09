@@ -47,6 +47,7 @@ import LongTermAnnotation from '../agent/LongTermAnnotation.js'
 import {useDebounce} from 'use-debounce'
 import ListSlider from './components/ListSlider.js'
 import MessageOptions from './components/MessageOptions.js'
+import ChatList from "./components/ChatList";
 
 const darkMode = Appearance.getColorScheme() === 'dark'
 
@@ -306,19 +307,31 @@ const ChatScreen: any = observer(({navigation}) => {
       <View style={styles.background}></View>
 
       {displayedMessageIds.length > 0 && headerHeight && footerHeight ? (
-        <ListSlider
-          searchMode={searchMode}
-          messageIds={displayedMessageIds}
-          searchResults={searchResults}
-          headerHeight={headerHeight}
-          footerHeight={footerHeight}
-          safeAreaFooterHeight={safeAreaFooterHeight}
+        <ChatList
+          messageIds={chatStore.displayedMessageIds}
           onEmptyAreaPress={() => {
             chatStore.closeAllOptions()
             inputRef.current?.blur()
           }}
+          headerHeight={headerHeight}
+          footerHeight={footerHeight}
+          safeAreaFooterHeight={safeAreaFooterHeight}
         />
       ) : null}
+      {/*{displayedMessageIds.length > 0 && headerHeight && footerHeight ? (*/}
+      {/*  <ListSlider*/}
+      {/*    searchMode={searchMode}*/}
+      {/*    messageIds={displayedMessageIds}*/}
+      {/*    searchResults={searchResults}*/}
+      {/*    headerHeight={headerHeight}*/}
+      {/*    footerHeight={footerHeight}*/}
+      {/*    safeAreaFooterHeight={safeAreaFooterHeight}*/}
+      {/*    onEmptyAreaPress={() => {*/}
+      {/*      chatStore.closeAllOptions()*/}
+      {/*      inputRef.current?.blur()*/}
+      {/*    }}*/}
+      {/*  />*/}
+      {/*) : null}*/}
 
       <TouchableWithoutFeedback
         onPress={() => {

@@ -14,6 +14,7 @@ import {
 import ChatMessage, { leftMargin, margin, profileRowMinHeight, rightMargin } from "./ChatMessage.js";
 import type {MessageSQL} from '../../schema/Message/MessageSchema.mjs'
 import chatStore from "../../stores/ChatStore.js";
+import ChatList from "./ChatList";
 
 /*
 
@@ -53,6 +54,15 @@ const MessageList = ({
   const [stickToBottom, setStickToBottom] = useState(true)
   const scrollOffset = useRef(0)
 
+  // When the scroll list first loads, I want it to appear as if it's already scrolled to the bottom.
+  // This is done efficiently, in constant time no matter how many messages the user has in the chat,
+  // by performing a SQL query for only the most recent messages.
+  // It uses OFFSET and LIMIT to do this.
+  // The LIMIT size is the number of messages that are retrieved in each batch when performing pagination.
+  // So the last few messages are retrieved, and then the FlatList is scrolled to the end, which is a constant time procedure.
+  // From here, the user can scroll up to see earlier messages.
+  // When a threshold is reached, more messages are fetched.
+
   const [isInitial, setIsInitial] = useState(true)
   useEffect(() => {
     if (isInitial) {
@@ -88,6 +98,7 @@ const MessageList = ({
 
   const onMessageLayout = (event: any, message: MessageSQL) => {
     if (stickToBottom) {
+      console.log("scrollToEnd");
       flatListRef.current.scrollToEnd({animated: false})
     }
   }
@@ -104,10 +115,12 @@ const MessageList = ({
     const prevScrollOffset = scrollOffset.current
     scrollOffset.current = event.nativeEvent.contentOffset.y
 
-    if (contentHeight.current - scrollOffset.current - visibleHeight <= 0) {
-      if (!stickToBottom) setStickToBottom(true)
+    if (contentHeight.current <= scrollOffset.current + visibleHeight) {
+      console.log('stick')
+      setStickToBottom(false)
     } else {
-      if (stickToBottom) setStickToBottom(false)
+      console.log('unstick')
+      setStickToBottom(false)
     }
 
     // Pagination:
@@ -172,6 +185,8 @@ const MessageList = ({
   //   }),
   // ).current
 
+  console.log("messageIds", messageIds);
+
   return (
     <Animated.View
       style={{
@@ -192,52 +207,54 @@ const MessageList = ({
         behavior={Platform.OS === 'ios' ? 'position' : null}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} //
       >
-        <FlatList
-          style={styles.flatList}
-          ref={flatListRef}
-          scrollsToTop={false}
-          onScrollBeginDrag={() => {
-            chatStore.deselectOptionsTarget()
-            chatStore.deselectOptionsColorTarget()
-          }}
-          onScroll={onScroll}
-          onContentSizeChange={onContentSizeChange}
-          onViewableItemsChanged={onViewableItemsChanged}
-          scrollEventThrottle={17}
-          automaticallyAdjustsScrollIndicatorInsets={false}
-          ListFooterComponent={<View style={{height: paddingFooter}} />}
-          contentContainerStyle={{
-            paddingLeft: leftMargin + 5,
-            paddingRight: rightMargin,
-            paddingTop: paddingHeader,
-            // paddingBottom: paddingFooter,
-          }}
-          scrollIndicatorInsets={{
-            bottom: paddingFooter,
-            top: paddingHeader,
-          }}
-          data={messageIds}
-          keyExtractor={messageId => messageId}
-          ItemSeparatorComponent={() => (
-            <TouchableWithoutFeedback onPress={() => {
-              chatStore.deselectOptionsTarget()
-              chatStore.deselectOptionsColorTarget()
-              chatStore.inputRef?.blur()
-            }}>
-              <View style={{height: margin * 2}} />
-            </TouchableWithoutFeedback>
-          )}
-          renderItem={item => {
-            const messageId = item.item
-            return (
-              <ChatMessage
-                messageId={messageId.toString()}
-                isActive={item.index === 0}
-                onMessageLayout={onMessageLayout}
-              />
-            )
-          }}
-        />
+        {/*<ChatList/>*/}
+
+        {/*<FlatList*/}
+        {/*  style={styles.flatList}*/}
+        {/*  ref={flatListRef}*/}
+        {/*  scrollsToTop={false}*/}
+        {/*  onScrollBeginDrag={() => {*/}
+        {/*    chatStore.deselectOptionsTarget()*/}
+        {/*    chatStore.deselectOptionsColorTarget()*/}
+        {/*  }}*/}
+        {/*  onScroll={onScroll}*/}
+        {/*  onContentSizeChange={onContentSizeChange}*/}
+        {/*  onViewableItemsChanged={onViewableItemsChanged}*/}
+        {/*  scrollEventThrottle={17}*/}
+        {/*  automaticallyAdjustsScrollIndicatorInsets={false}*/}
+        {/*  ListFooterComponent={<View style={{height: paddingFooter}} />}*/}
+        {/*  contentContainerStyle={{*/}
+        {/*    paddingLeft: leftMargin + 5,*/}
+        {/*    paddingRight: rightMargin,*/}
+        {/*    paddingTop: paddingHeader,*/}
+        {/*    // paddingBottom: paddingFooter,*/}
+        {/*  }}*/}
+        {/*  scrollIndicatorInsets={{*/}
+        {/*    bottom: paddingFooter,*/}
+        {/*    top: paddingHeader,*/}
+        {/*  }}*/}
+        {/*  data={messageIds}*/}
+        {/*  keyExtractor={messageId => messageId}*/}
+        {/*  ItemSeparatorComponent={() => (*/}
+        {/*    <TouchableWithoutFeedback onPress={() => {*/}
+        {/*      chatStore.deselectOptionsTarget()*/}
+        {/*      chatStore.deselectOptionsColorTarget()*/}
+        {/*      chatStore.inputRef?.blur()*/}
+        {/*    }}>*/}
+        {/*      <View style={{height: margin * 2}} />*/}
+        {/*    </TouchableWithoutFeedback>*/}
+        {/*  )}*/}
+        {/*  renderItem={item => {*/}
+        {/*    const messageId = item.item*/}
+        {/*    return (*/}
+        {/*      <ChatMessage*/}
+        {/*        messageId={messageId.toString()}*/}
+        {/*        isActive={item.index === 0}*/}
+        {/*        onMessageLayout={onMessageLayout}*/}
+        {/*      />*/}
+        {/*    )*/}
+        {/*  }}*/}
+        {/*/>*/}
       </KeyboardAvoidingView>
     </Animated.View>
   )
