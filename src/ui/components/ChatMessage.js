@@ -48,6 +48,7 @@ type ChatMessageProps = {
   messageId: string,
   isActive: boolean,
   onMessageLayout?: (any, MessageSQL) => void,
+  onMarkdownLayout?: (any, MessageSQL) => void,
   isFloating?: ?boolean,
 }
 
@@ -56,6 +57,7 @@ const ChatMessage: ChatMessageProps => any = observer(
     messageId,
     isActive, // whether or not this is the last message in the chat.
     onMessageLayout,
+    onMarkdownLayout,
     isFloating, // whether or not this is being rendered as a floating message.
   }: ChatMessageProps): any => {
     const message = chatStore.messages[messageId]
@@ -137,10 +139,11 @@ const ChatMessage: ChatMessageProps => any = observer(
     }, [isOptionTarget, isOptionColorTarget])
 
     const [markdownRendered, setMarkdownRendered] = useState(false)
-    function onMarkdownLayout(event: any) {
+    function _onMarkdownLayout(event: any) {
       if (!markdownRendered) {
         setMarkdownRendered(true)
       }
+      if (onMarkdownLayout) onMarkdownLayout(event, message)
     }
 
     const opacityAnim = useRef(new Animated.Value(0)).current
@@ -253,7 +256,7 @@ const ChatMessage: ChatMessageProps => any = observer(
           message={message}
           initialLayout={initialLayout}
           isFloating={isFloating}
-          onMarkdownLayout={onMarkdownLayout}
+          onMarkdownLayout={_onMarkdownLayout}
         />
         {!message.deleted ? (
           <DeleteButton

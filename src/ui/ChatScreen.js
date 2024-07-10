@@ -341,7 +341,7 @@ const ChatScreen: any = observer(({navigation}) => {
         }}>
         <View style={styles.header}>
           <BlurView
-            style={{flex: 1}}
+            style={{flex: 1, opacity: 0}}
             blurType={Colors.chatHeaderBlurType}
             blurAmount={70} //
             onLayout={onLayoutHeader} //
@@ -635,6 +635,7 @@ const styles = StyleSheet.create({
   },
   footerBlur: {
     flex: 1,
+    opacity: 0,
   },
   safeArea: {
     flexDirection: 'row',
