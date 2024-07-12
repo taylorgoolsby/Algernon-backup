@@ -8,7 +8,6 @@ import debounce from 'lodash.debounce'
 import type { MessageSQL } from "../../schema/Message/MessageSchema.mjs";
 
 const screenHeight = Dimensions.get('window').height
-const EXTRA_SPACE = 0 // Currently there is an issue where the first message should not have any extra space above it.
 
 type ChatListProps = {
   onEmptyAreaPress: () => void,
@@ -29,19 +28,24 @@ type ChatListState = {
 
 class ChatList extends React.Component<ChatListProps, ChatListState> {
   scrollViewRef: any
+  queuedScrollOffsetDiff: number = 0
   scrollOffset: number = 0
   prevScrollOffset: number = 0
+  contentOffset: number = 0
+  scrollDiff: number = 0
   // When a message is rendered, because of issues with markdown rendering, it lays out twice, and the height changes between them.
   // We onMarkdownLayout to detect when the markdown is fully rendered and to set completedLayouts[messageId] = true.
   // This allows an item to be mounted as visible, lay out twice, and then become invisible for list virtualization.
+  layoutsInProgress: {[messageId: string]: boolean} = {}
+  completedMarkdownLayouts: {[messageId: string]: boolean} = {}
   completedLayouts: {[messageId: string]: boolean} = {}
   itemHeights: Array<{messageId: number, height: number}>
   itemIndexMapping: {[messageId: string]: number} = {} // Tells the index of the item in itemHeights
+  queuedCumulativeHeights: {[messageId: string]: number} = {}
   cumulativeHeights: {[messageId: string]: number} = {}
   getMoreInFlight: boolean = false
   isInitialFlight: boolean = false
   getMoreScrollAdjusted: boolean = false
-  newMessageHeights: {[messageId: string]: number} = {}
   visibilityMap: {[messageId: string]: boolean} = {}
   visibleMessageIds: Array<string> = []
   keyboardDidShowListener: any
@@ -66,8 +70,9 @@ class ChatList extends React.Component<ChatListProps, ChatListState> {
     for (let i = 0; i < props.messageIds.length; i++) {
       const messageId = props.messageIds[i]
       this.itemIndexMapping[messageId] = i
+      this.queuedCumulativeHeights[messageId] = 0
       this.cumulativeHeights[messageId] = 0
-      this.newMessageHeights[messageId] = 0
+      this.layoutsInProgress[messageId] = true
     }
     this.getMoreInFlight = true
     this.isInitialFlight = true
@@ -107,6 +112,8 @@ class ChatList extends React.Component<ChatListProps, ChatListState> {
     prevState: ChatListState,
     _: any,
   ) {
+    console.log("componentDidUpdate");
+
     if (
       prevProps.footerHeight !== this.props.footerHeight ||
       prevProps.safeAreaFooterHeight !== this.props.safeAreaFooterHeight ||
@@ -128,25 +135,45 @@ class ChatList extends React.Component<ChatListProps, ChatListState> {
       this.onIncomingMessages(this.props, this.state)
     }
 
+    console.log("this.getMoreInFlight", this.getMoreInFlight);
+
     // Update scroll position after fetching more items
     // and those new items have been layed out:
     if (this.getMoreInFlight) {
       // Check if all newMessageHeights have a non-zero value:
-      let allNonZero = true
-      for (const height of Object.values(this.newMessageHeights)) {
-        if (height === 0) {
-          allNonZero = false
+      let anyInProgress = false
+      let allLayoutsCompleted = true
+      for (const messageId of Object.keys(this.layoutsInProgress)) {
+        anyInProgress = !this.completedLayouts[messageId]
+        const markdownLayoutCompleted = this.completedMarkdownLayouts[messageId]
+        if (!markdownLayoutCompleted) {
+          allLayoutsCompleted = false
           break
         }
       }
-      if (allNonZero) {
+
+      console.log("anyInProgress", anyInProgress);
+      console.log("allLayoutsCompleted", allLayoutsCompleted);
+
+      if (anyInProgress && allLayoutsCompleted) {
         setTimeout(() => {
           // A setTimeout is used here because it seems that the scrollView
           // needs 2 frames rendered with the new contentHeight
           // in order for .scrollTo to see the new contentHeight.
-          this.adjustScrollPosition()
+          // this.adjustScrollPosition()
+          this.finalizeNewItemLayouts()
         }, 0)
       }
+    }
+
+    if (this.getMoreScrollAdjusted) {
+      // Shortly after componentDidUpdate after finalizeNewItemLayouts,
+      // there will be a new onScroll event with a large value.
+      const expectedJump = this.contentOffset - this.scrollOffset
+      // This large jump should be ignored,
+      // so we cancel it out by adding the negation to scrollDiff.
+      this.scrollDiff -= expectedJump
+      this.getMoreScrollAdjusted = false
     }
   }
 
@@ -156,7 +183,9 @@ class ChatList extends React.Component<ChatListProps, ChatListState> {
 
   getMoreMessages: any = () => {
     this.getMoreInFlight = true
-    this.newMessageHeights = {}
+    this.queuedCumulativeHeights = {...this.cumulativeHeights}
+    this.queuedScrollOffsetDiff = 0
+    this.layoutsInProgress = {}
     chatStore.fetchEarlierMessages()
   }
 
@@ -182,8 +211,9 @@ class ChatList extends React.Component<ChatListProps, ChatListState> {
       messageIds.forEach(messageId => {
         nextItemHeights.push({messageId: parseInt(messageId), height: 0})
         nextItemIndexMapping[messageId.toString()] = nextItemHeights.length - 1
+        this.queuedCumulativeHeights[messageId.toString()] = 0
         this.cumulativeHeights[messageId.toString()] = 0
-        this.newMessageHeights[messageId] = 0
+        this.layoutsInProgress[messageId] = true
       })
     } else {
       let currentItemsHeightsIndex = 0
@@ -193,8 +223,9 @@ class ChatList extends React.Component<ChatListProps, ChatListState> {
           nextItemHeights.push({messageId, height: 0})
           nextItemIndexMapping[messageId.toString()] =
             nextItemHeights.length - 1
+          this.queuedCumulativeHeights[messageId.toString()] = 0
           this.cumulativeHeights[messageId.toString()] = 0
-          this.newMessageHeights[messageId.toString()] = 0
+          this.layoutsInProgress[messageId.toString()] = true
         } else if (
           currentFirstMessageId <= messageId &&
           messageId <= currentLastMessageId
@@ -212,8 +243,9 @@ class ChatList extends React.Component<ChatListProps, ChatListState> {
           nextItemHeights.push({messageId, height: 0})
           nextItemIndexMapping[messageId.toString()] =
             nextItemHeights.length - 1
+          this.queuedCumulativeHeights[messageId.toString()] = 0
           this.cumulativeHeights[messageId.toString()] = 0
-          this.newMessageHeights[messageId.toString()] = 0
+          this.layoutsInProgress[messageId.toString()] = true
         }
       }
     }
@@ -226,6 +258,20 @@ class ChatList extends React.Component<ChatListProps, ChatListState> {
   }
 
   onItemLayout: any = (messageId: number, height: number) => {
+    /*
+    On layout,
+    itemHeights is updated, and then a re-render is caused with debounce so that all new items are layed out before the next render.
+    contentHeight is derived from itemHeights, and is used to set the height of the content container, since the items are absolutely positioned.
+    Then we must wait one more frame to allow the native ScrollView to register the new contentHeight.
+    Then we can call .scrollTo with the new scrollOffset.
+    We apply the new cumulativeHeights on the same frame that the new scrollOffset is applied
+    because those two things need to always be in sync.
+    * */
+
+    if (this.completedLayouts[messageId.toString()]) {
+      return
+    }
+
     const index = this.itemIndexMapping[messageId.toString()]
     const oldHeight = this.itemHeights[index].height
     this.itemHeights[index].height = height
@@ -236,83 +282,30 @@ class ChatList extends React.Component<ChatListProps, ChatListState> {
     // This means subtracting out the old height and adding the new height.
     for (let i = index + 1; i < this.itemHeights.length; i++) {
       const nextMessageId = this.itemHeights[i].messageId.toString()
-      this.cumulativeHeights[nextMessageId] += height - oldHeight
+      this.queuedCumulativeHeights[nextMessageId] += height - oldHeight
     }
 
-    if (this.newMessageHeights.hasOwnProperty(messageId.toString())) {
-      this.newMessageHeights[messageId.toString()] = height
-    }
+    // cumulativeHeights is the top value for absolutely positioned items.
+    // It is relative to the scrollOffset.
+    // This means scrollOffset and cumulativeHeights must always be in sync.
+    this.queuedScrollOffsetDiff += height - oldHeight
 
     this.causeRerender()
   }
 
   onMarkdownLayout: (any, MessageSQL) => void = (event: any, message: MessageSQL) => {
     const { height } = event.nativeEvent.layout
-    if (height !== 0) {
-      this.completedLayouts[message.messageId.toString()] = true
+
+    console.log("onMarkdownLayout", message.messageId, height);
+
+    if (height !== 0 || message.deleted) {
+      this.completedMarkdownLayouts[message.messageId.toString()] = true
     }
   }
 
-  onScroll: any = (event: any) => {
-    // if (this.getMoreInFlight) {
-    //   if (this.scrollViewRef) {
-    //     // Kill any decay animation.
-    //     // The decay animation happens on the native side,
-    //     // so this JS code's value for this.scrollOffset might be old.
-    //     // Since .scrollTo is called after the new messages have been layed out,
-    //     // in adjustScrollPosition, an old value of this.scrollOffset is used,
-    //     // which causes the scrollView to appear to skip slightly due to the
-    //     // discrepancy between the JS this.scrollOffset and the native scroll position.
-    //     // So we kill the decay animation now, to prevent the discrepancy.
-    //     console.log(".scrollTo", this.scrollOffset);
-    //     this.scrollViewRef.scrollTo({
-    //       y: this.scrollOffset,
-    //       animated: false
-    //     })
-    //   }
-    // } else {
-    //   const prevScrollOffset = this.scrollOffset
-    //   this.scrollOffset = event.nativeEvent.contentOffset.y
-    //
-    //   console.log("onScroll", this.scrollOffset);
-    //
-    //   // Pagination:
-    //   if (this.scrollOffset < 250 && this.scrollOffset - prevScrollOffset < 0) {
-    //     this.getMoreMessages()
-    //   }
-    // }
+  finalizeNewItemLayouts: any = () => {
+    this.cumulativeHeights = {...this.queuedCumulativeHeights} // todo: constant time
 
-    // console.log("event.nativeEvent.contentOffset.y", event.nativeEvent.contentOffset.y);
-
-    if (this.getMoreScrollAdjusted) {
-      // When adjustScrollPosition is called, it calls .scrollTo with the new scrollOffset.
-      // However, is it possible for the native side to call onScroll with the old scrollOffset
-      // before the new scrollOffset takes effect because of the decay animation (scrolling momentum).
-      // So we ignore any onScroll events which do not have the new scrollOffset.
-      // When we finally see a scroll event with the new offset, we disable this.getMoreScrollAdjusted.
-      if (Math.abs(this.scrollOffset - event.nativeEvent.contentOffset.y) < 1) {
-        this.getMoreScrollAdjusted = false
-        console.log('exit')
-      } else {
-        return
-      }
-    }
-
-    this.prevScrollOffset = this.scrollOffset
-    this.scrollOffset = event.nativeEvent.contentOffset.y
-
-    // Pagination:
-    if (
-      this.scrollOffset < 250 + EXTRA_SPACE &&
-      this.scrollOffset - this.prevScrollOffset < 0
-    ) {
-      this.getMoreMessages()
-    }
-
-    this.recalcVisible()
-  }
-
-  adjustScrollPosition: any = () => {
     const {footerHeight, headerHeight} =
       this.props
     const {
@@ -324,113 +317,64 @@ class ChatList extends React.Component<ChatListProps, ChatListState> {
       : initialSafeAreaFooterHeight
     const paddingHeader = headerHeight
 
-    let sumNewMessageHeights = 0
-    for (const height of Object.values(this.newMessageHeights)) {
-      sumNewMessageHeights += height
+    let contentHeight = 0 // todo: constant time
+    for (const itemHeight of this.itemHeights) {
+      contentHeight += itemHeight.height
     }
 
-    if (this.scrollViewRef) {
-      let nextScrollOffset = this.scrollOffset + sumNewMessageHeights
-      if (this.isInitialFlight) {
-        nextScrollOffset += EXTRA_SPACE
-        // On initial render, scrolling to bottom is capped by screenHeight and padding:
-        nextScrollOffset += -screenHeight + paddingFooter + paddingHeader
-        this.isInitialFlight = false
-      }
+    const maxScrollOffset = contentHeight - screenHeight + paddingFooter + paddingHeader
+    // this.prevScrollOffset = Math.min(this.prevScrollOffset, maxScrollOffset)
+    // this.scrollOffset = Math.min(this.scrollOffset, maxScrollOffset)
 
-      this.scrollViewRef.scrollTo({
-        y: nextScrollOffset,
-        animated: false,
-      })
-      this.prevScrollOffset = nextScrollOffset
-      this.scrollOffset = nextScrollOffset
+    const meantimeScroll = this.scrollOffset - this.contentOffset
+    this.contentOffset += meantimeScroll
+    this.contentOffset += this.queuedScrollOffsetDiff
+    this.contentOffset = Math.min(this.contentOffset, maxScrollOffset)
+    // this.prevScrollOffset = this.contentOffset
+    // this.scrollOffset = this.contentOffset
+    this.scrollDiff = 0
 
-      console.log("adjustScrollPosition this.prevScrollOffset", this.prevScrollOffset);
-      console.log("adjustScrollPosition this.scrollOffset", this.scrollOffset);
+    console.log("\nfinalize\n", this.contentOffset);
 
-      setTimeout(() => {
-        this.onScroll({nativeEvent: {contentOffset: {y: this.scrollOffset}}})
-      }, 100)
-    }
-
-    this.newMessageHeights = {}
     this.getMoreInFlight = false
     this.getMoreScrollAdjusted = true
-    // this.recalcVisible()
+
+    for (const messageId of Object.keys(this.layoutsInProgress)) {
+      this.completedLayouts[messageId] = true
+    }
+    this.layoutsInProgress = {}
+
+    this.recalcVisible()
+    this.causeRerender()
+  }
+
+  onScroll: any = (event: any) => {
+    // console.log("event.nativeEvent.contentOffset.y", event.nativeEvent.contentOffset.y);
+
+    this.prevScrollOffset = this.scrollOffset
+    this.scrollOffset = event.nativeEvent.contentOffset.y
+
+    this.scrollDiff += this.scrollOffset - this.prevScrollOffset
+
+    // Pagination:
+    if (
+      this.scrollOffset < 250 &&
+      this.scrollOffset - this.prevScrollOffset < 0
+    ) {
+      this.getMoreMessages()
+    }
+
+    this.recalcVisible()
   }
 
   recalcVisible: any = () => {
-    // This function causes a rerender if the visibility of any item changes.
-    // It should be of constant order, O(1), because it only re-checks
-    // the items which are currently visible, and any nearby items based on the
-    // change in scrollOffset.
-    // For example, if the scrollOffset decreased by 100, then we would re-check
-    // the items which fall within that range of 100 above the first currently
-    // visible item.
     let changed = false
 
-    // New items are layed out during momentum scrolling.
-    // This means it is possible for onScroll and onItemLayout to be called
-    // around the same time.
-    // onScroll calls recalcVisibility which depends on the scrollOffset.
-    // So for example, if the scrollOffset is old, but new items have been layed out,
-    // then the currently visible items will have their cumulativeHeights updated,
-    // but the scrollOffset will be old, so the new items will appear relative to
-    // the scrollOffset in a position which is not correct.
-    // scrollOffset and cumulativeHeights need to be in sync,
-    // or at least they need to appear to be in sync during a recalc.
-    let adjustedScrollOffset = this.scrollOffset
-    for (const messageId of Object.keys(this.newMessageHeights)) {
-      adjustedScrollOffset += this.newMessageHeights[messageId]
-    }
+    let adjustedScrollOffset = this.contentOffset + this.scrollDiff
 
-    const scrollDiff = adjustedScrollOffset - this.prevScrollOffset
-
-    // const visibleStart = this.scrollOffset
-    // const visibleEnd = this.scrollOffset + screenHeight
-
-    // We will need a map of this.visibilityMap[messageId], which will be used
-    // during rendering to quickly determine if an item is visible.
-
-    // We will also have a this.visibleMessageIds array, which is an array of messageIds.
-    // It keeps order of the currently visible items.
-
-    // We can loop through this map to re-check the visibility of currently visible items.
-    // However, we also need to check the visibility of items which are near the currently
-    // visible items, based on the change in scrollOffset.
-    // If the scrollOffset decreased by 100,
-    // we know the messageId of the first currently visible item from this.visibleMessageIds[0].
-    // Then we can use this.itemIndexMapping to get the index of that item in this.itemHeights.
-    // Then we can decrement that index by 1, and check the height of the first non-visible item before the first currently visible item.
-    // We compare the height of that item to the scrollDiff, and if it fits within that range, we re-check its visibility.
-
-    // If scrollDiff is large because scrolling is very fast, sometimes the this.visibleMessageIds will be left empty after
-    // all of its items have been checked for visibility.
-    // So we need to save the messageId of the first or last currently visible item before updating this.visibleMessageIds.
-    // Then if scrollDiff is negative, we check items before the first visible item.
-    // If scrollDiff is positive, we check items after the last visible item.
-    // This will add messageIds back into this.visibleMessageIds.
-
-    // Finally, after this.visibleMessageIds is completely updated,
-    // we update this.visibilityMap if anything changed,
-    // and then cause a re-render.
+    console.log("recalcVisible", adjustedScrollOffset);
 
     const firstVisibleMessageId: ?string = this.visibleMessageIds[0] ?? null
-    // const lastVisibleMessageId: ?string =
-    //   this.visibleMessageIds[this.visibleMessageIds.length - 1] ?? null
-    const startLength = this.visibleMessageIds.length
-
-    console.log('recalcVisible', scrollDiff, firstVisibleMessageId, startLength, adjustedScrollOffset, this.cumulativeHeights[firstVisibleMessageId])
-
-    // todo: introduce a variable to keep of the first visible messageId
-    //  the last time recalc was called.
-    //  In case of fast scrolling up, we can start from that messageId,
-    //  obtaining its top from cumulativeHeights,
-    //  and then check items up to the current scrollOffset.
-    //  Also, when the scrollOffset is adjusted for pagination,
-    //  their cumulativeHeights are updated, so the same algorithm can be used
-    //  with the new scrollOffset and cumulativeHeights.
-    //  Finally, the problem of scrollOffset thrashing due to native bridge discrepancies, needs to be handled separately.
 
     const nextVisibleMessageIds: Array<string> = []
 
@@ -451,8 +395,6 @@ class ChatList extends React.Component<ChatListProps, ChatListState> {
       // $FlowFixMe
       const firstVisibleTop = this.cumulativeHeights[firstVisibleMessageId]
       const diff = adjustedScrollOffset - firstVisibleTop - paddingHeader // todo: check
-
-      console.log("diff", diff);
 
       if (diff < 0) {
         // First visible item is below top edge of screen.
@@ -528,9 +470,8 @@ class ChatList extends React.Component<ChatListProps, ChatListState> {
     }
 
     if (changed) {
-      console.log("changed", changed);
+      console.log('changed', nextVisibleMessageIds)
       this.visibleMessageIds = nextVisibleMessageIds
-      console.log("this.visibleMessageIds", this.visibleMessageIds);
       this.visibilityMap = {}
       for (let i = 0; i < this.visibleMessageIds.length; i++) {
         const messageId: string = this.visibleMessageIds[i]
@@ -542,7 +483,6 @@ class ChatList extends React.Component<ChatListProps, ChatListState> {
   }
 
   isVisible: (string, number) => boolean = (messageId: string, scrollOffset: number) => {
-    console.log('isVisible', messageId)
     if (!this.completedLayouts[messageId]) {
       return false
     }
@@ -561,13 +501,11 @@ class ChatList extends React.Component<ChatListProps, ChatListState> {
       (itemTop < visibleStart && itemBottom < visibleStart) ||
       (visibleEnd < itemTop && visibleEnd < itemBottom)
 
-    console.log("notVisible", notVisible);
-
     return !notVisible
   }
 
   causeRerender: any = () => {
-    // if (this.state.cacheBust === 2) {
+    // if (this.state.cacheBust === 18) {
     //   return
     // }
 
@@ -597,15 +535,19 @@ class ChatList extends React.Component<ChatListProps, ChatListState> {
     for (const itemHeight of itemHeights) {
       contentHeight += itemHeight.height
     }
-    contentHeight += EXTRA_SPACE // extra space to allow scrolling while loading.
 
-    // console.log("this.itemHeights", this.itemHeights);
+    // console.log('')
     console.log("this.state.cacheBust", this.state.cacheBust);
     console.log("contentHeight", contentHeight);
-    console.log("this.visibilityMap", this.visibilityMap);
+    console.log("this.contentOffset", this.contentOffset);
     console.log("this.visibleMessageIds", this.visibleMessageIds);
-    console.log("this.scrollOffset", this.scrollOffset);
+    console.log("this.cumulativeHeights", this.cumulativeHeights);
+    console.log("this.layoutsInProgress", this.layoutsInProgress);
+    console.log("this.completedMarkdownLayouts", this.completedMarkdownLayouts);
     console.log("this.completedLayouts", this.completedLayouts);
+    console.log("this.queuedCumulativeHeights", this.queuedCumulativeHeights);
+    // console.log("messageIds", messageIds);
+
 
     return (
       <ScrollView
@@ -635,6 +577,7 @@ class ChatList extends React.Component<ChatListProps, ChatListState> {
           paddingBottom: paddingFooter,
           // height: itemPositions[itemPositions.length - 1]
         }}
+        contentOffset={{x: 0, y: this.contentOffset}}
         scrollEventThrottle={17}
         // decelerationRate={this.getMoreInFlight ? 0 : 'normal'}
       >
@@ -643,17 +586,18 @@ class ChatList extends React.Component<ChatListProps, ChatListState> {
             height: contentHeight,
           }}
         />
-        {Object.keys(this.newMessageHeights).map((messageId, index) => {
+        {Object.keys(this.layoutsInProgress).map((messageId) => {
+          console.log("laying out", messageId);
+          const index = this.itemIndexMapping[messageId]
           return (
             <ItemWrapper
               key={messageId}
               messageId={parseInt(messageId)}
               onLayout={this.onItemLayout}
-              top={paddingHeader + (this.cumulativeHeights[messageId] || 0) + EXTRA_SPACE}
-              isNew={this.newMessageHeights[messageId] === 0}
-              isVisible={this.visibilityMap[messageId] || !this.completedLayouts[messageId]}
-              // isVisible={true}
-              layedOutHeight={this.itemHeights[index].height}
+              top={0}
+              isLayoutInProgress={true}
+              isVirtual={false}
+              virtualHeight={0}
             >
               <ChatMessage
                 messageId={messageId}
@@ -663,17 +607,17 @@ class ChatList extends React.Component<ChatListProps, ChatListState> {
             </ItemWrapper>
           )
         })}
-        {this.visibleMessageIds.map((messageId, index) => {
+        {this.visibleMessageIds.map((messageId) => {
+          const index = this.itemIndexMapping[messageId]
           return (
             <ItemWrapper
               key={messageId}
               messageId={parseInt(messageId)}
               onLayout={this.onItemLayout}
-              top={paddingHeader + (this.cumulativeHeights[messageId] || 0) + EXTRA_SPACE}
-              isNew={this.newMessageHeights[messageId] === 0}
-              isVisible={this.visibilityMap[messageId] || !this.completedLayouts[messageId]}
-              // isVisible={true}
-              layedOutHeight={this.itemHeights[index].height}
+              top={paddingHeader + (this.cumulativeHeights[messageId] || 0)}
+              isLayoutInProgress={false}
+              isVirtual={!this.visibilityMap[messageId]}
+              virtualHeight={this.itemHeights[index].height}
             >
               <ChatMessage
                 messageId={messageId}
@@ -693,75 +637,10 @@ type ItemWrapperProps = {
   onLayout: (number, number) => void,
   children: any,
   top: number,
-  isNew: boolean,
-  isVisible: boolean,
-  layedOutHeight: number
+  isLayoutInProgress: boolean,
+  isVirtual: boolean,
+  virtualHeight?: number
 }
-
-// class ItemWrapper extends React.Component<ItemWrapperProps, any> {
-//   constructor(props: ItemWrapperProps) {
-//     super(props)
-//   }
-//
-//   // shouldComponentUpdate(
-//   //   nextProps: ItemWrapperProps,
-//   //   nextState: any,
-//   // ): boolean {
-//   //   console.log("this.props", this.props);
-//   //   console.log("nextProps", nextProps);
-//   //   return true
-//   //
-//   //   // if (this.props.someValue !== nextProps.someValue) {
-//   //   //   return true;
-//   //   // }
-//   //   // if (this.state.someOtherValue !== nextState.someOtherValue) {
-//   //   //   return true;
-//   //   // }
-//   //   // return false;
-//   // }
-//
-//   onLayoutHandler = (event: any) => {
-//     const {height} = event.nativeEvent.layout
-//     this.props.onLayout(this.props.messageId, height)
-//   }
-//
-//   render(): any {
-//     const {messageId, children, top, isNew, isVisible, layedOutHeight} =
-//       this.props
-//
-//     console.log('rendering', messageId, isVisible, layedOutHeight, top, isNew)
-//
-//     return isVisible ? (
-//       <View
-//         onLayout={this.onLayoutHandler}
-//         style={{
-//           position: 'absolute',
-//           top,
-//           left: leftMargin + 5,
-//           right: rightMargin,
-//           paddingTop: margin,
-//           paddingBottom: margin,
-//           opacity: isNew ? 0 : 1,
-//         }}>
-//         {children}
-//       </View>
-//     ) : (
-//       <View
-//         onLayout={this.onLayoutHandler}
-//         style={{
-//           position: 'absolute',
-//           top: top,
-//           left: leftMargin + 5,
-//           right: rightMargin,
-//           paddingTop: margin,
-//           paddingBottom: margin,
-//           opacity: 0,
-//           height: layedOutHeight,
-//         }}
-//       />
-//     )
-//   }
-// }
 
 const ItemWrapper = (props: ItemWrapperProps) => {
   const {
@@ -769,18 +648,18 @@ const ItemWrapper = (props: ItemWrapperProps) => {
     onLayout,
     children,
     top,
-    isNew,
-    isVisible,
-    layedOutHeight
+    isLayoutInProgress,
+    isVirtual,
+    virtualHeight
   } = props
   const onLayoutHandler = (event: any) => {
     const {height} = event.nativeEvent.layout
     onLayout(messageId, height)
   }
 
-  // console.log('rendering', messageId, isVisible, layedOutHeight)
+  // console.log('rendering', messageId, isLayoutInProgress, isVirtual, virtualHeight)
 
-  return isVisible ? (
+  return !isVirtual ? (
     <View
       onLayout={onLayoutHandler}
       style={{
@@ -790,7 +669,7 @@ const ItemWrapper = (props: ItemWrapperProps) => {
         right: rightMargin,
         paddingTop: margin,
         paddingBottom: margin,
-        opacity: isNew ? 0 : 1,
+        opacity: isLayoutInProgress ? 0 : 1,
       }}>
       {children}
     </View>
@@ -805,7 +684,7 @@ const ItemWrapper = (props: ItemWrapperProps) => {
         paddingTop: margin,
         paddingBottom: margin,
         opacity: 0,
-        height: layedOutHeight
+        height: virtualHeight ?? 0
       }}
     />
   )

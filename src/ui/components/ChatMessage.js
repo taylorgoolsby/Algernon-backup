@@ -395,6 +395,13 @@ const MainText: any = ({
         duration: 200,
         useNativeDriver: false,
       }).start()
+      onMarkdownLayout({
+        nativeEvent: {
+          layout: {
+            height: 0
+          }
+        }
+      })
     }
   }, [message.deleted])
 
