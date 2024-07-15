@@ -332,7 +332,7 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
           bottom: paddingHeader,
         }}
         contentContainerStyle={{
-          paddingLeft: leftMargin + 5,
+          paddingLeft: leftMargin + 3,
           paddingRight: rightMargin,
           paddingTop: paddingFooter,
           paddingBottom: paddingHeader,

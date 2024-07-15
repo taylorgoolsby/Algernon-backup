@@ -342,7 +342,7 @@ const ChatScreen: any = observer(({navigation}) => {
         }}>
         <View style={styles.header}>
           <BlurView
-            style={{flex: 1, opacity: 0}}
+            style={{flex: 1, opacity: 1}}
             blurType={Colors.chatHeaderBlurType}
             blurAmount={70} //
             onLayout={onLayoutHeader} //
@@ -387,7 +387,7 @@ const ChatScreen: any = observer(({navigation}) => {
           <TouchableOpacity
             style={{
               // paddingLeft: 22,
-              paddingLeft: leftMargin + 18,
+              paddingLeft: leftMargin + 17,
               paddingBottom: 12,
               paddingRight: 30,
             }}
@@ -636,7 +636,7 @@ const styles = StyleSheet.create({
   },
   footerBlur: {
     flex: 1,
-    opacity: 0,
+    opacity: 1,
   },
   safeArea: {
     flexDirection: 'row',
