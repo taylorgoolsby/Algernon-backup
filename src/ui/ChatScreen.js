@@ -48,6 +48,7 @@ import {useDebounce} from 'use-debounce'
 import ListSlider from './components/ListSlider.js'
 import MessageOptions from './components/MessageOptions.js'
 import ChatList from "./components/ChatList";
+import InvertedChatList from './components/InvertedChatList.js'
 
 const darkMode = Appearance.getColorScheme() === 'dark'
 
@@ -307,7 +308,7 @@ const ChatScreen: any = observer(({navigation}) => {
       <View style={styles.background}></View>
 
       {displayedMessageIds.length > 0 && headerHeight && footerHeight ? (
-        <ChatList
+        <InvertedChatList
           messageIds={chatStore.displayedMessageIds}
           onEmptyAreaPress={() => {
             chatStore.closeAllOptions()
