@@ -121,6 +121,8 @@ export class ChatStore {
       this.messages[message.messageId.toString()] = message
     }
     this.loaded = true
+
+    console.log("this.displayedMessageIds", this.displayedMessageIds);
   }
 
   appendMessage: (AppendMessageOutput) => void = (output: AppendMessageOutput) => {

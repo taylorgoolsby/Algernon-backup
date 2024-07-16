@@ -50,26 +50,7 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
   constructor(props: InvertedChatListProps) {
     super(props)
 
-    this.state = {
-      visibleHeight: 0,
-      keyboardHeight: 0,
-      initialSafeAreaFooterHeight: props.safeAreaFooterHeight,
-      displayedMessageIds: props.messageIds,
-      cacheBust: 0,
-      // itemHeights: props.messageIds.map(messageId => ({messageId: parseInt(messageId), height: 0}))
-    }
-
-    this.itemHeights = props.messageIds.map(messageId => ({
-      messageId: parseInt(messageId),
-      height: 0,
-    }))
-    for (let i = 0; i < props.messageIds.length; i++) {
-      const messageId = props.messageIds[i]
-      this.itemIndexMapping[messageId] = i
-      this.queuedCumulativeHeights[messageId] = 0
-      this.cumulativeHeights[messageId] = 0
-      this.layoutsInProgress[messageId] = true
-    }
+    this.reset(props, true)
 
     this.keyboardDidShowListener = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
@@ -88,6 +69,34 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
       trailing: false,
     })
     this.causeRerender = debounce(this.causeRerender, 100)
+  }
+
+  reset: any = (props: InvertedChatListProps, isInit: boolean) => {
+    const initialState = {
+      visibleHeight: 0,
+      keyboardHeight: 0,
+      initialSafeAreaFooterHeight: props.safeAreaFooterHeight,
+      displayedMessageIds: props.messageIds,
+      cacheBust: 0,
+    }
+    if (isInit) {
+      this.state = initialState
+    } else {
+      initialState.cacheBust = (this.state.cacheBust + 1) % 100
+      this.setState(initialState)
+    }
+
+    this.itemHeights = props.messageIds.map(messageId => ({
+      messageId: parseInt(messageId),
+      height: 0,
+    }))
+    for (let i = 0; i < props.messageIds.length; i++) {
+      const messageId = props.messageIds[i]
+      this.itemIndexMapping[messageId] = i
+      this.queuedCumulativeHeights[messageId] = 0
+      this.cumulativeHeights[messageId] = 0
+      this.layoutsInProgress[messageId] = true
+    }
   }
 
   componentWillUnmount() {
@@ -123,8 +132,13 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
       }
     }
 
-    if (prevProps.messageIds !== this.props.messageIds) {
+    if (prevProps.messageIds.length < this.props.messageIds.length) {
       this.onIncomingMessages(this.props, this.state)
+    } else if (prevProps.messageIds.length > this.props.messageIds.length) {
+      // This happens when the user performs a complete reset.
+      // Deleting individual messages will not trigger this because messages are soft deleted.
+      // They are still returned from the database, but have a deleted flag set to true.
+      this.reset(this.props, false)
     }
   }
 

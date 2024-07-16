@@ -23,12 +23,6 @@ const SettingsScreen: any = observer((props: any) => {
 
   async function deleteData() {
     try {
-      preferencesStore.reset()
-      await preferencesStore.save()
-
-      await paymentStore.reset()
-      await paymentStore.restorePurchases(true)
-
       await truncateDatabase()
 
       await FaissBridge.deleteEntireIndex()
@@ -37,10 +31,33 @@ const SettingsScreen: any = observer((props: any) => {
       await chatStore.load()
 
       navigation.goBack()
+
+      preferencesStore.reset()
+      await preferencesStore.save()
+
+      // For some reason, paymentStore.reset must be called after navigation.goBack.
+      // Otherwise, the backward transition doesn't happen properly.
+      // My guess is the cause has something to do with AppNavigator's dependency on paymentStore.
+      await paymentStore.reset()
+      await paymentStore.restorePurchases(true)
     } catch (err) {
       console.error(err)
     }
   }
+
+  // async function goBack() {
+  //
+  //   try {
+  //     await new Promise((resolve) => {
+  //       setTimeout(() => {
+  //         resolve()
+  //       }, 200)
+  //     })
+  //     navigation.goBack();
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // }
 
   async function showDeleteConfirmation() {
     const confirmation = await modalStore.confirm(
