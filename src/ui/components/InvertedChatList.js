@@ -1,11 +1,15 @@
 // @flow
 
 import React from 'react'
-import {View, ScrollView, FlatList, Keyboard, Platform, Dimensions} from 'react-native'
+import { View, Button, FlatList, Keyboard, Platform, Dimensions, TouchableOpacity } from "react-native";
+import Text from './Text.js'
 import ChatMessage, { leftMargin, margin, rightMargin } from "./ChatMessage";
 import type { MessageSQL } from "../../schema/Message/MessageSchema.mjs";
 import chatStore from "../../stores/ChatStore";
 import debounce from "lodash.debounce";
+import Colors, { userChat } from "../../Colors";
+import MessageInterface from "../../schema/Message/MessageInterface.js";
+import { MessageRole } from "../../schema/Message/MessageSchema.mjs";
 
 const screenHeight = Dimensions.get('window').height
 
@@ -259,25 +263,63 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
   }
 
   renderItem: any = (item) => {
-    const messageId = item.item
-    const index = item.index
-
-    return (
-      <View
-        style={{
-          paddingTop: margin,
-          paddingBottom: margin,
-        }}
-        onLayout={(event: any) => this.onItemLayout(messageId, event)}
-      >
-        <ChatMessage
-          key={messageId}
-          messageId={messageId}
-          isActive={index === 0}
-          onMarkdownLayout={this.onMarkdownLayout}
+    if (typeof item.item === 'object' && item.item.buttonLabel) {
+      const onboardingItem = item.item
+      return (
+        <View
+          style={{
+            paddingTop: margin,
+            paddingBottom: margin,
+          }}
+        >
+          <TouchableOpacity
+            style={{
+              backgroundColor: userChat,
+              borderRadius: 24,
+              height: 42,
+              paddingLeft: 14,
+              paddingRight: 14,
+              justifyContent: 'center',
+              alignItems: 'flex-end',
+              alignSelf: 'flex-end',
+            }}
+            onPress={() => onboardingItem.onChoose(onboardingItem)}
+          >
+            <Text>
+              {onboardingItem.buttonLabel}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )
+    } else if (typeof item.item === 'object' && item.item.height) {
+      return (
+        <View
+          style={{
+            height: item.item.height,
+          }}
         />
-      </View>
-    )
+      )
+    } else {
+      const messageId = item.item
+      const index = item.index
+
+      return (
+        <View
+          style={{
+            paddingTop: margin,
+            paddingBottom: margin,
+          }}
+          onLayout={(event: any) => this.onItemLayout(messageId, event)}
+        >
+          <ChatMessage
+            key={messageId}
+            messageId={messageId}
+            isActive={index === 0}
+            onMarkdownLayout={this.onMarkdownLayout}
+          />
+        </View>
+      )
+    }
   }
 
   causeRerender: any = () => {
@@ -308,8 +350,72 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
       ? footerHeight + keyboardHeight
       : initialSafeAreaFooterHeight
 
-    // console.log("this.cumulativeHeights", this.cumulativeHeights);
-    // console.log("this.contentHeight", this.contentHeight);
+    if (messageIds.length === 1) {
+      // If the messages is just one, then present some onboarding.
+      // The first message should be a welcome message explaining what the app is good at.
+      // Then some options will appear below, and if the user selects it,
+      // then it will cause that message to be sent as if the user sent it.
+      // This is an AI chat app, but the core tech is to take anything the user says
+      // and to parse it into annotations where each annotation represents a
+      // unit of semantic meaning. This becomes a data point in a vector embedding space.
+      // Later, when the user is talking about related topic, the AI will be able to
+      // make connections to the previous annotations and to generate a response
+      // which helps the user see connections, and it helps them manage their thoughts.
+      // For example, during journaling, past stories the user has told the AI
+      // can be recovered by it, and prompt the user.
+      // It's about helping the user see connections or loose ends they don't see.
+
+      // Specifically, the first message they see is, "
+
+
+
+      //// invertedMessageIds.push({
+      ////   text: 'Help me brainstorm',
+      ////   -> Okay, what are you working on?
+      ////   onChoose: () => {}
+      //// })
+      //// invertedMessageIds.push({
+      ////   text: 'Uncover hidden links',
+      ////   -> I need more information to do that. As you tell me more, I'll be able to make connections.
+      ////   onChoose: () => {}
+      //// })
+      invertedMessageIds.unshift({
+        buttonLabel: 'Organize my thoughts',
+        userMessage: 'Can you help me organize my thoughts?',
+        assistantMessage: 'Sure, what\'s on your mind?',
+        onChoose: async (item) => {
+          try {
+            const userMessage = await MessageInterface.insert(chatStore.windowId, MessageRole.USER, item.userMessage, true);
+            chatStore.appendMessage({
+              windowId: chatStore.windowId,
+              message: userMessage,
+            })
+            const aiMessage = await MessageInterface.insert(
+              chatStore.windowId,
+              MessageRole.ASSISTANT,
+              item.assistantMessage,
+              true
+            )
+            chatStore.appendMessage({
+              windowId: chatStore.windowId,
+              message: aiMessage,
+            })
+          } catch (error) {
+            console.error(error)
+          }
+        }
+      })
+      invertedMessageIds.unshift({
+        height: 2 * margin,
+      })
+      // invertedMessageIds.push({
+      //   text: 'Inspire me',
+      //   -> Okay, what are you interested in? Cars, shoes, art?
+      //   -> Cars
+      //   -> What kinds of cars do you like? You can show me a picture or describe it. Later, I can help you find similar cars.
+      //   onChoose: () => {}
+      // })
+    }
 
     return (
       <FlatList
@@ -336,7 +442,7 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
           paddingRight: rightMargin,
           paddingTop: paddingFooter,
           paddingBottom: paddingHeader,
-          // height: itemPositions[itemPositions.length - 1]
+          // height: this.contentHeight,
         }}
       />
     )
