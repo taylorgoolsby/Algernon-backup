@@ -530,6 +530,7 @@ const ChatScreen: any = observer(({navigation}) => {
                     disabled={!!input.trim() && !isRecording && !canPost}>
                     {isTranscribing ? <SpokeSpinner/> : (
                       <AnimatedIcon
+                        style={{marginRight: !(input.trim() && !isRecording) && !isRecording ? 1 : 0}}
                         name={
                           (input.trim() && !isRecording) || searchMode
                             ? 'arrow-up-circle'
@@ -539,7 +540,7 @@ const ChatScreen: any = observer(({navigation}) => {
                         }
                         size={
                           !(input.trim() && !isRecording) && !isRecording
-                            ? 26
+                            ? 25
                             : 28
                         }
                         color={submitColor.interpolate({

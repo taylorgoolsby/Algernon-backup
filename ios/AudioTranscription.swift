@@ -19,6 +19,11 @@ class AudioTranscription: NSObject, WhisperDelegate {
 
     @objc
     func initialize(_ resolver: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        if whisper != nil {
+            resolver("Whisper already initialized")
+            return
+        }
+      
         guard let modelPath = Bundle.main.path(forResource: "ggml-tiny", ofType: "bin") else {
             reject("Error", "Model path not found", nil)
             return
