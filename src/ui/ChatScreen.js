@@ -17,8 +17,7 @@ import {
   Appearance,
 } from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
-import Text from './components/Text.js'
-import ChatMessage, {leftMargin, rightMargin} from './components/ChatMessage.js'
+import {leftMargin, rightMargin} from './components/ChatMessage.js'
 import ProfilePic from './components/ProfilePic.js'
 import ChatIteration from '../agent/ChatIteration.js'
 import {observer} from 'mobx-react'
@@ -34,7 +33,6 @@ import Colors, {
   shadow,
 } from '../Colors.js'
 import modalStore from '../stores/ModalStore.js'
-import Voice from '@react-native-voice/voice'
 import {
   check,
   request,
@@ -45,10 +43,28 @@ import {
 import type {MessageSQL} from '../schema/Message/MessageSchema.mjs'
 import LongTermAnnotation from '../agent/LongTermAnnotation.js'
 import {useDebounce} from 'use-debounce'
-import ListSlider from './components/ListSlider.js'
 import MessageOptions from './components/MessageOptions.js'
-import ChatList from "./components/ChatList";
 import InvertedChatList from './components/InvertedChatList.js'
+// import RNFS from 'react-native-fs';
+import { NativeModules } from 'react-native';
+import SpokeSpinner from "./components/SpokeSpinner";
+
+const { AudioTranscription } = NativeModules;
+
+// const listFolderContents = async (folderPath) => {
+//   console.log("folderPath", folderPath);
+//   try {
+//     const files = await RNFS.readDir(folderPath); // Get the contents of the directory
+//     files.forEach(file => {
+//       console.log(file.name, file.isFile() ? 'File' : 'Directory');
+//     });
+//   } catch (err) {
+//     console.error(err.message);
+//   }
+// }
+// const folderPath = `${RNFS.MainBundlePath}`
+// listFolderContents(folderPath)
+
 
 const darkMode = Appearance.getColorScheme() === 'dark'
 
@@ -61,6 +77,7 @@ const ChatScreen: any = observer(({navigation}) => {
   const [searchInputFocused, setSearchInputFocused] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
+  const [isTranscribing, setIsTranscribing] = useState(false)
   const [showFlipSide, setShowFlipSide] = useState(false)
   const [showOptionsForMessage, setShowOptionsForMessage] =
     useState<?MessageSQL>(null)
@@ -118,7 +135,7 @@ const ChatScreen: any = observer(({navigation}) => {
 
   // const [micReady, setMicReady] = useState(false)
   // const [speechReady, setSpeechReady] = useState(false)
-  async function checkAndRequestVoice(): Promise<boolean> {
+  async function checkAndRequestAudio(): Promise<boolean> {
     let micCheck = await check(PERMISSIONS.IOS.MICROPHONE)
     console.log('micCheck', micCheck)
     if (micCheck !== RESULTS.GRANTED) {
@@ -126,15 +143,15 @@ const ChatScreen: any = observer(({navigation}) => {
       console.log('micCheck', micCheck)
     }
 
-    let speechCheck = await check(PERMISSIONS.IOS.SPEECH_RECOGNITION)
-    if (speechCheck !== RESULTS.GRANTED) {
-      speechCheck = await request(PERMISSIONS.IOS.SPEECH_RECOGNITION)
-    }
+    // let speechCheck = await check(PERMISSIONS.IOS.SPEECH_RECOGNITION)
+    // if (speechCheck !== RESULTS.GRANTED) {
+    //   speechCheck = await request(PERMISSIONS.IOS.SPEECH_RECOGNITION)
+    // }
 
-    if (micCheck === RESULTS.BLOCKED || speechCheck === RESULTS.BLOCKED) {
+    if (micCheck === RESULTS.BLOCKED) {
       modalStore.cta(
         null,
-        'Please enable microphone and speech recognition permissions in your system settings.',
+        'Please enable microphone permissions in your system settings.',
         'Open Settings',
         () => {
           openSettings().catch(console.error)
@@ -142,7 +159,7 @@ const ChatScreen: any = observer(({navigation}) => {
       )
     }
 
-    return micCheck === RESULTS.GRANTED && speechCheck === RESULTS.GRANTED
+    return micCheck === RESULTS.GRANTED
   }
 
   const voiceInitialized = useRef(false)
@@ -151,21 +168,10 @@ const ChatScreen: any = observer(({navigation}) => {
     if (!voiceInitialized.current) {
       voiceInitialized.current = true
       Promise.resolve().then(async () => {
-        // setVoiceReady(await Voice.isAvailable() === 1)
         setVoiceReady(true)
-        Voice.onSpeechResults = e => {
-          console.log('e.value', e.value)
-          setInput(input + ' ' + e.value[0])
-          // console.log("e.value", e.value);
-        }
-        // Voice.onSpeechPartialResults = (e) => {
-        //   console.log("e.value", e.value);
-        // }
-        Voice.onSpeechError = e => {
-          console.log(e.error)
-          stopSpeechToText()
-          modalStore.showError('Speech recognition stopped')
-        }
+        AudioTranscription.initialize()
+          .then((message) => console.log(message))
+          .catch((error) => console.error(error));
       })
     }
   }, [])
@@ -183,18 +189,30 @@ const ChatScreen: any = observer(({navigation}) => {
     // If the user rejects these permissions, then this function will exit
     // early so no recording is started.
 
-    const permissionsGranted = await checkAndRequestVoice()
+    const permissionsGranted = await checkAndRequestAudio()
 
     if (permissionsGranted && voiceReady) {
       setIsRecording(true)
-      Voice.start('en-US') // todo: detect language
+      AudioTranscription.onData((transcription) => {
+        setIsTranscribing(false)
+
+        // Remove instances of [BLANK_AUDIO]
+        const cleanTranscription = transcription.replace(/\[BLANK_AUDIO\]/g, '');
+        setInput(cleanTranscription)
+      })
+      AudioTranscription.start()
+        .then((message) => console.log(message))
+        .catch((error) => console.error(error));
     }
   }
 
-  const stopSpeechToText = () => {
+  const stopSpeechToText = async () => {
     if (isRecording) {
       setIsRecording(false)
-      Voice.stop()
+      setIsTranscribing(true)
+      AudioTranscription.stop()
+        .then((message) => console.log(message))
+        .catch((error) => console.error(error));
     }
   }
 
@@ -510,24 +528,26 @@ const ChatScreen: any = observer(({navigation}) => {
                         : startSpeechToText
                     }
                     disabled={!!input.trim() && !isRecording && !canPost}>
-                    <AnimatedIcon
-                      name={
-                        (input.trim() && !isRecording) || searchMode
-                          ? 'arrow-up-circle'
-                          : isRecording
-                          ? 'stop-circle'
-                          : 'mic'
-                      }
-                      size={
-                        !(input.trim() && !isRecording) && !isRecording
-                          ? 26
-                          : 28
-                      }
-                      color={submitColor.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [footerInactive, footerActive],
-                      })}
-                    />
+                    {isTranscribing ? <SpokeSpinner/> : (
+                      <AnimatedIcon
+                        name={
+                          (input.trim() && !isRecording) || searchMode
+                            ? 'arrow-up-circle'
+                            : isRecording
+                              ? 'stop-circle'
+                              : 'mic'
+                        }
+                        size={
+                          !(input.trim() && !isRecording) && !isRecording
+                            ? 26
+                            : 28
+                        }
+                        color={submitColor.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [footerInactive, footerActive],
+                        })}
+                      />
+                    )}
                   </TouchableOpacity>
                   {/*{isRecording ? (*/}
                   {/*  <TouchableOpacity*/}

@@ -15,11 +15,16 @@
 		55C8C953B19006FB6848658C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9D525A29B57CBC895699329E /* PrivacyInfo.xcprivacy */; };
 		7699B88040F8A987B510C191 /* libPods-CobaltMobileRN-CobaltMobileRNTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-CobaltMobileRN-CobaltMobileRNTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		8C010B212C48A8DC00220DC9 /* ggml-tiny-encoder.mlmodelc in Resources */ = {isa = PBXBuildFile; fileRef = 8C010B1F2C48A8D900220DC9 /* ggml-tiny-encoder.mlmodelc */; };
+		8C010B222C48A8DC00220DC9 /* ggml-tiny.bin in Resources */ = {isa = PBXBuildFile; fileRef = 8C010B202C48A8DC00220DC9 /* ggml-tiny.bin */; };
 		8C022CDE2BB5CEE500CBB95A /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C022CDD2BB5CEE500CBB95A /* StoreKit.framework */; };
 		8C022CE02BB5D67900CBB95A /* SyncedProducts.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 8C022CDF2BB5D67900CBB95A /* SyncedProducts.storekit */; };
 		8C097E582BB0EC9C0078CE31 /* CodeGenTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C097E572BB0EC9C0078CE31 /* CodeGenTokenizer.swift */; };
 		8C097E662BB19BE70078CE31 /* CodeGen-merges.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8C097E642BB19BE70078CE31 /* CodeGen-merges.txt */; };
 		8C097E672BB19BE70078CE31 /* CodeGen-vocab.json in Resources */ = {isa = PBXBuildFile; fileRef = 8C097E652BB19BE70078CE31 /* CodeGen-vocab.json */; };
+		8C1186062C486982004A652D /* AudioTranscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C1186052C486982004A652D /* AudioTranscription.swift */; };
+		8C1186082C4869A4004A652D /* AudioTranscriptionBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C1186072C4869A4004A652D /* AudioTranscriptionBridge.m */; };
+		8C11860B2C4879C6004A652D /* SwiftWhisper in Frameworks */ = {isa = PBXBuildFile; productRef = 8C11860A2C4879C6004A652D /* SwiftWhisper */; };
 		8C33BC332BA418EC0023A2D9 /* TextFeatureExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C33BC322BA418EC0023A2D9 /* TextFeatureExtractor.swift */; };
 		8C33BC352BA419EA0023A2D9 /* TextFeatureExtractor.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C33BC342BA419EA0023A2D9 /* TextFeatureExtractor.m */; };
 		8C33BC392BA42DD40023A2D9 /* MiniLM-vocab.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8C33BC382BA42DD40023A2D9 /* MiniLM-vocab.txt */; };
@@ -92,11 +97,15 @@
 		5DCACB8F33CDC322A6C60F78 /* libPods-CobaltMobileRN.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-CobaltMobileRN.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = CobaltMobileRN/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-CobaltMobileRN-CobaltMobileRNTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CobaltMobileRN-CobaltMobileRNTests.release.xcconfig"; path = "Target Support Files/Pods-CobaltMobileRN-CobaltMobileRNTests/Pods-CobaltMobileRN-CobaltMobileRNTests.release.xcconfig"; sourceTree = "<group>"; };
+		8C010B1F2C48A8D900220DC9 /* ggml-tiny-encoder.mlmodelc */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = "ggml-tiny-encoder.mlmodelc"; sourceTree = "<group>"; };
+		8C010B202C48A8DC00220DC9 /* ggml-tiny.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = "ggml-tiny.bin"; sourceTree = "<group>"; };
 		8C022CDD2BB5CEE500CBB95A /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		8C022CDF2BB5D67900CBB95A /* SyncedProducts.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = SyncedProducts.storekit; sourceTree = "<group>"; };
 		8C097E572BB0EC9C0078CE31 /* CodeGenTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeGenTokenizer.swift; sourceTree = "<group>"; };
 		8C097E642BB19BE70078CE31 /* CodeGen-merges.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "CodeGen-merges.txt"; sourceTree = "<group>"; };
 		8C097E652BB19BE70078CE31 /* CodeGen-vocab.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "CodeGen-vocab.json"; sourceTree = "<group>"; };
+		8C1186052C486982004A652D /* AudioTranscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTranscription.swift; sourceTree = "<group>"; };
+		8C1186072C4869A4004A652D /* AudioTranscriptionBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AudioTranscriptionBridge.m; sourceTree = "<group>"; };
 		8C33BC322BA418EC0023A2D9 /* TextFeatureExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFeatureExtractor.swift; sourceTree = "<group>"; };
 		8C33BC342BA419EA0023A2D9 /* TextFeatureExtractor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextFeatureExtractor.m; sourceTree = "<group>"; };
 		8C33BC382BA42DD40023A2D9 /* MiniLM-vocab.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "MiniLM-vocab.txt"; sourceTree = "<group>"; };
@@ -132,7 +141,7 @@
 		8CFAFCF92BC854FF00AF4869 /* DMMono-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "DMMono-Light.ttf"; path = "../../assets/fonts/DMMono-Light.ttf"; sourceTree = "<group>"; };
 		8CFAFCFA2BC854FF00AF4869 /* Poppins-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Poppins-Light.ttf"; path = "../../assets/fonts/Poppins-Light.ttf"; sourceTree = "<group>"; };
 		8CFAFD0E2BC86BB800AF4869 /* Figtree-VariableFont_wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Figtree-VariableFont_wght.ttf"; path = "../../assets/fonts/Figtree-VariableFont_wght.ttf"; sourceTree = "<group>"; };
-		9D525A29B57CBC895699329E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = CobaltMobileRN/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		9D525A29B57CBC895699329E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = CobaltMobileRN/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -151,6 +160,7 @@
 			files = (
 				8CFD0A222BA3E6340080EBE1 /* FAISS in Frameworks */,
 				8C022CDE2BB5CEE500CBB95A /* StoreKit.framework in Frameworks */,
+				8C11860B2C4879C6004A652D /* SwiftWhisper in Frameworks */,
 				8CFA36082BA1A408009546C7 /* MLXOptimizers in Frameworks */,
 				8CFD0A1D2BA3E32C0080EBE1 /* OpenMP in Frameworks */,
 				8CFD0A242BA3E6340080EBE1 /* FAISS_C in Frameworks */,
@@ -211,6 +221,8 @@
 				8C9AAF8E2BAB2C7300FF60EF /* NativeTokenizer.swift */,
 				8C022CDF2BB5D67900CBB95A /* SyncedProducts.storekit */,
 				9D525A29B57CBC895699329E /* PrivacyInfo.xcprivacy */,
+				8C1186052C486982004A652D /* AudioTranscription.swift */,
+				8C1186072C4869A4004A652D /* AudioTranscriptionBridge.m */,
 			);
 			name = CobaltMobileRN;
 			sourceTree = "<group>";
@@ -295,6 +307,8 @@
 		8CFD0A252BA3EDF40080EBE1 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				8C010B1F2C48A8D900220DC9 /* ggml-tiny-encoder.mlmodelc */,
+				8C010B202C48A8DC00220DC9 /* ggml-tiny.bin */,
 				8C097E642BB19BE70078CE31 /* CodeGen-merges.txt */,
 				8C097E652BB19BE70078CE31 /* CodeGen-vocab.json */,
 				8C33BC3F2BA563BE0023A2D9 /* all-MiniLM-L6-v2-coreml-float32.mlpackage */,
@@ -370,6 +384,7 @@
 				8CFD0A232BA3E6340080EBE1 /* FAISS_C */,
 				8C33BC3B2BA430B60023A2D9 /* Transformers */,
 				8C9AAF882BAB279300FF60EF /* Tiktoken */,
+				8C11860A2C4879C6004A652D /* SwiftWhisper */,
 			);
 			productName = CobaltMobileRN;
 			productReference = 13B07F961A680F5B00A75B9A /* CobaltMobileRN.app */;
@@ -408,6 +423,7 @@
 				8CFD0A202BA3E6340080EBE1 /* XCRemoteSwiftPackageReference "faiss-mobile" */,
 				8C33BC3A2BA430B60023A2D9 /* XCRemoteSwiftPackageReference "swift-transformers" */,
 				8C9AAF872BAB279300FF60EF /* XCRemoteSwiftPackageReference "Tiktoken" */,
+				8C1186092C4879C6004A652D /* XCRemoteSwiftPackageReference "SwiftWhisper" */,
 			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
@@ -431,6 +447,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8C010B222C48A8DC00220DC9 /* ggml-tiny.bin in Resources */,
+				8C010B212C48A8DC00220DC9 /* ggml-tiny-encoder.mlmodelc in Resources */,
 				8C33BC392BA42DD40023A2D9 /* MiniLM-vocab.txt in Resources */,
 				8CA26A152BCF9B33009563A5 /* Poppins-Medium.ttf in Resources */,
 				8CA26A172BCFA34C009563A5 /* Poppins-Regular.ttf in Resources */,
@@ -602,11 +620,13 @@
 				8CACCE532BA29DD2004643C2 /* LLMModel.swift in Sources */,
 				8C33BC402BA563BE0023A2D9 /* all-MiniLM-L6-v2-coreml-float32.mlpackage in Sources */,
 				8CACCE602BA2BC50004643C2 /* Qwen2.swift in Sources */,
+				8C1186062C486982004A652D /* AudioTranscription.swift in Sources */,
 				8CACCE5E2BA2BC50004643C2 /* Gemma.swift in Sources */,
 				8CFA35FD2BA18D80009546C7 /* FaissBridge.m in Sources */,
 				8CACCE502BA29DD2004643C2 /* Configuration.swift in Sources */,
 				8CACCE4F2BA29DD2004643C2 /* Evaluate.swift in Sources */,
 				8CFA36252BA29209009546C7 /* LLMNativeModule.m in Sources */,
+				8C1186082C4869A4004A652D /* AudioTranscriptionBridge.m in Sources */,
 				8C9AAF8F2BAB2C7300FF60EF /* NativeTokenizer.swift in Sources */,
 				8C33BC332BA418EC0023A2D9 /* TextFeatureExtractor.swift in Sources */,
 				8CACCE512BA29DD2004643C2 /* Load.swift in Sources */,
@@ -699,7 +719,7 @@
 				DEVELOPMENT_TEAM = TY6EV5VRJ3;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = CobaltMobileRN/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Cobalt AI";
+				INFOPLIST_KEY_CFBundleDisplayName = "Algernon AI";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -712,7 +732,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = to.tgoolsby.cobalt;
+				PRODUCT_BUNDLE_IDENTIFIER = to.tgoolsby.algernon;
 				PRODUCT_NAME = CobaltMobileRN;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -737,7 +757,7 @@
 				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = TY6EV5VRJ3;
 				INFOPLIST_FILE = CobaltMobileRN/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Cobalt AI";
+				INFOPLIST_KEY_CFBundleDisplayName = "Algernon AI";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -750,7 +770,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = to.tgoolsby.cobalt;
+				PRODUCT_BUNDLE_IDENTIFIER = to.tgoolsby.algernon;
 				PRODUCT_NAME = CobaltMobileRN;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -943,6 +963,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		8C1186092C4879C6004A652D /* XCRemoteSwiftPackageReference "SwiftWhisper" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/exPHAT/SwiftWhisper.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.2.0;
+			};
+		};
 		8C33BC3A2BA430B60023A2D9 /* XCRemoteSwiftPackageReference "swift-transformers" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/huggingface/swift-transformers";
@@ -994,6 +1022,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		8C11860A2C4879C6004A652D /* SwiftWhisper */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8C1186092C4879C6004A652D /* XCRemoteSwiftPackageReference "SwiftWhisper" */;
+			productName = SwiftWhisper;
+		};
 		8C33BC3B2BA430B60023A2D9 /* Transformers */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 8C33BC3A2BA430B60023A2D9 /* XCRemoteSwiftPackageReference "swift-transformers" */;

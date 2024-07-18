@@ -43,8 +43,6 @@
 	<string>This app does not directly need this API, however this app uses react-native-device-info for providing the version number, build number, and first install time to the JavaScript runtime. react-native-device-info makes general references to other APIs which are not needed by this app.</string>
 	<key>NSPrivacyAccessedAPICategoryUserDefaults</key>
 	<string>This app does not directly need this API, however this app uses react-native-device-info for providing the version number, build number, and first install time to the JavaScript runtime. react-native-device-info makes general references to other APIs which are not needed by this app.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Speech recognition is used for speech-to-text.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Nunito-VariableFont_wght.ttf</string>

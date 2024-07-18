@@ -7,9 +7,10 @@ import ChatMessage, { leftMargin, margin, rightMargin } from "./ChatMessage";
 import type { MessageSQL } from "../../schema/Message/MessageSchema.mjs";
 import chatStore from "../../stores/ChatStore";
 import debounce from "lodash.debounce";
-import Colors, { userChat } from "../../Colors";
+import Colors, { aiText2, aiText2Active, userChat, userText2, userText2Active } from "../../Colors";
 import MessageInterface from "../../schema/Message/MessageInterface.js";
 import { MessageRole } from "../../schema/Message/MessageSchema.mjs";
+import Icon from "react-native-vector-icons/Ionicons.js";
 
 const screenHeight = Dimensions.get('window').height
 
@@ -283,25 +284,39 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
         <View
           style={{
             paddingTop: margin,
-            paddingBottom: margin,
+            // paddingBottom: margin,
           }}
         >
           <TouchableOpacity
             style={{
               backgroundColor: userChat,
-              borderRadius: 24,
+              borderRadius: 21,
               height: 42,
               paddingLeft: 14,
-              paddingRight: 14,
-              justifyContent: 'center',
-              alignItems: 'flex-end',
+              // paddingRight: 14,
               alignSelf: 'flex-end',
+              alignItems: 'center',
+              flexDirection: 'row',
             }}
             onPress={() => onboardingItem.onChoose(onboardingItem)}
           >
             <Text>
               {onboardingItem.buttonLabel}
             </Text>
+            <View
+              style={{
+                width: 42,
+                height: 42,
+                marginRight: -3,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Icon
+                name={'add-outline'}
+                size={18}
+                color={userText2}
+              />
+            </View>
           </TouchableOpacity>
         </View>
       )
@@ -365,29 +380,28 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
       : initialSafeAreaFooterHeight
 
     if (messageIds.length === 1) {
-      // If the messages is just one, then present some onboarding.
-      // The first message should be a welcome message explaining what the app is good at.
-      // Then some options will appear below, and if the user selects it,
-      // then it will cause that message to be sent as if the user sent it.
-      // This is an AI chat app, but the core tech is to take anything the user says
-      // and to parse it into annotations where each annotation represents a
-      // unit of semantic meaning. This becomes a data point in a vector embedding space.
-      // Later, when the user is talking about related topic, the AI will be able to
-      // make connections to the previous annotations and to generate a response
-      // which helps the user see connections, and it helps them manage their thoughts.
-      // For example, during journaling, past stories the user has told the AI
-      // can be recovered by it, and prompt the user.
-      // It's about helping the user see connections or loose ends they don't see.
+      async function onSuggestionChoose(item) {
+        try {
+          const userMessage = await MessageInterface.insert(chatStore.windowId, MessageRole.USER, item.userMessage, true);
+          chatStore.appendMessage({
+            windowId: chatStore.windowId,
+            message: userMessage,
+          })
+          const aiMessage = await MessageInterface.insert(
+            chatStore.windowId,
+            MessageRole.ASSISTANT,
+            item.assistantMessage,
+            true
+          )
+          chatStore.appendMessage({
+            windowId: chatStore.windowId,
+            message: aiMessage,
+          })
+        } catch (error) {
+          console.error(error)
+        }
+      }
 
-      // Specifically, the first message they see is, "
-
-
-
-      //// invertedMessageIds.push({
-      ////   text: 'Help me brainstorm',
-      ////   -> Okay, what are you working on?
-      ////   onChoose: () => {}
-      //// })
       //// invertedMessageIds.push({
       ////   text: 'Uncover hidden links',
       ////   -> I need more information to do that. As you tell me more, I'll be able to make connections.
@@ -397,38 +411,27 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
         buttonLabel: 'Organize my thoughts',
         userMessage: 'Can you help me organize my thoughts?',
         assistantMessage: 'Sure, what\'s on your mind?',
-        onChoose: async (item) => {
-          try {
-            const userMessage = await MessageInterface.insert(chatStore.windowId, MessageRole.USER, item.userMessage, true);
-            chatStore.appendMessage({
-              windowId: chatStore.windowId,
-              message: userMessage,
-            })
-            const aiMessage = await MessageInterface.insert(
-              chatStore.windowId,
-              MessageRole.ASSISTANT,
-              item.assistantMessage,
-              true
-            )
-            chatStore.appendMessage({
-              windowId: chatStore.windowId,
-              message: aiMessage,
-            })
-          } catch (error) {
-            console.error(error)
-          }
-        }
+        onChoose: onSuggestionChoose
       })
       invertedMessageIds.unshift({
-        height: 2 * margin,
+        buttonLabel: 'I want to learn a new topic',
+        userMessage: 'Can you help me organize my thoughts?',
+        assistantMessage: 'Sure, what\'s on your mind?',
+        // -> Okay, what are you working on?
+        onChoose: onSuggestionChoose
       })
-      // invertedMessageIds.push({
-      //   text: 'Inspire me',
-      //   -> Okay, what are you interested in? Cars, shoes, art?
-      //   -> Cars
-      //   -> What kinds of cars do you like? You can show me a picture or describe it. Later, I can help you find similar cars.
-      //   onChoose: () => {}
-      // })
+      invertedMessageIds.unshift({
+        buttonLabel: 'Inspire me',
+        userMessage: 'Inspire me',
+        assistantMessage: 'Okay, what are you interested in? Cars, shoes, art?',
+        onChoose: onSuggestionChoose
+        // -> Okay, what are you interested in? Cars, shoes, art?
+        // -> Cars
+        // -> What kinds of cars do you like? You can show me a picture or describe it. Later, I can help you find similar cars.
+      })
+      invertedMessageIds.unshift({
+        height: 3 * margin,
+      })
     }
 
     return (
