@@ -76,7 +76,8 @@ async function initData() {
   if (initialized) return
 
   // await MessageInterface.insert(chatStore.windowId, MessageRole.ASSISTANT, 'Hi, how can I help?', true)
-  await MessageInterface.insert(chatStore.windowId, MessageRole.ASSISTANT, 'Hi! Talk freely, and I\'ll find patterns in your thoughts.', true)
+  // await MessageInterface.insert(chatStore.windowId, MessageRole.ASSISTANT, 'Hi! Talk freely, and I\'ll find patterns in your thoughts.', true)
+  await MessageInterface.insert(chatStore.windowId, MessageRole.ASSISTANT, 'Hey there! Share your thoughts, and I’ll help you uncover the hidden patterns within.', true)
 }
 
 async function migrate() {

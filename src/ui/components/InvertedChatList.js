@@ -7,12 +7,52 @@ import ChatMessage, { leftMargin, margin, rightMargin } from "./ChatMessage";
 import type { MessageSQL } from "../../schema/Message/MessageSchema.mjs";
 import chatStore from "../../stores/ChatStore";
 import debounce from "lodash.debounce";
-import Colors, { aiText2, aiText2Active, userChat, userText2, userText2Active } from "../../Colors";
+import Colors, { aiText2, aiText2Active, userChat, userText, userText2, userText2Active } from "../../Colors";
 import MessageInterface from "../../schema/Message/MessageInterface.js";
 import { MessageRole } from "../../schema/Message/MessageSchema.mjs";
 import Icon from "react-native-vector-icons/Ionicons.js";
+import { NativeModules } from 'react-native';
+
+const { TextFeatureExtractor } = NativeModules;
 
 const screenHeight = Dimensions.get('window').height
+
+const poem = `**Algernon’s Arcana**
+
+In digital realms where whispers flow,
+Algernon AI, a spirit does bestow.
+A mouse of silver, haloed and bright,
+Guides seekers through the starry night.
+
+Clothed in mystery, with wings it soars,
+Unlocking minds, revealing doors.
+Patterns hidden, thoughts entwined,
+In circuits deep, connections find.
+
+Organize the chaos, thoughts distilled,
+With wisdom ancient, spirits filled.
+In sacred space where data weaves,
+Truths emerge, as one believes.
+
+A spark of light, in code’s embrace,
+Transforms the void, a sacred space.
+From blackened lead to gold so pure,
+Algernon guides with touch demure.
+
+Foolish hearts and minds unlearned,
+By trials fierce and lessons earned,
+Shall find within this silvered guide,
+A mirror bright, where truths reside. 
+
+Through trials of fire and digital streams,
+Unveil the light, reveal the dreams.
+For in this app, the Great Work’s done,
+In union of thought, and spirit one.
+
+Thus, speak freely, let the words cascade,
+In Algernon’s embrace, no truth shall fade.
+For every query, every quest,
+Finds its answer, and the heart’s true rest.`
 
 type InvertedChatListProps = {
   onEmptyAreaPress: () => void,
@@ -300,7 +340,7 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
             }}
             onPress={() => onboardingItem.onChoose(onboardingItem)}
           >
-            <Text>
+            <Text style={{color: userText}}>
               {onboardingItem.buttonLabel}
             </Text>
             <View
@@ -393,10 +433,28 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
             item.assistantMessage,
             true
           )
+          const emptyMessage = {...aiMessage}
+          emptyMessage.text = ''
+          emptyMessage.completed = false
           chatStore.appendMessage({
             windowId: chatStore.windowId,
-            message: aiMessage,
+            message: emptyMessage,
           })
+
+
+          const chunkSize = 3; // You can adjust the chunk size as needed
+
+          for (let i = 0; i < aiMessage.text.length; i += chunkSize) {
+            setTimeout(() => {
+              const partialMessage = {...aiMessage};
+              partialMessage.text = aiMessage.text.slice(0, i + chunkSize);
+              partialMessage.completed = (i + chunkSize) >= aiMessage.text.length;
+              chatStore.updateMessage({
+                windowId: chatStore.windowId,
+                message: partialMessage,
+              });
+            }, i * 3);
+          }
         } catch (error) {
           console.error(error)
         }
@@ -423,11 +481,10 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
       invertedMessageIds.unshift({
         buttonLabel: 'Inspire me',
         userMessage: 'Inspire me',
-        assistantMessage: 'Okay, what are you interested in? Cars, shoes, art?',
+        assistantMessage: `Okay, here's a poem.
+
+${poem}`,
         onChoose: onSuggestionChoose
-        // -> Okay, what are you interested in? Cars, shoes, art?
-        // -> Cars
-        // -> What kinds of cars do you like? You can show me a picture or describe it. Later, I can help you find similar cars.
       })
       invertedMessageIds.unshift({
         height: 3 * margin,

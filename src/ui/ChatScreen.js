@@ -368,24 +368,28 @@ const ChatScreen: any = observer(({navigation}) => {
             <SafeAreaView style={styles.safeArea}>
               <View
                 style={{
-                  paddingBottom: 12,
+                  height: 30,
                   flexDirection: 'row',
                   justifyContent: 'flex-end',
                   flex: 1,
                 }}
                 onLayout={onLayoutInnerHeader}>
                 <TouchableOpacity
-                  style={[styles.sendButton, {paddingRight: 24, opacity: 0}]}
+                  style={[styles.sendButton, {paddingLeft: 30, paddingRight: rightMargin + 7, opacity: 1}]}
                   onPress={() => {
-                    setShowFlipSide(!showFlipSide)
+                    // setShowFlipSide(!showFlipSide)
                   }}
-                  disabled={true}>
+                  // disabled={true}
+                >
                   <Icon
+                    style={{transform: [{translateY: -3}]}}
                     // name={'analytics-outline'}
-                    name={'layers-outline'}
+                    // name={'layers-outline'}
+                    name={'sparkles'}
+                    // name={'analytics'}
                     size={18}
                     color={headerRight}
-                    opacity={0.3}
+                    opacity={1}
                   />
                 </TouchableOpacity>
               </View>
@@ -477,7 +481,10 @@ const ChatScreen: any = observer(({navigation}) => {
               <TouchableWithoutFeedback onPress={focusInput}>
                 <View style={styles.inputBar} onLayout={onLayoutFooter}>
                   <TouchableOpacity
-                    style={styles.clearInputButton}
+                    style={[
+                      styles.clearInputButton,
+
+                    ]}
                     onPress={() => {
                       if (searchMode) {
                         exitSearchMode()
@@ -494,7 +501,10 @@ const ChatScreen: any = observer(({navigation}) => {
                           : 'search-circle'
                       }
                       size={!!input && !searchMode ? 28 : 30}
-                      style={{marginLeft: !!input && !searchMode ? 0 : -1}}
+                      style={{
+                        marginLeft: !!input && !searchMode ? 0 : -1,
+                        marginRight: !!input && !searchMode ? 0 : -1
+                      }}
                       color={clearColor.interpolate({
                         inputRange: [0, 1],
                         outputRange: [
@@ -519,7 +529,7 @@ const ChatScreen: any = observer(({navigation}) => {
                     placeholderTextColor={Colors.sendIconDisabledBg}
                   />
                   <TouchableOpacity
-                    style={[styles.sendButton, {marginRight: isRecording ? -1 : 0}]}
+                    style={[styles.sendButton, {transform: [{translateX: 0.5}]}]}
                     onPress={
                       (input.trim() && !isRecording) || searchMode
                         ? submit
@@ -530,7 +540,7 @@ const ChatScreen: any = observer(({navigation}) => {
                     disabled={!!input.trim() && !isRecording && !canPost}>
                     {isTranscribing ? <SpokeSpinner/> : (
                       <AnimatedIcon
-                        style={{marginRight: !(input.trim() && !isRecording) && !isRecording ? 1 : 0}}
+                        style={{marginRight: !(input.trim() && !isRecording) && !isRecording ? 2 : 0}}
                         name={
                           (input.trim() && !isRecording) || searchMode
                             ? 'arrow-up-circle'
@@ -540,7 +550,7 @@ const ChatScreen: any = observer(({navigation}) => {
                         }
                         size={
                           !(input.trim() && !isRecording) && !isRecording
-                            ? 25
+                            ? 24
                             : 28
                         }
                         color={submitColor.interpolate({
@@ -707,7 +717,7 @@ const styles = StyleSheet.create({
   clearInputButton: {
     padding: 0,
     paddingLeft: leftMargin + 12,
-    paddingRight: 7,
+    paddingRight: 10,
     alignSelf: 'stretch',
     justifyContent: 'center',
     alignItems: 'center',

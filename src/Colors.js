@@ -22,8 +22,8 @@ export const shadow: {...} = {
   elevation: 1,
 }
 
-export const headerLeft: string = darkMode ? 'rgba(255, 255, 255, 0.99)' : 'rgba(0, 0, 0, 0.75)' //blue
-export const headerRight: string = darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.53)' // opacity=0.3
+export const headerLeft: string = darkMode ? 'rgba(255, 255, 255, 0.99)' : 'rgba(0, 0, 0, 0.88)' //blue
+export const headerRight: string = darkMode ? 'rgba(255, 255, 255, 0.99)' : 'rgba(0, 0, 0, 0.88)' // opacity=0.3
 export const userChat: string = blue
 // export const aiChat: string = darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)'
 export const aiChat: string = darkMode ? 'rgba(255, 255, 255, 0.01)' : 'rgba(0, 0, 0, 0.0)'
