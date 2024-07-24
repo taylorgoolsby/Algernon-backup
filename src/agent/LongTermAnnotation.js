@@ -34,10 +34,11 @@ export default class LongTermAnnotation {
   static backgroundAnnotate(
     model: ModelConfig,
     message: MessageSQL,
+    searchSummary: ?string,
   ): void {
     Promise.resolve().then(async () => {
       try {
-        const text = message.text
+        const text = message.text + '\n\n' + (searchSummary ?? '')
 
         const annotations = await LongTermAnnotation.getAnnotations(
           model,
@@ -198,7 +199,7 @@ Explanation: Similar to the previous example, this input is an acknowledgement w
         }
         break
       } catch (err) {
-        console.warn('Annotator did not output JSON', rawJSON)
+        // console.warn('Annotator did not output JSON', rawJSON)
       }
     }
 

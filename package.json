@@ -44,6 +44,7 @@
     "react-native-swiper": "^1.6.0",
     "react-native-url-polyfill": "2.0.0",
     "react-native-vector-icons": "^10.0.3",
+    "sanitize-html": "^2.13.0",
     "traverse": "0.6.8",
     "use-debounce": "^10.0.0"
   },

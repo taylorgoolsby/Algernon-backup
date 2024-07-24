@@ -16,6 +16,8 @@ export default class Config {
   static awsAccessKeyId: string = RNConfig.AWS_ACCESS_KEY_ID;
   static awsSecretAccessKey: string = RNConfig.AWS_SECRET_ACCESS_KEY;
 
+  static bingSecret: string = RNConfig.BING_SECRET;
+
   static monthlyProductId: string = 'sub1.monthly1'
   static annualProductId: string = 'sub1.annual1'
   static tokensPerChar: number = 0.17421777221526907
