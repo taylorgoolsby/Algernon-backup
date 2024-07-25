@@ -7,16 +7,21 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Colors from "../../Colors.js"; // Assuming you're using Ionicons
 import Text from './Text.js'
 
-const HeaderBackButton = (): any => {
+type HeaderBackButtonProps = {
+}
+
+const HeaderBackButton = (props: HeaderBackButtonProps): any => {
   const navigation = useNavigation();
 
   return (
     <TouchableOpacity
-      style={styles.button}
+      style={[
+        styles.button,
+      ]}
       onPress={() => navigation.goBack()}
     >
       <Icon style={styles.icon} name="chevron-back-outline" size={22} color={Colors.settingsText} />
-      <Text style={styles.text}>Back</Text>
+      {/*<Text style={styles.text}>Back</Text>*/}
     </TouchableOpacity>
   );
 };
@@ -25,8 +30,8 @@ const styles = StyleSheet.create({
   button: {
     flexDirection: 'row',
     alignItems: 'center',
-    // marginLeft: 10,
-    transform: [{translateY: 1.5}],
+    // transform: [{translateY: 1.5 + 2}],
+    backgroundColor: 'orange'
   },
   text: {
     marginLeft: 5,

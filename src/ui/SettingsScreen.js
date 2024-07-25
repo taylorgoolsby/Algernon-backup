@@ -13,6 +13,7 @@ import Picker from './components/Picker.js'
 import paymentStore from '../stores/PaymentStore.js'
 import {deepLinkToSubscriptions} from 'react-native-iap'
 import Icon from 'react-native-vector-icons/Ionicons'
+import CustomHeader from "./components/CustomHeader";
 
 const {FaissBridge} = NativeModules
 
@@ -72,6 +73,16 @@ const SettingsScreen: any = observer((props: any) => {
 
   return (
     <View style={styles.container}>
+      <CustomHeader
+        title={'Settings'}
+        makeSpace
+        titleYOffset={-1}
+        leftIcon={'back'}
+        onLeftPress={() => {
+          navigation.goBack()
+        }}
+      />
+
       {paymentStore.isSubscribed ? null : (
         <View style={styles.row}>
           <Text style={{flex: 1, color: Colors.settingsText}}>Subscribe</Text>

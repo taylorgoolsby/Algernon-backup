@@ -21,6 +21,7 @@ import Config from '../Config.js'
 import ModalLayer from './ModalLayer.js'
 import Colors from "../Colors.js";
 import HeaderBackButton from "./components/HeaderBackButton.js";
+import MemoryViewer from "./MemoryViewer";
 
 setup({storekitMode: 'STOREKIT2_MODE'})
 
@@ -149,14 +150,21 @@ const AppNavigator: any = withIAPContext(
                   name="Models"
                   component={ModelsScreen}
                   options={{
-                    headerShown: true,
+                    headerShown: false,
                   }}
                 />
                 <Stack.Screen
                   name="Settings"
                   component={SettingsScreen}
                   options={{
-                    headerShown: true,
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="MemoryViewer"
+                  component={MemoryViewer}
+                  options={{
+                    headerShown: false,
                   }}
                 />
               </>

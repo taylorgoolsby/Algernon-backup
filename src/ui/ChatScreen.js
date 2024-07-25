@@ -48,6 +48,7 @@ import InvertedChatList from './components/InvertedChatList.js'
 // import RNFS from 'react-native-fs';
 import { NativeModules } from 'react-native';
 import SpokeSpinner from "./components/SpokeSpinner";
+import CustomHeader from "./components/CustomHeader";
 
 const { AudioTranscription } = NativeModules;
 
@@ -358,44 +359,21 @@ const ChatScreen: any = observer(({navigation}) => {
           chatStore.deselectOptionsTarget()
           inputRef.current?.blur()
         }}>
-        <View style={styles.header}>
-          <BlurView
-            style={{flex: 1, opacity: 1}}
-            blurType={Colors.chatHeaderBlurType}
-            blurAmount={70} //
-            onLayout={onLayoutHeader} //
-          >
-            <SafeAreaView style={styles.safeArea}>
-              <View
-                style={{
-                  height: 30,
-                  flexDirection: 'row',
-                  justifyContent: 'flex-end',
-                  flex: 1,
-                }}
-                onLayout={onLayoutInnerHeader}>
-                <TouchableOpacity
-                  style={[styles.sendButton, {paddingLeft: 30, paddingRight: rightMargin + 7, opacity: 1}]}
-                  onPress={() => {
-                    // setShowFlipSide(!showFlipSide)
-                  }}
-                  // disabled={true}
-                >
-                  <Icon
-                    style={{transform: [{translateY: -3}]}}
-                    // name={'analytics-outline'}
-                    // name={'layers-outline'}
-                    name={'sparkles'}
-                    // name={'analytics'}
-                    size={18}
-                    color={headerRight}
-                    opacity={1}
-                  />
-                </TouchableOpacity>
-              </View>
-            </SafeAreaView>
-          </BlurView>
-        </View>
+        <CustomHeader
+          title={''}
+          onOuterLayout={onLayoutHeader}
+          onInnerLayout={onLayoutInnerHeader}
+          leftIcon={'monolith'}
+          onLeftPress={() => {
+            navigation.navigate('Settings')
+            inputRef.current?.blur()
+          }}
+          rightIcon={'sparkles'}
+          onRightPress={() => {
+            navigation.navigate('MemoryViewer')
+            inputRef.current?.blur()
+          }}
+        />
       </TouchableWithoutFeedback>
 
       <View
