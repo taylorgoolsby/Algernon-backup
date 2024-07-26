@@ -2,8 +2,19 @@
 
 import sqltag, { join } from '@taylorgoolsby/sql-template-tag'
 import database from '../database.js'
+import type { AnnotationSQL } from "./AnnotationSchema.mjs";
 
 export default class AnnotationInterface {
+  static async getAll(): Promise<Array<AnnotationSQL>> {
+    const query = sqltag`
+      SELECT * 
+      FROM Annotation
+      ORDER BY annotationId ASC;
+    `
+    const rows = await database.query(query)
+    return rows
+  }
+
   static async retrieve(
     annotationIds: Array<number>,
   ): Promise<Array<{| text: string, dateCreated: string |}>> {

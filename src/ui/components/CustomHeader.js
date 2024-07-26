@@ -1,6 +1,6 @@
 // @flow
 
-import React from 'react'
+import React, { useState } from "react";
 import {TouchableOpacity, StyleSheet, SafeAreaView, View} from 'react-native'
 import {useNavigation} from '@react-navigation/native'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -13,8 +13,8 @@ import { leftMargin, rightMargin } from "./ChatMessage";
 type CustomHeaderProps = {
   title: string,
   makeSpace?: boolean, // The header is absolute positioned, so if true, it will make space for the header
-  onOuterLayout?: ?() => void,
-  onInnerLayout?: ?() => void,
+  onOuterLayout?: ?(any) => void,
+  onInnerLayout?: ?(any) => void,
   onLeftPress: () => void,
   onRightPress?: ?() => void,
   leftIcon?: 'monolith' | 'back',
@@ -33,7 +33,12 @@ const CustomHeader = (props: CustomHeaderProps): any => {
     rightIcon
   } = props
 
-  const navigation = useNavigation()
+  const [outerHeight, setOuterHeight] = useState(0);
+
+  function handleOuterLayout(event: any) {
+    if (onOuterLayout) onOuterLayout(event)
+    setOuterHeight(event.nativeEvent.layout.height)
+  }
 
   let leftIconComponent = null
   if (leftIcon === 'monolith') {
@@ -87,7 +92,7 @@ const CustomHeader = (props: CustomHeaderProps): any => {
           style={{flex: 1, opacity: 1}}
           blurType={Colors.chatHeaderBlurType}
           blurAmount={70}
-          onLayout={onOuterLayout}
+          onLayout={handleOuterLayout}
         >
           <SafeAreaView style={styles.safeArea}>
             <View
@@ -137,7 +142,7 @@ const CustomHeader = (props: CustomHeaderProps): any => {
           </SafeAreaView>
         </BlurView>
       </View>
-      {!!makeSpace ? <View style={{height: 30}} /> : null}
+      {!!makeSpace ? <View style={{height: outerHeight}} /> : null}
     </>
   )
 }

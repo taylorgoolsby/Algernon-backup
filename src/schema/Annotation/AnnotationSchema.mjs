@@ -6,7 +6,7 @@ export type AnnotationSQL = {
   annotationId: number,
   messageId: number,
   text: string,
-  embedding: Array<number>,
+  embedding: string,
   dateCreated: string,
 }
 

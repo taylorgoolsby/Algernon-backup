@@ -3,7 +3,7 @@
 import React, {useState, useEffect, useRef} from 'react'
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import {NavigationContainer} from '@react-navigation/native'
-import {Image, View} from 'react-native'
+import {Easing, Animated, View} from 'react-native'
 import ChatScreen from './ChatScreen.js' // Adjust the path as necessary
 import ModelsScreen from './ModelsScreen.js' // Adjust the path as necessary
 import IntroScreen from './IntroScreen.js'
@@ -45,6 +45,54 @@ function newLog(...args: Array<any>) {
 }
 // $FlowFixMe
 console.log = newLog.bind(console) // eslint-disable-line no-console
+
+const slideOutTransition = {
+  gestureDirection: 'horizontal',
+  transitionSpec: {
+    open: {
+      animation: 'timing',
+      config: {
+        duration: 300,
+        easing: Easing.out(Easing.poly(4)),
+      },
+    },
+    close: {
+      animation: 'timing',
+      config: {
+        duration: 300,
+        easing: Easing.in(Easing.poly(4)),
+      },
+    },
+  },
+  cardStyleInterpolator: ({ current, next, layouts }: any) => {
+    return {
+      cardStyle: {
+        transform: [
+          {
+            translateX: Animated.multiply(current.progress.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, layouts.screen.width],
+            }), -1),
+          },
+          {
+            translateX: next
+              ? next.progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [layouts.screen.width, 0],
+              })
+              : 1,
+          },
+        ],
+      },
+    };
+  },
+}
+
+const forFade = ({ current }: any) => ({
+  cardStyle: {
+    opacity: current.progress,
+  },
+});
 
 const Stack = createNativeStackNavigator()
 
@@ -130,6 +178,8 @@ const AppNavigator: any = withIAPContext(
       <View style={{flex: 1}}>
         <NavigationContainer>
           <Stack.Navigator screenOptions={{
+            // ...slideOutTransition,
+            // cardStyleInterpolator: forFade,
             headerTitleStyle: {
               fontFamily: Colors.fontFamily,
               fontSize: Colors.fontSize,
@@ -158,6 +208,8 @@ const AppNavigator: any = withIAPContext(
                   component={SettingsScreen}
                   options={{
                     headerShown: false,
+                    cardStyleInterpolator: forFade,
+
                   }}
                 />
                 <Stack.Screen

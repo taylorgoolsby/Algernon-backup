@@ -10,6 +10,7 @@ import Icon from "react-native-vector-icons/Ionicons";
 import HeaderBackButton from "./components/HeaderBackButton";
 import CustomHeader from "./components/CustomHeader";
 import { useNavigation } from "@react-navigation/native";
+import PlotView from "./components/PlotView";
 
 // This is a page for vieweing the memory of the AI, which is a data visualization of a vector database.
 // The viewer is a 2d plot of the vectors, reduced by PCA.
@@ -21,11 +22,13 @@ const MemoryViewer: any = observer((props: any) => {
     <View style={styles.container}>
       <CustomHeader
         title={'Memories'}
+        makeSpace
         leftIcon={'back'}
         onLeftPress={() => {
           navigation.goBack()
         }}
       />
+      <PlotView/>
     </View>
   )
 })
@@ -35,7 +38,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.secondaryBg,
     alignItems: 'stretch',
-    padding: 20,
+    // padding: 20,
   },
   header: {
     position: 'absolute',
