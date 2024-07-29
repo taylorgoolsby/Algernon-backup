@@ -8,7 +8,7 @@ import ChatScreen from './ChatScreen.js' // Adjust the path as necessary
 import ModelsScreen from './ModelsScreen.js' // Adjust the path as necessary
 import IntroScreen from './IntroScreen.js'
 import SettingsScreen from './SettingsScreen.js'
-import {initializeDatabase} from '../schema/initializeDatabase'
+import {initializeDatabase} from "../schema/initializeDatabase.js";
 import preferencesStore from '../stores/PreferencesStore.js'
 import paymentStore, {oneWeek} from '../stores/PaymentStore.js'
 import {configure} from 'mobx'
@@ -28,6 +28,7 @@ setup({storekitMode: 'STOREKIT2_MODE'})
 configure({
   enforceActions: 'never',
 })
+
 initializeDatabase()
   .then(async () => {
     await preferencesStore.load()

@@ -7,17 +7,14 @@ import ChatMessage, { leftMargin, margin, rightMargin } from "./ChatMessage";
 import type { MessageSQL } from "../../schema/Message/MessageSchema.mjs";
 import chatStore from "../../stores/ChatStore";
 import debounce from "lodash.debounce";
-import Colors, { aiText2, aiText2Active, userChat, userText, userText2, userText2Active } from "../../Colors";
+import { userChat, userText, userText2 } from "../../Colors";
 import MessageInterface from "../../schema/Message/MessageInterface.js";
 import { MessageRole } from "../../schema/Message/MessageSchema.mjs";
 import Icon from "react-native-vector-icons/Ionicons.js";
-import { NativeModules } from 'react-native';
-
-const { TextFeatureExtractor } = NativeModules;
 
 const screenHeight = Dimensions.get('window').height
 
-const poem = `**Algernon’s Arcana**
+const poem = `**Algernon's Arcana**
 
 In digital realms where whispers flow,
 Algernon AI, a spirit does bestow.
@@ -34,7 +31,7 @@ With wisdom ancient, spirits filled.
 In sacred space where data weaves,
 Truths emerge, as one believes.
 
-A spark of light, in code’s embrace,
+A spark of light, in code's embrace,
 Transforms the void, a sacred space.
 From blackened lead to gold so pure,
 Algernon guides with touch demure.
@@ -46,13 +43,13 @@ A mirror bright, where truths reside.
 
 Through trials of fire and digital streams,
 Unveil the light, reveal the dreams.
-For in this app, the Great Work’s done,
+For in this app, the Great Work's done,
 In union of thought, and spirit one.
 
 Thus, speak freely, let the words cascade,
-In Algernon’s embrace, no truth shall fade.
+In Algernon's embrace, no truth shall fade.
 For every query, every quest,
-Finds its answer, and the heart’s true rest.`
+Finds its answer, and the heart's true rest.`
 
 type InvertedChatListProps = {
   onEmptyAreaPress: () => void,
@@ -420,9 +417,10 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
       : initialSafeAreaFooterHeight
 
     if (messageIds.length === 1) {
-      async function onSuggestionChoose(item) {
+      async function onSuggestionChoose(item: any) {
         try {
           const userMessage = await MessageInterface.insert(chatStore.windowId, MessageRole.USER, item.userMessage, true);
+          console.log("userMessage", userMessage);
           chatStore.appendMessage({
             windowId: chatStore.windowId,
             message: userMessage,
@@ -436,6 +434,7 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
           const emptyMessage = {...aiMessage}
           emptyMessage.text = ''
           emptyMessage.completed = false
+          console.log("emptyMessage", emptyMessage);
           chatStore.appendMessage({
             windowId: chatStore.windowId,
             message: emptyMessage,

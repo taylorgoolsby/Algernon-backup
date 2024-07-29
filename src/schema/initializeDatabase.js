@@ -1,9 +1,9 @@
 // @flow
 
-import SQLite from "react-native-sqlite-storage";
+import { NativeModules } from 'react-native';
 import createTables from "./createTables.js";
 import VersionInterface from "./Version/VersionInterface.js";
-import { setDB, query } from "./database.js";
+import { query } from "./database.js";
 import AnnotationInterface from "./Annotation/AnnotationInterface.js";
 import CompletionInterface from "./Completion/CompletionInterface.js";
 import MessageInterface from "./Message/MessageInterface.js";
@@ -12,43 +12,11 @@ import sqltag from "@taylorgoolsby/sql-template-tag";
 import chatStore from "../stores/ChatStore.js";
 import { MessageRole } from "./Message/MessageSchema.mjs";
 
-SQLite.enablePromise(true)
-const databaseName = 'Cobalt.db'
-const RESET_DATABASE = false
+const { DatabaseModule } = NativeModules;
 
 export async function initializeDatabase() {
   try {
-    if (RESET_DATABASE) {
-      console.log('Deleting database.')
-      await new Promise(async (resolve, reject) => {
-        await SQLite.deleteDatabase(
-          {name: databaseName, location: 'Documents'},
-          () => {
-            console.log('Database deleted.')
-            resolve()
-          },
-          error => {
-            console.error(error)
-            reject(error)
-          },
-        )
-      })
-    }
-
-    await new Promise(async (resolve, reject) => {
-      const instance = await SQLite.openDatabase(
-        {name: databaseName, location: 'Documents'},
-        () => {
-          console.log('Database opened successfully.')
-          resolve()
-        },
-        error => {
-          console.error('Error opening database:', error)
-          reject(error)
-        },
-      )
-      setDB(instance)
-    })
+    await DatabaseModule.initialize()
 
     const createTableStatements = createTables
       .split(';')

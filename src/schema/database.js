@@ -1,12 +1,9 @@
 // @flow
 
+import { NativeModules } from 'react-native';
 import { format } from "../utils/SqlString.js";
 
-let db = null
-
-export function setDB(instance: any) {
-  db = instance
-}
+const { DatabaseModule } = NativeModules;
 
 function flattenSql(queryObject: {
   sql: Array<string>,
@@ -15,19 +12,10 @@ function flattenSql(queryObject: {
   // The values of queryObject.sql and queryObject.values are arrays that you would be received by a template tag function.
   // This function flattens them into a single string.
 
-  return format(queryObject.sql, queryObject.values)
+  console.log("queryObject.sql", queryObject.sql);
+  console.log("queryObject.values", queryObject.values);
 
-  // if (!queryObject.strings) {
-  //   return queryObject.sql
-  // }
-  // let flattened = ''
-  // for (let i = 0; i < queryObject.strings.length; i++) {
-  //   flattened += queryObject.strings[i]
-  //   if (queryObject.values[i]) {
-  //     flattened += queryObject.values[i]
-  //   }
-  // }
-  // return flattened.trim()
+  return format(queryObject.sql, queryObject.values).trim()
 }
 
 export async function query(queryObject: {
@@ -35,27 +23,30 @@ export async function query(queryObject: {
   values: Array<string>,
 }): any {
   try {
-    if (!db) {
-      console.error('Database not initialized')
-      return
-    }
+    const queryString = flattenSql(queryObject);
+    // const queryString = await DatabaseModule.format(queryObject.sql, queryObject.values);
+    console.log("queryString", queryString);
 
-    // console.log(flattenSql(queryObject))
+    const res = await DatabaseModule.executeQuery(queryString);
 
-    const [results] = await db.executeSql(queryObject.sql, queryObject.values)
-    if (queryObject.sql.includes('SELECT')) {
-      return results.rows.raw()
+    const results = res.results
+    results['insertId'] = res.insertId
+
+    console.log("results", results);
+
+    if (queryString.toLowerCase().includes('select')) {
+      return results;
     } else {
-      return results
+      return results;
     }
   } catch (error) {
-    console.error('Error executing query:', error)
-    throw error
+    console.error('Error executing query:', error);
+    throw error;
   }
 }
 
 const database = {
-  query,
+  query
 }
 
 export default database

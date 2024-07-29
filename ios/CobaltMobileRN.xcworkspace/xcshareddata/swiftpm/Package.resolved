@@ -1,5 +1,5 @@
 {
-  "originHash" : "f88dd87f08b46d7386acac59d54a0f00f35818e3f542f7f2035ceab6d97ee7a3",
+  "originHash" : "f62636385205805214622a6a6983a838bd2caa2a837823412cee482fbce4c2eb",
   "pins" : [
     {
       "identity" : "faiss-mobile",
@@ -7,6 +7,14 @@
       "location" : "https://github.com/DeveloperMindset-com/faiss-mobile",
       "state" : {
         "revision" : "bc775df1e598fca39f1c3588e3814e66e27430fc"
+      }
+    },
+    {
+      "identity" : "grdb.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/groue/GRDB.swift",
+      "state" : {
+        "revision" : "04543755d8deeaacf122e2856e4fc056dc304277"
       }
     },
     {
