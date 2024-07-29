@@ -7,7 +7,7 @@ import Config from "../Config";
 class BingSearch {
   static async search(
     searchTerm: string,
-  ) {
+  ): Promise<any> {
     const url = 'https://api.bing.microsoft.com/v7.0/search'
 
     const config: any = {
