@@ -1,13 +1,10 @@
 // @flow
 
 import React from 'react'
-import { View, StyleSheet, NativeModules, TouchableOpacity, SafeAreaView } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { observer } from "mobx-react";
-import Colors, { headerRight } from "../Colors";
-import { BlurView } from "@react-native-community/blur";
+import Colors, { darkMode } from "../Colors";
 import { rightMargin } from "./components/ChatMessage";
-import Icon from "react-native-vector-icons/Ionicons";
-import HeaderBackButton from "./components/HeaderBackButton";
 import CustomHeader from "./components/CustomHeader";
 import { useNavigation } from "@react-navigation/native";
 import PlotView from "./components/PlotView";
@@ -36,7 +33,7 @@ const MemoryViewer: any = observer((props: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.secondaryBg,
+    backgroundColor: darkMode ? 'black' : Colors.chatBg,
     alignItems: 'stretch',
     // padding: 20,
   },
