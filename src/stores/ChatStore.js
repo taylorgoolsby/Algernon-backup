@@ -174,12 +174,10 @@ export class ChatStore {
     this.messages[messageId.toString()] = message
   }
 
-  getOrCreateOrbSim: (number, ?boolean) => OrbSim = (messageId: number, tenX?: ?boolean): OrbSim => {
+  getOrCreateOrbSim: (number, number) => OrbSim = (messageId: number, scale: number): OrbSim => {
     if (!this.orbSims[messageId.toString()]) {
-      const t = tenX ? 10 : 1
-
-      const r = 7 * t
-      const v = 5 * t
+      const r = 7 * scale
+      const v = 5 * scale
       const m = Math.random()
       const phase = Math.random() * 2 * Math.PI
 
@@ -226,8 +224,8 @@ export class ChatStore {
     return this.orbSims[messageId.toString()]
   }
 
-  updateOrbSim: (number, number) => void = (messageId: number, time: number) => {
-    const sim = this.getOrCreateOrbSim(messageId)
+  updateOrbSim: (number, number, number) => void = (messageId: number, time: number, scale: number) => {
+    const sim = this.getOrCreateOrbSim(messageId, scale)
 
     // Implement a simple spring force simulation on the dots:
     // 1. Calculate the force on each dot

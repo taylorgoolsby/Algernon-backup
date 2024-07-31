@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orb Simulation with Rendering</title>
+  <style>
+    body {
+      background-color: rgba(112, 163, 255, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .profile-pic {
+      position: relative;
+      border-radius: 24px;
+      overflow: hidden;
+      background-color: white;
+    }
+    .overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+    }
+    .blur-layer {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 240px; /* 24 * scale (assuming scale = 10) */
+      height: 240px; /* 24 * scale (assuming scale = 10) */
+      border-radius: 120px; /* 12 * scale (assuming scale = 10) */
+      border-width: 1px;
+      border-color: rgba(112, 163, 255, 0.9); /* Colors.blue */
+      border-style: solid;
+      backdrop-filter: blur(50px); /* 5 * scale (assuming scale = 10) */
+      transform: translate(-50%, -50%);
+    }
+  </style>
+</head>
+<body>
+<div class="profile-pic" id="profile-pic"></div>
+<script>
+  const darkMode = true
+
+  const Colors = {
+    blue: 'rgba(112, 163, 255, 0.9)',
+    teal: 'rgba(132, 227, 151, 0.9)',
+    red: 'rgb(215, 29, 29)',
+    green: 'rgb(85, 191, 106)',
+    white: 'white',
+    shadowColor: darkMode
+      ? 'rgba(255, 255, 255, 0.2)'
+      : 'rgba(0, 0, 0, 0.2)',
+    borderColor: darkMode
+      ? 'rgba(255, 255, 255, 0.7)'
+      : 'rgba(0, 0, 0, 0.75)',
+  }
+
+  const orbSims = {}
+  const scale = 10
+
+  function getOrCreateOrbSim(messageId, scale) {
+    if (!orbSims[messageId]) {
+      console.log("scale", scale);
+      const r = 7 * scale
+      const v = 5 * scale
+      const m = Math.random()
+      const phase = Math.random() * 2 * Math.PI
+
+      orbSims[messageId] = {
+        time: Date.now(),
+        points: [
+          {xPos: 0, yPos: 0, xVel: 0, yVel: 0, color: Colors.blue},
+          {
+            xPos: r * Math.sin(Math.PI),
+            yPos: r * Math.cos(Math.PI),
+            xVel: v * Math.cos(Math.PI + phase),
+            yVel: -v * Math.sin(Math.PI + phase),
+            color: 'rgba(255, 186, 0, 0.9)',
+          },
+          {
+            xPos: 0.5 * r * Math.sin(m * 2 * Math.PI),
+            yPos: 0.5 * r * Math.cos(m * 2 * Math.PI),
+            xVel: (Math.random() - 0.5) * 2 * v,
+            yVel: (Math.random() - 0.5) * 2 * v,
+            color: Colors.red,
+          },
+          {
+            xPos: r * Math.sin(2 * Math.PI),
+            yPos: r * Math.cos(2 * Math.PI),
+            xVel: v * Math.cos(2 * Math.PI + phase),
+            yVel: -v * Math.sin(2 * Math.PI + phase),
+            color: Colors.teal,
+          },
+          {xPos: 0, yPos: 0, xVel: 0, yVel: 0, color: Colors.blue},
+        ],
+      }
+    }
+    return orbSims[messageId]
+  }
+
+  function updateOrbSim(messageId, time, scale) {
+    const sim = getOrCreateOrbSim(messageId, scale)
+
+    const k = 0.1
+    const dt = (Math.min(time - sim.time, 1000) * 0.001) / 2
+    sim.time = time
+    const n = sim.points.length
+
+    for (let i = 0; i < n; i++) {
+      if (i === 0) continue
+      for (let j = 0; j < n; j++) {
+        if (i === j) continue
+        const dx = sim.points[j].xPos - sim.points[i].xPos
+        const dy = sim.points[j].yPos - sim.points[i].yPos
+        const d = Math.sqrt(dx * dx + dy * dy)
+        if (d < 0.005) continue
+        const f = k * d
+        const fx = (f * dx) / d
+        const fy = (f * dy) / d
+        sim.points[i].xVel += fx * dt
+        sim.points[i].yVel += fy * dt
+        sim.points[i].xPos += sim.points[i].xVel * dt
+        sim.points[i].yPos += sim.points[i].yVel * dt
+
+        if (isNaN(sim.points[i].xVel)) sim.points[i].xVel = 0
+        if (isNaN(sim.points[i].yVel)) sim.points[i].yVel = 0
+        if (isNaN(sim.points[i].xPos)) sim.points[i].xPos = 0
+        if (isNaN(sim.points[i].yPos)) sim.points[i].yPos = 0
+      }
+    }
+  }
+
+  function renderOrbs() {
+    const profilePic = document.getElementById('profile-pic')
+    profilePic.innerHTML = ''
+
+    const messageId = 1
+    const points = orbSims[messageId].points ?? []
+
+    profilePic.style.width = `${24 * scale}px`
+    profilePic.style.height = `${24 * scale}px`
+    profilePic.style.borderRadius = `${12 * scale}px`
+
+    let averageDistanceFromCenter = Math.sqrt(
+      points.reduce((acc, orb) => {
+        return acc + orb.xPos * orb.xPos + orb.yPos * orb.yPos
+      }, 0) / 4,
+    )
+
+    const overlay = {
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+    }
+
+    const g = 2.8 / 10
+
+    points.forEach((orb, i) => {
+      const orbElement = document.createElement('div')
+      orbElement.style.position = 'absolute'
+      orbElement.style.backgroundColor = orb.color
+
+      if (i === 0) {
+        Object.assign(orbElement.style, {
+          borderRadius: `${
+            (8 * scale + averageDistanceFromCenter / g) / 2
+          }px`,
+          width: `${8 * scale + averageDistanceFromCenter / g}px`,
+          height: `${8 * scale + averageDistanceFromCenter / g}px`,
+          top: '50%',
+          left: '50%',
+          marginLeft: `${
+            -((8 * scale + averageDistanceFromCenter / g) / 2) + orb.xPos
+          }px`,
+          marginTop: `${
+            -((8 * scale + averageDistanceFromCenter / g) / 2) + -orb.yPos
+          }px`,
+        })
+      } else {
+        Object.assign(orbElement.style, {
+          borderRadius: `${5 * scale}px`,
+          width: `${10 * scale}px`,
+          height: `${10 * scale}px`,
+          top: '50%',
+          left: '50%',
+          marginLeft: `${-5 * scale + orb.xPos}px`,
+          marginTop: `${-5 * scale - orb.yPos}px`,
+        })
+      }
+
+      Object.assign(orbElement.style, overlay)
+      profilePic.appendChild(orbElement)
+    })
+
+    // Add the blur layer
+    const blurLayer = document.createElement('div')
+    Object.assign(blurLayer.style, {
+      position: 'absolute',
+      width: `${24 * scale}px`,
+      height: `${24 * scale}px`,
+      borderRadius: `${12 * scale}px`,
+      borderWidth: '0px',
+      borderColor: Colors.blue,
+      borderStyle: 'solid',
+      backdropFilter: `blur(${5 * scale}px)`,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    })
+    profilePic.appendChild(blurLayer)
+  }
+
+  function animate() {
+    const messageId = 1
+    updateOrbSim(messageId, Date.now(), scale)
+    renderOrbs()
+
+    requestAnimationFrame(animate)
+  }
+
+  // Initialize the simulation
+  getOrCreateOrbSim(1, scale)
+  animate()
+</script>
+</body>
+</html>

@@ -33,7 +33,7 @@ const ProfilePic = (props: ProfilePicProps): any => {
   const step = () => {
     const nextTime = Date.now()
     setTime(nextTime)
-    chatStore.updateOrbSim(message.messageId, nextTime)
+    chatStore.updateOrbSim(message.messageId, nextTime, t)
   }
 
   const timeout = useRef<any>(null)
@@ -170,7 +170,6 @@ const ProfilePic = (props: ProfilePicProps): any => {
                       marginLeft: -5 * t + orb.xPos,
                       marginTop: -5 * t + -orb.yPos,
                       backgroundColor: orb.color
-
                     },
               ]}
             />

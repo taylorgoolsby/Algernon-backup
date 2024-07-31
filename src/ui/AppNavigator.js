@@ -22,6 +22,7 @@ import ModalLayer from './ModalLayer.js'
 import Colors from "../Colors.js";
 import HeaderBackButton from "./components/HeaderBackButton.js";
 import MemoryViewer from "./MemoryViewer";
+import FlowerBG from "./FlowerBG";
 
 setup({storekitMode: 'STOREKIT2_MODE'})
 
@@ -216,6 +217,13 @@ const AppNavigator: any = withIAPContext(
                 <Stack.Screen
                   name="MemoryViewer"
                   component={MemoryViewer}
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="FlowerBG"
+                  component={FlowerBG}
                   options={{
                     headerShown: false,
                   }}

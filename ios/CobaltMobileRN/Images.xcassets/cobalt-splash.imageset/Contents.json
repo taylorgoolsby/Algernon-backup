@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "cobalt-logo-1-full.png",
+      "filename" : "algernon-splash1x.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "cobalt-logo-2-full.png",
+      "filename" : "algernon-splash2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "cobalt-logo-3-full.png",
+      "filename" : "algernon-splash3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

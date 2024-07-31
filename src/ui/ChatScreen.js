@@ -31,6 +31,7 @@ import Colors, {
   headerRight,
   searchActive,
   shadow,
+  darkMode
 } from '../Colors.js'
 import modalStore from '../stores/ModalStore.js'
 import {
@@ -65,9 +66,6 @@ const { AudioTranscription } = NativeModules;
 // }
 // const folderPath = `${RNFS.MainBundlePath}`
 // listFolderContents(folderPath)
-
-
-const darkMode = Appearance.getColorScheme() === 'dark'
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon)
 

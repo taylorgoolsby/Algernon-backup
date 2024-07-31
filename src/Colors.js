@@ -2,7 +2,8 @@
 
 import { Appearance } from "react-native";
 
-export const darkMode = Appearance.getColorScheme() === 'dark'
+// export const darkMode = Appearance.getColorScheme() === 'dark'
+export const darkMode = true
 
 const defaultText = darkMode ? 'white' : 'rgba(0, 0, 0, 0.90)'
 

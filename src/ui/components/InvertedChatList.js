@@ -1,7 +1,7 @@
 // @flow
 
 import React from 'react'
-import { View, Button, FlatList, Keyboard, Platform, Dimensions, TouchableOpacity } from "react-native";
+import { View, FlatList, Keyboard, Platform, Dimensions, TouchableOpacity } from "react-native";
 import Text from './Text.js'
 import ChatMessage, { leftMargin, margin, rightMargin } from "./ChatMessage";
 import type { MessageSQL } from "../../schema/Message/MessageSchema.mjs";
