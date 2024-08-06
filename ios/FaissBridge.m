@@ -3,9 +3,12 @@
 #include "IndexFlat_c.h"
 #include "faiss_c.h"
 #include "index_io_c.h"
+#import "CobaltMobileRN-Swift.h"
+#import "ClusteringAndEllipsoids.h"
 
 @implementation FaissBridge {
     FaissIndex* index;
+    int dimension;
 }
 
 // To expose this module to React Native
@@ -15,6 +18,8 @@ RCT_EXPORT_MODULE();
 RCT_EXPORT_METHOD(init:(NSInteger)k
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
+    dimension = (int)k;
+    
     if (!index) {
         // If the index is not loaded or initialized, attempt to read from file
         if (![self readIndexFromFile]) {
@@ -173,6 +178,32 @@ RCT_EXPORT_METHOD(searchVectors:(NSArray<NSNumber *> *)queryVector
     free(distances);
     
     // Return the search results
+    resolve(resultDict);
+}
+
+RCT_EXPORT_METHOD(retrain:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    if (!index) {
+        if (![self readIndexFromFile]) {
+            reject(@"index_error", @"Index is not initialized or loaded", nil);
+            return;
+        }
+    }
+
+    int ntotal = (int)faiss_Index_ntotal((FaissIndex *)index);
+
+    // Retrieve the data from the index using reconstruct_n
+    float* database = (float*)malloc(ntotal * dimension * sizeof(float));
+    faiss_Index_reconstruct_n((FaissIndex *)index, 0, ntotal, database);
+
+    // Use the new class for clustering and ellipsoids
+    ClusteringAndEllipsoids *clustering = [[ClusteringAndEllipsoids alloc] init];
+    NSDictionary *resultDict = [clustering performClusteringAndEllipsoids:database rows:ntotal cols:dimension];
+
+    // Free allocated memory
+    free(database);
+
+    // Return the result
     resolve(resultDict);
 }
 

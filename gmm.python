@@ -1,0 +1,68 @@
+import time
+import numpy as np
+import faiss
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+try:
+    from faiss.contrib.datasets_fb import DatasetSIFT1M
+except ImportError:
+    from faiss.contrib.datasets import DatasetSIFT1M
+
+print("load data")
+
+# Load the SIFT1M dataset
+ds = DatasetSIFT1M()
+xq = ds.get_queries()
+xb = ds.get_database()
+gt = ds.get_groundtruth()
+xt = ds.get_train()
+
+# Decimate the dataset to a more manageable size
+n_samples = 10000
+xb_indices = np.random.choice(xb.shape[0], n_samples, replace=False)
+xt_indices = np.random.choice(xt.shape[0], n_samples, replace=False)
+xb = xb[xb_indices]
+xt = xt[xt_indices]
+
+# Dimensions and number of queries
+nq, d = xq.shape
+
+# Function to plot clusters in 3D
+def plot_clusters(data, labels, title):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    scatter = ax.scatter(data[:, 0], data[:, 1], data[:, 2], c=labels, s=10, cmap='viridis')
+    legend = ax.legend(*scatter.legend_elements(), title="Clusters")
+    ax.add_artist(legend)
+    ax.set_title(title)
+    plt.show()
+
+# PCA followed by K-means
+print("Performing PCA to reduce to 3 dimensions")
+pca = faiss.PCAMatrix(d, 3)
+pca.train(xb)
+xb_pca = pca.apply_py(xb)
+
+print("Performing K-means on PCA-reduced data")
+ncentroids = 10
+kmeans_pca = faiss.Clustering(3, ncentroids)
+index_pca = faiss.IndexFlatL2(3)
+kmeans_pca.train(xb_pca, index_pca)
+_, labels_pca = index_pca.search(xb_pca, 1)
+
+# Plot PCA-reduced data with K-means clustering
+plot_clusters(xb_pca, labels_pca.flatten(), "K-means on PCA-reduced data")
+
+# K-means followed by PCA
+print("Performing K-means on original data")
+kmeans = faiss.Clustering(d, ncentroids)
+index_flat = faiss.IndexFlatL2(d)
+kmeans.train(xb, index_flat)
+_, labels = index_flat.search(xb, 1)
+
+print("Performing PCA on K-means clustered data")
+xb_pca_after_kmeans = pca.apply_py(xb)
+
+# Plot K-means clustered data with PCA reduction
+plot_clusters(xb_pca_after_kmeans, labels.flatten(), "PCA on K-means clustered data")

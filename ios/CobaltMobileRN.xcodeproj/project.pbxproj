@@ -51,6 +51,9 @@
 		8CACCE5E2BA2BC50004643C2 /* Gemma.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE5B2BA2BC50004643C2 /* Gemma.swift */; };
 		8CACCE5F2BA2BC50004643C2 /* Starcoder2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE5C2BA2BC50004643C2 /* Starcoder2.swift */; };
 		8CACCE602BA2BC50004643C2 /* Qwen2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE5D2BA2BC50004643C2 /* Qwen2.swift */; };
+		8CB23D802C5AFFCD0007AEB0 /* GMM.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CB23D7F2C5AFFCD0007AEB0 /* GMM.m */; };
+		8CB23D822C5D6A6F0007AEB0 /* ClusteringAndEllipsoids.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CB23D812C5D6A6F0007AEB0 /* ClusteringAndEllipsoids.m */; };
+		8CB23D852C5E1ECC0007AEB0 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CB23D842C5E1ECC0007AEB0 /* Accelerate.framework */; };
 		8CC3082D2BB378F900D70C69 /* Nunito-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CC308292BB378F800D70C69 /* Nunito-VariableFont_wght.ttf */; };
 		8CEC98B62C53621200E4045F /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 8CEC98B52C53621200E4045F /* GRDB */; };
 		8CEC98B82C53623800E4045F /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEC98B72C53623800E4045F /* DatabaseManager.swift */; };
@@ -135,6 +138,11 @@
 		8CACCE5C2BA2BC50004643C2 /* Starcoder2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Starcoder2.swift; sourceTree = "<group>"; };
 		8CACCE5D2BA2BC50004643C2 /* Qwen2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Qwen2.swift; sourceTree = "<group>"; };
 		8CACCE612BA2C3EF004643C2 /* CobaltMobileRNDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = CobaltMobileRNDebug.entitlements; path = CobaltMobileRN/CobaltMobileRNDebug.entitlements; sourceTree = "<group>"; };
+		8CB23D7E2C5AFFC00007AEB0 /* GMM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GMM.h; sourceTree = "<group>"; };
+		8CB23D7F2C5AFFCD0007AEB0 /* GMM.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GMM.m; sourceTree = "<group>"; };
+		8CB23D812C5D6A6F0007AEB0 /* ClusteringAndEllipsoids.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ClusteringAndEllipsoids.m; sourceTree = "<group>"; };
+		8CB23D832C5D6AB70007AEB0 /* ClusteringAndEllipsoids.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ClusteringAndEllipsoids.h; sourceTree = "<group>"; };
+		8CB23D842C5E1ECC0007AEB0 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		8CC308292BB378F800D70C69 /* Nunito-VariableFont_wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Nunito-VariableFont_wght.ttf"; path = "../../assets/fonts/Nunito-VariableFont_wght.ttf"; sourceTree = "<group>"; };
 		8CDF7ACA2BA3C1E700C5F5FE /* CobaltMobileRNRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = CobaltMobileRNRelease.entitlements; path = CobaltMobileRN/CobaltMobileRNRelease.entitlements; sourceTree = "<group>"; };
 		8CEC98B72C53623800E4045F /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
@@ -165,6 +173,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8CB23D852C5E1ECC0007AEB0 /* Accelerate.framework in Frameworks */,
 				8CFD0A222BA3E6340080EBE1 /* FAISS in Frameworks */,
 				8C022CDE2BB5CEE500CBB95A /* StoreKit.framework in Frameworks */,
 				8C11860B2C4879C6004A652D /* SwiftWhisper in Frameworks */,
@@ -234,6 +243,10 @@
 				8CEC98B72C53623800E4045F /* DatabaseManager.swift */,
 				8CEC98B92C53625B00E4045F /* DatabaseModule.swift */,
 				8CEC98BB2C53627A00E4045F /* DatabaseModule.m */,
+				8CB23D7E2C5AFFC00007AEB0 /* GMM.h */,
+				8CB23D7F2C5AFFCD0007AEB0 /* GMM.m */,
+				8CB23D812C5D6A6F0007AEB0 /* ClusteringAndEllipsoids.m */,
+				8CB23D832C5D6AB70007AEB0 /* ClusteringAndEllipsoids.h */,
 			);
 			name = CobaltMobileRN;
 			sourceTree = "<group>";
@@ -241,6 +254,7 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				8CB23D842C5E1ECC0007AEB0 /* Accelerate.framework */,
 				8C022CDD2BB5CEE500CBB95A /* StoreKit.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				5DCACB8F33CDC322A6C60F78 /* libPods-CobaltMobileRN.a */,
@@ -436,7 +450,7 @@
 				8C33BC3A2BA430B60023A2D9 /* XCRemoteSwiftPackageReference "swift-transformers" */,
 				8C9AAF872BAB279300FF60EF /* XCRemoteSwiftPackageReference "Tiktoken" */,
 				8C1186092C4879C6004A652D /* XCRemoteSwiftPackageReference "SwiftWhisper" */,
-				8CEC98B42C53621200E4045F /* XCRemoteSwiftPackageReference "GRDB" */,
+				8CEC98B42C53621200E4045F /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
@@ -631,6 +645,7 @@
 				8CACCE542BA29DD2004643C2 /* Models.swift in Sources */,
 				8CFA36232BA291D4009546C7 /* LLMNativeModule.swift in Sources */,
 				8CEC98B82C53623800E4045F /* DatabaseManager.swift in Sources */,
+				8CB23D822C5D6A6F0007AEB0 /* ClusteringAndEllipsoids.m in Sources */,
 				8CACCE532BA29DD2004643C2 /* LLMModel.swift in Sources */,
 				8C33BC402BA563BE0023A2D9 /* all-MiniLM-L6-v2-coreml-float32.mlpackage in Sources */,
 				8CACCE602BA2BC50004643C2 /* Qwen2.swift in Sources */,
@@ -652,6 +667,7 @@
 				8CACCE552BA29DD2004643C2 /* Phi.swift in Sources */,
 				8CACCE5F2BA2BC50004643C2 /* Starcoder2.swift in Sources */,
 				8C097E582BB0EC9C0078CE31 /* CodeGenTokenizer.swift in Sources */,
+				8CB23D802C5AFFCD0007AEB0 /* GMM.m in Sources */,
 				8CACCE522BA29DD2004643C2 /* Tokenizer.swift in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				8C33BC3E2BA43DEC0023A2D9 /* BertTokenizer.swift in Sources */,
@@ -731,13 +747,20 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = CobaltMobileRN/CobaltMobileRNDebug.entitlements;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = TY6EV5VRJ3;
 				ENABLE_BITCODE = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"COCOAPODS=1",
+					"FB_SONARKIT_ENABLED=1",
+					"ACCELERATE_NEW_LAPACK=1",
+					"ACCELERATE_LAPACK_ILP64=1",
+				);
 				INFOPLIST_FILE = CobaltMobileRN/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Algernon AI";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -770,12 +793,18 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = CobaltMobileRN/CobaltMobileRNRelease.entitlements;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = TY6EV5VRJ3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"COCOAPODS=1",
+					"ACCELERATE_LAPACK_ILP64=1",
+					"ACCELERATE_NEW_LAPACK=1",
+				);
 				INFOPLIST_FILE = CobaltMobileRN/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Algernon AI";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1003,7 +1032,7 @@
 				revision = 4ad6460448278f7a28f1e4ee2723500369f20acb;
 			};
 		};
-		8CEC98B42C53621200E4045F /* XCRemoteSwiftPackageReference "GRDB" */ = {
+		8CEC98B42C53621200E4045F /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift";
 			requirement = {
@@ -1063,7 +1092,7 @@
 		};
 		8CEC98B52C53621200E4045F /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 8CEC98B42C53621200E4045F /* XCRemoteSwiftPackageReference "GRDB" */;
+			package = 8CEC98B42C53621200E4045F /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
 		};
 		8CFA35FF2BA1A408009546C7 /* MLX */ = {
