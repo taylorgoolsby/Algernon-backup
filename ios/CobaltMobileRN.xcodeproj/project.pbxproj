@@ -59,6 +59,7 @@
 		8CEC98B82C53623800E4045F /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEC98B72C53623800E4045F /* DatabaseManager.swift */; };
 		8CEC98BA2C53625B00E4045F /* DatabaseModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEC98B92C53625B00E4045F /* DatabaseModule.swift */; };
 		8CEC98BC2C53627A00E4045F /* DatabaseModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CEC98BB2C53627A00E4045F /* DatabaseModule.m */; };
+		8CF8599A2C62FC0200845B81 /* iris_dataset.csv in Resources */ = {isa = PBXBuildFile; fileRef = 8CF859992C62FC0200845B81 /* iris_dataset.csv */; };
 		8CFA35FD2BA18D80009546C7 /* FaissBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CFA35FC2BA18D80009546C7 /* FaissBridge.m */; };
 		8CFA36002BA1A408009546C7 /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA35FF2BA1A408009546C7 /* MLX */; };
 		8CFA36022BA1A408009546C7 /* MLXFFT in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA36012BA1A408009546C7 /* MLXFFT */; };
@@ -148,6 +149,7 @@
 		8CEC98B72C53623800E4045F /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
 		8CEC98B92C53625B00E4045F /* DatabaseModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseModule.swift; sourceTree = "<group>"; };
 		8CEC98BB2C53627A00E4045F /* DatabaseModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DatabaseModule.m; sourceTree = "<group>"; };
+		8CF859992C62FC0200845B81 /* iris_dataset.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = iris_dataset.csv; path = ../python/iris_dataset.csv; sourceTree = "<group>"; };
 		8CFA35FB2BA18D80009546C7 /* FaissBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FaissBridge.h; sourceTree = "<group>"; };
 		8CFA35FC2BA18D80009546C7 /* FaissBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FaissBridge.m; sourceTree = "<group>"; };
 		8CFA36172BA286B2009546C7 /* CobaltMobileRN-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CobaltMobileRN-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -216,6 +218,7 @@
 		13B07FAE1A68108700A75B9A /* CobaltMobileRN */ = {
 			isa = PBXGroup;
 			children = (
+				8CF859992C62FC0200845B81 /* iris_dataset.csv */,
 				8C174FB12BACA2510085DF07 /* Fonts */,
 				8CFD0A252BA3EDF40080EBE1 /* Models */,
 				8CDF7ACA2BA3C1E700C5F5FE /* CobaltMobileRNRelease.entitlements */,
@@ -450,7 +453,7 @@
 				8C33BC3A2BA430B60023A2D9 /* XCRemoteSwiftPackageReference "swift-transformers" */,
 				8C9AAF872BAB279300FF60EF /* XCRemoteSwiftPackageReference "Tiktoken" */,
 				8C1186092C4879C6004A652D /* XCRemoteSwiftPackageReference "SwiftWhisper" */,
-				8CEC98B42C53621200E4045F /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+				8CEC98B42C53621200E4045F /* XCRemoteSwiftPackageReference "GRDB" */,
 			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
@@ -476,6 +479,7 @@
 			files = (
 				8C010B222C48A8DC00220DC9 /* ggml-tiny.bin in Resources */,
 				8C010B212C48A8DC00220DC9 /* ggml-tiny-encoder.mlmodelc in Resources */,
+				8CF8599A2C62FC0200845B81 /* iris_dataset.csv in Resources */,
 				8C33BC392BA42DD40023A2D9 /* MiniLM-vocab.txt in Resources */,
 				8CA26A152BCF9B33009563A5 /* Poppins-Medium.ttf in Resources */,
 				8CA26A172BCFA34C009563A5 /* Poppins-Regular.ttf in Resources */,
@@ -1032,7 +1036,7 @@
 				revision = 4ad6460448278f7a28f1e4ee2723500369f20acb;
 			};
 		};
-		8CEC98B42C53621200E4045F /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+		8CEC98B42C53621200E4045F /* XCRemoteSwiftPackageReference "GRDB" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift";
 			requirement = {
@@ -1092,7 +1096,7 @@
 		};
 		8CEC98B52C53621200E4045F /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 8CEC98B42C53621200E4045F /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			package = 8CEC98B42C53621200E4045F /* XCRemoteSwiftPackageReference "GRDB" */;
 			productName = GRDB;
 		};
 		8CFA35FF2BA1A408009546C7 /* MLX */ = {

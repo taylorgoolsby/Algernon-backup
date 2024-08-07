@@ -45,7 +45,7 @@
 }
 
 - (NSDictionary *)performKMeansWithSilhouetteScoring:(float *)data rows:(int)rows cols:(int)cols maxK:(int)maxK maxIterations:(int)maxIterations {
-    float bestScore = FLT_MAX; // Initialize to maximum value to find minimum squared error
+    float bestScore = -FLT_MAX; // Initialize to minimum value to find maximum silhouette score
     int bestK = 2;
     int *bestLabels = NULL;
     float *bestCentroids = NULL;
@@ -74,31 +74,12 @@
         [allSilhouetteScores addObject:[NSValue valueWithPointer:silhouetteScoresArray]];
         [allClusterCounts addObject:[NSValue valueWithPointer:clusterCounts]];
 
-        // Check if any cluster has an average silhouette score less than the overall average
-        BOOL valid = YES;
-        for (int i = 0; i < k; ++i) {
-            if (clusterSilhouetteScores[i] < averageSilhouetteScore) {
-                valid = NO;
-                break;
-            }
-        }
-
-        if (valid) {
-            // Calculate the squared error for even distribution
-            float meanCount = (float)rows / k;
-            float squaredError = 0.0;
-            for (int i = 0; i < k; ++i) {
-                float error = (float)clusterCounts[i] - meanCount;
-                squaredError += error * error;
-            }
-
-            // Choose the k with the smallest squared error
-            if (squaredError < bestScore) {
-                bestScore = squaredError;
-                bestK = k;
-                bestLabels = labels;
-                bestCentroids = centroids;
-            }
+        // Choose the k with the highest average silhouette score
+        if (averageSilhouetteScore > bestScore) {
+            bestScore = averageSilhouetteScore;
+            bestK = k;
+            bestLabels = labels;
+            bestCentroids = centroids;
         }
     }
 
@@ -114,6 +95,7 @@
     };
 }
 
+
 - (NSDictionary *)calculateSilhouetteScore:(float *)data labels:(int *)labels rows:(int)rows cols:(int)cols k:(int)k {
     float *a = malloc(rows * sizeof(float));
     float *b = malloc(rows * sizeof(float));
@@ -127,8 +109,11 @@
     for (int i = 0; i < rows; ++i) {
         float intraClusterDist = 0.0;
         int intraClusterCount = 0;
-        float interClusterDist = FLT_MAX;
-        
+        float *interClusterDists = malloc(k * sizeof(float));
+        int *interClusterCounts = malloc(k * sizeof(int));
+        memset(interClusterDists, 0, k * sizeof(float));
+        memset(interClusterCounts, 0, k * sizeof(int));
+
         for (int j = 0; j < rows; ++j) {
             if (i == j) continue;
 
@@ -143,14 +128,26 @@
                 intraClusterDist += dist;
                 intraClusterCount++;
             } else {
-                if (dist < interClusterDist) {
-                    interClusterDist = dist;
-                }
+                interClusterDists[labels[j]] += dist;
+                interClusterCounts[labels[j]]++;
             }
         }
 
         a[i] = intraClusterCount > 0 ? intraClusterDist / intraClusterCount : 0.0;
-        b[i] = interClusterDist;
+
+        float minInterClusterDist = FLT_MAX;
+        for (int j = 0; j < k; ++j) {
+            if (j != labels[i] && interClusterCounts[j] > 0) {
+                float meanDist = interClusterDists[j] / interClusterCounts[j];
+                if (meanDist < minInterClusterDist) {
+                    minInterClusterDist = meanDist;
+                }
+            }
+        }
+        b[i] = minInterClusterDist;
+
+        free(interClusterDists);
+        free(interClusterCounts);
     }
 
     float silhouetteSum = 0.0;
