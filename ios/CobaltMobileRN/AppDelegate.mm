@@ -1,5 +1,6 @@
 #import "AppDelegate.h"
 #import "ClusteringAndEllipsoids.h"
+#import "SGESVDExample.h"
 
 #import <React/RCTBundleURLProvider.h>
 
@@ -16,6 +17,7 @@
   
   // Load and test IRIS dataset
   [self loadAndTestIRISDataset];
+//  [SGESVDExample runExample];
 
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
@@ -76,21 +78,65 @@
       }
     }
 
-    // Print the parsed data
-//    NSLog(@"Parsed IRIS Data:");
-//    for (int i = 0; i < rowsCount; i++) {
-//      NSMutableString *rowString = [NSMutableString string];
-//      for (int j = 0; j < colsCount; j++) {
-//        [rowString appendFormat:@"%f ", data[i * colsCount + j]];
-//      }
-//      NSLog(@"%@", rowString);
-//    }
+    NSLog(@"IRIS Data:");
+    for (int i = 0; i < rowsCount; ++i) {
+      NSMutableString *dataString = [NSMutableString string];
+      for (int j = 0; j < colsCount; ++j) {
+        [dataString appendFormat:@"%f ", data[i * colsCount + j]];
+      }
+      NSLog(@"%@", dataString);
+    }
 
     ClusteringAndEllipsoids *clusteringAndEllipsoids = [[ClusteringAndEllipsoids alloc] init];
     NSDictionary *result = [clusteringAndEllipsoids performClusteringAndEllipsoids:data rows:rowsCount cols:colsCount];
     
-    NSLog(@"Clustering and Ellipsoids Results: %@", result);
-    
+    // Convert pointers to arrays for printing
+    float *bestCentroids = (float *)[result[@"bestCentroids"] pointerValue];
+    int *bestLabels = (int *)[result[@"bestLabels"] pointerValue];
+    int *bestClusterCounts = (int *)[result[@"bestClusterCounts"] pointerValue];
+    float *reducedData = (float *)[result[@"reducedData"] pointerValue];
+
+    NSLog(@"Best K: %@", result[@"bestK"]);
+    NSLog(@"Best Score: %@", result[@"bestScore"]);
+
+    NSLog(@"Best Labels:");
+    NSMutableString *labelsString = [NSMutableString string];
+    for (int i = 0; i < rowsCount; ++i) {
+      [labelsString appendFormat:@"%d ", bestLabels[i]];
+    }
+    NSLog(@"%@", labelsString);
+
+    NSLog(@"Best Centroids:");
+    for (int i = 0; i < [result[@"bestK"] intValue]; ++i) {
+      NSMutableString *centroidString = [NSMutableString string];
+      for (int j = 0; j < colsCount; ++j) {
+        [centroidString appendFormat:@"%f ", bestCentroids[i * colsCount + j]];
+      }
+      NSLog(@"%@", centroidString);
+    }
+
+    NSLog(@"Best Cluster Counts:");
+    for (int i = 0; i < [result[@"bestK"] intValue]; ++i) {
+      NSLog(@"%d", bestClusterCounts[i]);
+    }
+
+    NSLog(@"Reduced Data:");
+    for (int i = 0; i < rowsCount; ++i) {
+      NSMutableString *reducedDataString = [NSMutableString string];
+      for (int j = 0; j < 3; ++j) { // reducedDim is 3
+        [reducedDataString appendFormat:@"%f ", reducedData[i * 3 + j]];
+      }
+      NSLog(@"%@", reducedDataString);
+    }
+
+    NSLog(@"Best Ellipsoids:");
+    for (NSDictionary *ellipsoid in result[@"bestEllipsoids"]) {
+      NSLog(@"Mean: %@", ellipsoid[@"mean"]);
+      NSLog(@"Eigenvalues: %@", ellipsoid[@"eigenvalues"]);
+      NSLog(@"Eigenvectors: %@", ellipsoid[@"eigenvectors"]);
+    }
+
+    // Free allocated memory
     free(data);
   }
   @catch (NSException *exception) {

@@ -60,6 +60,7 @@
 		8CEC98BA2C53625B00E4045F /* DatabaseModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEC98B92C53625B00E4045F /* DatabaseModule.swift */; };
 		8CEC98BC2C53627A00E4045F /* DatabaseModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CEC98BB2C53627A00E4045F /* DatabaseModule.m */; };
 		8CF8599A2C62FC0200845B81 /* iris_dataset.csv in Resources */ = {isa = PBXBuildFile; fileRef = 8CF859992C62FC0200845B81 /* iris_dataset.csv */; };
+		8CF8599D2C63153600845B81 /* SGESVDExample.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF8599C2C63153600845B81 /* SGESVDExample.m */; };
 		8CFA35FD2BA18D80009546C7 /* FaissBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CFA35FC2BA18D80009546C7 /* FaissBridge.m */; };
 		8CFA36002BA1A408009546C7 /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA35FF2BA1A408009546C7 /* MLX */; };
 		8CFA36022BA1A408009546C7 /* MLXFFT in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA36012BA1A408009546C7 /* MLXFFT */; };
@@ -150,6 +151,8 @@
 		8CEC98B92C53625B00E4045F /* DatabaseModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseModule.swift; sourceTree = "<group>"; };
 		8CEC98BB2C53627A00E4045F /* DatabaseModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DatabaseModule.m; sourceTree = "<group>"; };
 		8CF859992C62FC0200845B81 /* iris_dataset.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = iris_dataset.csv; path = ../python/iris_dataset.csv; sourceTree = "<group>"; };
+		8CF8599B2C63152800845B81 /* SGESVDExample.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SGESVDExample.h; sourceTree = "<group>"; };
+		8CF8599C2C63153600845B81 /* SGESVDExample.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SGESVDExample.m; sourceTree = "<group>"; };
 		8CFA35FB2BA18D80009546C7 /* FaissBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FaissBridge.h; sourceTree = "<group>"; };
 		8CFA35FC2BA18D80009546C7 /* FaissBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FaissBridge.m; sourceTree = "<group>"; };
 		8CFA36172BA286B2009546C7 /* CobaltMobileRN-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CobaltMobileRN-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -250,6 +253,8 @@
 				8CB23D7F2C5AFFCD0007AEB0 /* GMM.m */,
 				8CB23D812C5D6A6F0007AEB0 /* ClusteringAndEllipsoids.m */,
 				8CB23D832C5D6AB70007AEB0 /* ClusteringAndEllipsoids.h */,
+				8CF8599B2C63152800845B81 /* SGESVDExample.h */,
+				8CF8599C2C63153600845B81 /* SGESVDExample.m */,
 			);
 			name = CobaltMobileRN;
 			sourceTree = "<group>";
@@ -670,6 +675,7 @@
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				8CACCE552BA29DD2004643C2 /* Phi.swift in Sources */,
 				8CACCE5F2BA2BC50004643C2 /* Starcoder2.swift in Sources */,
+				8CF8599D2C63153600845B81 /* SGESVDExample.m in Sources */,
 				8C097E582BB0EC9C0078CE31 /* CodeGenTokenizer.swift in Sources */,
 				8CB23D802C5AFFCD0007AEB0 /* GMM.m in Sources */,
 				8CACCE522BA29DD2004643C2 /* Tokenizer.swift in Sources */,
@@ -758,8 +764,8 @@
 					"$(inherited)",
 					"COCOAPODS=1",
 					"FB_SONARKIT_ENABLED=1",
-					"ACCELERATE_NEW_LAPACK=1",
-					"ACCELERATE_LAPACK_ILP64=1",
+					"ACCELERATE_NEW_LAPACK=0",
+					"ACCELERATE_LAPACK_ILP64=0",
 				);
 				INFOPLIST_FILE = CobaltMobileRN/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Algernon AI";
@@ -802,8 +808,8 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"COCOAPODS=1",
-					"ACCELERATE_LAPACK_ILP64=1",
-					"ACCELERATE_NEW_LAPACK=1",
+					"ACCELERATE_LAPACK_ILP64=0",
+					"ACCELERATE_NEW_LAPACK=0",
 				);
 				INFOPLIST_FILE = CobaltMobileRN/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Algernon AI";

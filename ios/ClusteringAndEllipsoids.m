@@ -6,14 +6,16 @@
 
 - (NSDictionary *)performClusteringAndEllipsoids:(float *)data rows:(int)rows cols:(int)cols {
     int maxK = 10; // Maximum number of clusters to test
-    int maxIterations = 100;
+    int maxIterations = 1000;
 
     // Perform k-means clustering with silhouette scoring to find the best number of clusters
     NSDictionary *bestKMeansResult = [self performKMeansWithSilhouetteScoring:data rows:rows cols:cols maxK:maxK maxIterations:maxIterations];
 
     int bestK = [bestKMeansResult[@"bestK"] intValue];
+    float bestScore = [bestKMeansResult[@"bestScore"] floatValue];
     int *bestLabels = [bestKMeansResult[@"bestLabels"] pointerValue];
     float *bestCentroids = [bestKMeansResult[@"bestCentroids"] pointerValue];
+    int *bestClusterCounts = [bestKMeansResult[@"bestClusterCounts"] pointerValue];
     NSMutableArray *allLabels = bestKMeansResult[@"allLabels"];
     NSMutableArray *allCentroids = bestKMeansResult[@"allCentroids"];
     NSMutableArray *allClusterSilhouetteScores = bestKMeansResult[@"allClusterSilhouetteScores"];
@@ -26,12 +28,14 @@
     [self performPCA:data rows:rows cols:cols output:reducedData outputDim:reducedDim];
     
     // Fit 3D Gaussian and obtain ellipsoids
-    NSMutableArray *ellipsoids = [self fit3DGaussianAndGetEllipsoid:reducedData rows:rows labels:bestLabels numClusters:bestK reducedDim:reducedDim clusterCounts:allClusterCounts];
+    NSMutableArray *ellipsoids = [self fit3DGaussianAndGetEllipsoid:reducedData rows:rows labels:bestLabels numClusters:bestK reducedDim:reducedDim clusterCounts:bestClusterCounts];
     
     NSDictionary *resultDict = @{
         @"bestK": @(bestK),
+        @"bestScore": @(bestScore),
         @"bestCentroids": [NSValue valueWithPointer:bestCentroids],
         @"bestLabels": [NSValue valueWithPointer:bestLabels],
+        @"bestClusterCounts": [NSValue valueWithPointer:bestClusterCounts],
         @"bestEllipsoids": ellipsoids,
         @"allLabels": allLabels,
         @"allCentroids": allCentroids,
@@ -49,6 +53,7 @@
     int bestK = 2;
     int *bestLabels = NULL;
     float *bestCentroids = NULL;
+    int *bestClusterCounts = NULL;
 
     NSMutableArray *allLabels = [NSMutableArray array];
     NSMutableArray *allCentroids = [NSMutableArray array];
@@ -80,13 +85,16 @@
             bestK = k;
             bestLabels = labels;
             bestCentroids = centroids;
+            bestClusterCounts = clusterCounts;
         }
     }
 
     return @{
         @"bestK": @(bestK),
+        @"bestScore": @(bestScore),
         @"bestLabels": [NSValue valueWithPointer:bestLabels],
         @"bestCentroids": [NSValue valueWithPointer:bestCentroids],
+        @"bestClusterCounts": [NSValue valueWithPointer:bestClusterCounts],
         @"allLabels": allLabels,
         @"allCentroids": allCentroids,
         @"allClusterSilhouetteScores": allClusterSilhouetteScores,
@@ -232,21 +240,59 @@
 }
 
 - (void)performPCA:(float *)data rows:(int)rows cols:(int)cols output:(float *)output outputDim:(int)outputDim {
+    // Print the input data
+//    NSLog(@"Input Data:");
+//    for (int i = 0; i < rows; ++i) {
+//        NSMutableString *rowString = [NSMutableString string];
+//        for (int j = 0; j < cols; ++j) {
+//            [rowString appendFormat:@"%f ", data[i * cols + j]];
+//        }
+//        NSLog(@"%@", rowString);
+//    }
+
     // Temporary array to store the centered data
     float *centeredData = malloc(rows * cols * sizeof(float));
     memcpy(centeredData, data, rows * cols * sizeof(float));
 
     // Center the data by subtracting the mean of each feature
     float *mean = malloc(cols * sizeof(float));
-    vDSP_meanv(centeredData, 1, mean, cols);
+    // Calculate the mean of each column
+    for (int j = 0; j < cols; ++j) {
+        vDSP_meanv(&data[j], cols, &mean[j], rows);
+    }
+  
+    // Print the mean of each feature
+//    NSLog(@"Mean:");
+//    NSMutableString *meanString = [NSMutableString string];
+//    for (int j = 0; j < cols; ++j) {
+//        [meanString appendFormat:@"%f ", mean[j]];
+//    }
+//    NSLog(@"%@", meanString);
+  
     for (__LAPACK_int i = 0; i < rows; ++i) {
         vDSP_vsub(mean, 1, &centeredData[i * cols], 1, &centeredData[i * cols], 1, cols);
     }
+  
+    // Print the centered data
+//    NSLog(@"Centered Data:");
+//    for (int i = 0; i < rows; ++i) {
+//        NSMutableString *rowString = [NSMutableString string];
+//        for (int j = 0; j < cols; ++j) {
+//            [rowString appendFormat:@"%f ", centeredData[i * cols + j]];
+//        }
+//        NSLog(@"%@", rowString);
+//    }
+
+    // Transpose the centered data to column-major order
+    float *centeredDataColMajor = malloc(rows * cols * sizeof(float));
+    vDSP_mtrans(centeredData, 1, centeredDataColMajor, 1, cols, rows);
 
     // Perform SVD
     float *U = malloc(rows * rows * sizeof(float));
     float *S = malloc(MIN(rows, cols) * sizeof(float));
     float *VT = malloc(cols * cols * sizeof(float));
+    __LAPACK_int lrows = rows;
+    __LAPACK_int lcols = cols;
     __LAPACK_int lda = rows;
     __LAPACK_int ldu = rows;
     __LAPACK_int ldvt = cols;
@@ -255,12 +301,12 @@
     float wkopt;
 
     // Query for optimal workspace size
-    sgesvd_("A", "A", (__LAPACK_int *)&rows, (__LAPACK_int *)&cols, centeredData, &lda, S, U, &ldu, VT, &ldvt, &wkopt, &lwork, &info);
+    sgesvd_("A", "A", &lrows, &lcols, centeredDataColMajor, &lda, S, U, &ldu, VT, &ldvt, &wkopt, &lwork, &info);
     lwork = (__LAPACK_int)wkopt;
     float *work = malloc(lwork * sizeof(float));
 
     // Actual SVD computation
-    sgesvd_("A", "A", (__LAPACK_int *)&rows, (__LAPACK_int *)&cols, centeredData, &lda, S, U, &ldu, VT, &ldvt, work, &lwork, &info);
+    sgesvd_("A", "A", &lrows, &lcols, centeredDataColMajor, &lda, S, U, &ldu, VT, &ldvt, work, &lwork, &info);
 
     if (info > 0) {
         NSLog(@"The algorithm computing SVD failed to converge.");
@@ -270,29 +316,57 @@
         free(VT);
         free(work);
         free(centeredData);
+        free(centeredDataColMajor);
         return;
     }
+
+    // Print U matrix
+//    NSLog(@"U Matrix:");
+//    for (int i = 0; i < rows; ++i) {
+//        NSMutableString *rowString = [NSMutableString string];
+//        for (int j = 0; j < rows; ++j) {
+//            [rowString appendFormat:@"%f ", U[i * rows + j]];
+//        }
+//        NSLog(@"%@", rowString);
+//    }
+
+    // Print S vector
+//    NSLog(@"S Vector:");
+//    for (int i = 0; i < MIN(rows, cols); ++i) {
+//        NSLog(@"%f", S[i]);
+//    }
+  
+    // Print VT matrix (V is the transpose of VT)
+//    NSLog(@"VT Matrix:");
+//    for (int i = 0; i < cols; ++i) {
+//        NSMutableString *rowString = [NSMutableString string];
+//        for (int j = 0; j < cols; ++j) {
+//            [rowString appendFormat:@"%f ", VT[i * cols + j]];
+//        }
+//        NSLog(@"%@", rowString);
+//    }
 
     // Reduce dimensions by selecting the first outputDim columns of U
     for (__LAPACK_int i = 0; i < rows; ++i) {
         for (__LAPACK_int j = 0; j < outputDim; ++j) {
-            output[i * outputDim + j] = U[i * rows + j];
+            output[i * outputDim + j] = U[j * rows + i];
         }
     }
-
+  
     free(mean);
     free(U);
     free(S);
     free(VT);
     free(work);
     free(centeredData);
+    free(centeredDataColMajor);
 }
 
-- (NSMutableArray *)fit3DGaussianAndGetEllipsoid:(float *)reducedData rows:(int)rows labels:(int *)labels numClusters:(int)numClusters reducedDim:(int)reducedDim clusterCounts:(NSMutableArray *)allClusterCounts {
+- (NSMutableArray *)fit3DGaussianAndGetEllipsoid:(float *)reducedData rows:(int)rows labels:(int *)labels numClusters:(int)numClusters reducedDim:(int)reducedDim clusterCounts:(int *)clusterCounts {
     NSMutableArray *ellipsoids = [NSMutableArray arrayWithCapacity:numClusters];
     
     for (int i = 0; i < numClusters; ++i) {
-        int clusterSize = [allClusterCounts[i] intValue];
+        int clusterSize = clusterCounts[i];
         
         // Allocate memory for cluster points
         float *clusterPoints = malloc(clusterSize * reducedDim * sizeof(float));
@@ -318,8 +392,10 @@
     // Fit 3D Gaussian and obtain the ellipsoid
     float mean[3] = {0.0, 0.0, 0.0};
     
-    // Calculate the mean using Accelerate
-    vDSP_meanv(clusterPoints, 1, mean, n);
+    // Calculate the mean of each column
+    for (int j = 0; j < 3; ++j) {
+        vDSP_meanv(&clusterPoints[j], 3, &mean[j], n);
+    }
     
     // Calculate the covariance matrix using Accelerate
     float *centeredData = malloc(n * 3 * sizeof(float));
@@ -328,10 +404,33 @@
         centeredData[i * 3 + 1] = clusterPoints[i * 3 + 1] - mean[1];
         centeredData[i * 3 + 2] = clusterPoints[i * 3 + 2] - mean[2];
     }
+  
+    // Print the centered reduced cluster points
+//    NSLog(@"Centered Reduced Cluster Points:");
+//    for (int i = 0; i < n; ++i) {
+//        NSMutableString *rowString = [NSMutableString string];
+//        for (int j = 0; j < 3; ++j) {
+//            [rowString appendFormat:@"%f ", centeredData[i * 3 + j]];
+//        }
+//        NSLog(@"%@", rowString);
+//    }
 
     // Transpose centered data
     float *centeredDataTransposed = malloc(n * 3 * sizeof(float));
-    vDSP_mtrans(centeredData, 1, centeredDataTransposed, 1, n, 3);
+    vDSP_mtrans(centeredData, 1, centeredDataTransposed, 1, 3, n);
+  
+  //  float *centeredDataColMajor = malloc(rows * cols * sizeof(float));
+  //  vDSP_mtrans(centeredData, 1, centeredDataColMajor, 1, cols, rows);
+  
+//    // Print the transposed centered data
+//     NSLog(@"Transposed Centered Data:");
+//     for (int i = 0; i < 3; ++i) {
+//         NSMutableString *rowString = [NSMutableString string];
+//         for (int j = 0; j < n; ++j) {
+//             [rowString appendFormat:@"%f ", centeredDataTransposed[i * n + j]];
+//         }
+//         NSLog(@"%@", rowString);
+//     }
 
     // Initialize the covariance matrix
     float covariance[3][3] = {0.0};
@@ -342,25 +441,36 @@
     // Scale the covariance matrix
     float scale = 1.0 / (n - 1);
     vDSP_vsmul((float *)covariance, 1, &scale, (float *)covariance, 1, 9);
+  
+//    // Print the covariance matrix
+//    NSLog(@"Covariance Matrix:");
+//    for (int i = 0; i < 3; ++i) {
+//        NSMutableString *rowString = [NSMutableString string];
+//        for (int j = 0; j < 3; ++j) {
+//            [rowString appendFormat:@"%f ", covariance[i][j]];
+//        }
+//        NSLog(@"%@", rowString);
+//    }
 
     free(centeredData);
     free(centeredDataTransposed);
     
     // Decompose the covariance matrix to get the axes of the ellipsoid
     float eigenvalues[3];
-    float eigenvectors[3][3];
+    float U[3][3];
+    float VT[3][3];
     __LAPACK_int n_ = 3;
     __LAPACK_int info;
     __LAPACK_int lwork = -1;
     float wkopt;
     
     // Query for optimal workspace size
-    sgesvd_("A", "A", (__LAPACK_int *)&n_, (__LAPACK_int *)&n_, (float *)covariance, (__LAPACK_int *)&n_, eigenvalues, (float *)eigenvectors, (__LAPACK_int *)&n_, (float *)eigenvectors, (__LAPACK_int *)&n_, &wkopt, &lwork, &info);
+    sgesvd_("A", "A", &n_, &n_, (float *)covariance, &n_, eigenvalues, (float *)U, &n_, (float *)VT, &n_, &wkopt, &lwork, &info);
     lwork = (__LAPACK_int)wkopt;
     float *work = malloc(lwork * sizeof(float));
     
     // Actual SVD computation
-    sgesvd_("A", "A", (__LAPACK_int *)&n_, (__LAPACK_int *)&n_, (float *)covariance, (__LAPACK_int *)&n_, eigenvalues, (float *)eigenvectors, (__LAPACK_int *)&n_, (float *)eigenvectors, (__LAPACK_int *)&n_, work, &lwork, &info);
+    sgesvd_("A", "A", &n_, &n_, (float *)covariance, &n_, eigenvalues, (float *)U, &n_, (float *)VT, &n_, work, &lwork, &info);
     
     free(work);
     
@@ -368,6 +478,32 @@
         NSLog(@"The algorithm computing SVD failed to converge.");
         return @{};
     }
+  
+//    // Print S (singular values)
+//    NSLog(@"Singular Values (S):");
+//    for (int i = 0; i < 3; ++i) {
+//        NSLog(@"%f", eigenvalues[i]);
+//    }
+//
+//    // Print U matrix
+//    NSLog(@"U Matrix:");
+//    for (int i = 0; i < 3; ++i) {
+//        NSMutableString *rowString = [NSMutableString string];
+//        for (int j = 0; j < 3; ++j) {
+//            [rowString appendFormat:@"%f ", U[i][j]];
+//        }
+//        NSLog(@"%@", rowString);
+//    }
+//
+//    // Print VT matrix
+//    NSLog(@"VT Matrix:");
+//    for (int i = 0; i < 3; ++i) {
+//        NSMutableString *rowString = [NSMutableString string];
+//        for (int j = 0; j < 3; ++j) {
+//            [rowString appendFormat:@"%f ", VT[i][j]];
+//        }
+//        NSLog(@"%@", rowString);
+//    }
     
     // The eigenvalues are the lengths of the axes of the ellipsoid
     // The eigenvectors are the directions of the axes
@@ -375,9 +511,9 @@
         @"mean": @[@(mean[0]), @(mean[1]), @(mean[2])],
         @"eigenvalues": @[@(eigenvalues[0]), @(eigenvalues[1]), @(eigenvalues[2])],
         @"eigenvectors": @[
-            @[@(eigenvectors[0][0]), @(eigenvectors[0][1]), @(eigenvectors[0][2])],
-            @[@(eigenvectors[1][0]), @(eigenvectors[1][1]), @(eigenvectors[1][2])],
-            @[@(eigenvectors[2][0]), @(eigenvectors[2][1]), @(eigenvectors[2][2])]
+            @[@(U[0][0]), @(U[1][0]), @(U[2][0])],
+            @[@(U[0][1]), @(U[1][1]), @(U[2][1])],
+            @[@(U[0][2]), @(U[1][2]), @(U[2][2])]
         ]
     };
     
