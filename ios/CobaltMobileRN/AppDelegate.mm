@@ -1,6 +1,7 @@
 #import "AppDelegate.h"
 #import "ClusteringAndEllipsoids.h"
 #import "SGESVDExample.h"
+#import "FaissBridge.h"
 
 #import <React/RCTBundleURLProvider.h>
 
@@ -16,8 +17,10 @@
   [UIApplication sharedApplication].statusBarHidden = YES;
   
   // Load and test IRIS dataset
-  [self loadAndTestIRISDataset];
+//  [self loadAndTestIRISDataset];
 //  [SGESVDExample runExample];
+  
+  [FaissBridge sharedInstance];  // This will call init and initialize FAISS
 
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }

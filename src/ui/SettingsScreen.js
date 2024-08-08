@@ -26,8 +26,7 @@ const SettingsScreen: any = observer((props: any) => {
     try {
       await truncateDatabase()
 
-      await FaissBridge.deleteEntireIndex()
-      await FaissBridge.init(384)
+      await FaissBridge.deleteAndReinitialize()
 
       await chatStore.load()
 

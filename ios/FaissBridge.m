@@ -14,35 +14,52 @@
 // To expose this module to React Native
 RCT_EXPORT_MODULE();
 
-// Method to get the total number of vectors in the index
-RCT_EXPORT_METHOD(init:(NSInteger)k
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
-    dimension = (int)k;
-    
-    if (!index) {
-        // If the index is not loaded or initialized, attempt to read from file
+// Indicate that this module should be initialized on the main queue
++ (BOOL)requiresMainQueueSetup {
+    return YES;
+}
+
+// Singleton instance
++ (instancetype)sharedInstance {
+    static FaissBridge *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[self alloc] init];
+    });
+    return sharedInstance;
+}
+
+// Initialize FAISS with a fixed dimension
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        dimension = 384;
         if (![self readIndexFromFile]) {
-            [self initializeAndTrainIndexWithDimension:(int)k];
+            [self initializeIndex];
             [self writeIndexToFile];
         }
     }
-    
-    // Return the total number of vectors
-    resolve(@(YES));
+    return self;
 }
 
-// Method to delete the entire index, both from memory and file system
-RCT_EXPORT_METHOD(deleteEntireIndex:(RCTPromiseResolveBlock)resolve
+- (void)initializeIndex {
+    faiss_IndexFlat_new_with(&index, (idx_t)dimension, METRIC_INNER_PRODUCT);
+}
+
+// Method to delete the entire index and reinitialize
+RCT_EXPORT_METHOD(deleteAndReinitialize:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
-    // First, deallocate the index if it exists
-    if (index) {
-        faiss_Index_free((FaissIndex *)index);
-        index = NULL; // Ensure the pointer is set to NULL after freeing
+    FaissBridge *sharedInstance = [FaissBridge sharedInstance];
+    if (!sharedInstance->index) {
+        reject(@"index_error", @"FAISS has not been initialized", nil);
+        return;
     }
+
+    faiss_Index_free((FaissIndex *)sharedInstance->index);
+    sharedInstance->index = NULL; // Ensure the pointer is set to NULL after freeing
     
     // Get the file path for the index
-    NSString *filePath = [self indexPath];
+    NSString *filePath = [sharedInstance indexPath];
     
     // Create a file manager instance
     NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -58,6 +75,10 @@ RCT_EXPORT_METHOD(deleteEntireIndex:(RCTPromiseResolveBlock)resolve
             return;
         }
     }
+
+    // Reinitialize the index
+    [sharedInstance initializeIndex];
+    [sharedInstance writeIndexToFile];
     
     // If everything is successful, resolve the promise
     resolve(@(YES));
@@ -66,16 +87,14 @@ RCT_EXPORT_METHOD(deleteEntireIndex:(RCTPromiseResolveBlock)resolve
 // Method to get the total number of vectors in the index
 RCT_EXPORT_METHOD(ntotal:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
-    if (!index) {
-        // If the index is not loaded or initialized, attempt to read from file
-        if (![self readIndexFromFile]) {
-            reject(@"index_error", @"Index is not initialized or loaded", nil);
-            return;
-        }
+    FaissBridge *sharedInstance = [FaissBridge sharedInstance];
+    if (!sharedInstance->index) {
+        reject(@"index_error", @"FAISS has not been initialized", nil);
+        return;
     }
 
     // Get the total number of vectors in the index
-    int ntotal = (int)faiss_Index_ntotal((FaissIndex *)index);
+    int ntotal = (int)faiss_Index_ntotal((FaissIndex *)sharedInstance->index);
     
     // Return the total number of vectors
     resolve(@(ntotal));
@@ -85,13 +104,10 @@ RCT_EXPORT_METHOD(ntotal:(RCTPromiseResolveBlock)resolve
 RCT_EXPORT_METHOD(addVector:(NSArray<NSNumber *> *)vector
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
-    // Ensure the index is loaded or initialized
-    if (!index) {
-        // Attempt to read the index from file first
-        if (![self readIndexFromFile]) {
-            // If reading fails, initialize a new index
-            [self initializeAndTrainIndexWithDimension:(int)vector.count];
-        }
+    FaissBridge *sharedInstance = [FaissBridge sharedInstance];
+    if (!sharedInstance->index) {
+        reject(@"index_error", @"FAISS has not been initialized", nil);
+        return;
     }
     
     // Convert NSArray to C array
@@ -104,10 +120,10 @@ RCT_EXPORT_METHOD(addVector:(NSArray<NSNumber *> *)vector
         c_vector[i] = [vector[i] floatValue];
     }
   
-    int ntotal = (int)faiss_Index_ntotal((FaissIndex *)index);
+    int ntotal = (int)faiss_Index_ntotal((FaissIndex *)sharedInstance->index);
     
     // Add the vector to the index
-    if (faiss_Index_add((FaissIndex *)index, 1, c_vector) != 0) {
+    if (faiss_Index_add((FaissIndex *)sharedInstance->index, 1, c_vector) != 0) {
         free(c_vector);
         reject(@"add_error", @"Failed to add vector to index", nil);
         return;
@@ -115,7 +131,7 @@ RCT_EXPORT_METHOD(addVector:(NSArray<NSNumber *> *)vector
     free(c_vector);
     
     // Write the updated index to file
-    if (![self writeIndexToFile]) {
+    if (![sharedInstance writeIndexToFile]) {
         reject(@"write_error", @"Failed to write updated index to file", nil);
         return;
     }
@@ -129,14 +145,10 @@ RCT_EXPORT_METHOD(searchVectors:(NSArray<NSNumber *> *)queryVector
                   numberOfResults:(NSInteger)k
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
-    // Ensure the index is loaded or initialized
-    if (!index) {
-        // Attempt to read the index from file first
-        if (![self readIndexFromFile]) {
-            // If reading fails, initialize a new index
-            [self initializeAndTrainIndexWithDimension:(int)queryVector.count];
-            [self writeIndexToFile];
-        }
+    FaissBridge *sharedInstance = [FaissBridge sharedInstance];
+    if (!sharedInstance->index) {
+        reject(@"index_error", @"FAISS has not been initialized", nil);
+        return;
     }
     
     // Convert NSArray to C array for the query vector
@@ -161,7 +173,7 @@ RCT_EXPORT_METHOD(searchVectors:(NSArray<NSNumber *> *)queryVector
     }
     
     // Perform the search
-    faiss_Index_search((FaissIndex *)index, 1, c_query, k, distances, labels);
+    faiss_Index_search((FaissIndex *)sharedInstance->index, 1, c_query, k, distances, labels);
     
     // Convert search results to NSArray for distances and labels
     NSMutableArray *distanceArray = [NSMutableArray arrayWithCapacity:k];
@@ -181,13 +193,35 @@ RCT_EXPORT_METHOD(searchVectors:(NSArray<NSNumber *> *)queryVector
     resolve(resultDict);
 }
 
-RCT_EXPORT_METHOD(retrain:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+//RCT_EXPORT_METHOD(retrain:(RCTPromiseResolveBlock)resolve
+//                  rejecter:(RCTPromiseRejectBlock)reject) {
+//    FaissBridge *sharedInstance = [FaissBridge sharedInstance];
+//    if (!sharedInstance->index) {
+//        reject(@"index_error", @"FAISS has not been initialized", nil);
+//        return;
+//    }
+//
+//    int ntotal = (int)faiss_Index_ntotal((FaissIndex *)sharedInstance->index);
+//
+//    // Retrieve the data from the index using reconstruct_n
+//    float* database = (float*)malloc(ntotal * sharedInstance->dimension * sizeof(float));
+//    faiss_Index_reconstruct_n((FaissIndex *)sharedInstance->index, 0, ntotal, database);
+//
+//    // Use the new class for clustering and ellipsoids
+//    ClusteringAndEllipsoids *clustering = [[ClusteringAndEllipsoids alloc] init];
+//    NSDictionary *resultDict = [clustering performClusteringAndEllipsoids:database rows:ntotal cols:sharedInstance->dimension];
+//
+//    // Free allocated memory
+//    free(database);
+//
+//    // Return the result
+//    resolve(resultDict);
+//}
+
+// Method to retrieve vectors from the FAISS index without exposing to JS
+- (NSDictionary *)getVectors {
     if (!index) {
-        if (![self readIndexFromFile]) {
-            reject(@"index_error", @"Index is not initialized or loaded", nil);
-            return;
-        }
+        return nil;
     }
 
     int ntotal = (int)faiss_Index_ntotal((FaissIndex *)index);
@@ -196,36 +230,12 @@ RCT_EXPORT_METHOD(retrain:(RCTPromiseResolveBlock)resolve
     float* database = (float*)malloc(ntotal * dimension * sizeof(float));
     faiss_Index_reconstruct_n((FaissIndex *)index, 0, ntotal, database);
 
-    // Use the new class for clustering and ellipsoids
-    ClusteringAndEllipsoids *clustering = [[ClusteringAndEllipsoids alloc] init];
-    NSDictionary *resultDict = [clustering performClusteringAndEllipsoids:database rows:ntotal cols:dimension];
+    NSMutableDictionary *resultDict = [NSMutableDictionary dictionary];
+    resultDict[@"database"] = [NSValue valueWithPointer:database];
+    resultDict[@"ntotal"] = @(ntotal);
+    resultDict[@"dimension"] = @(dimension);
 
-    // Free allocated memory
-    free(database);
-
-    // Return the result
-    resolve(resultDict);
-}
-
-// Initialize the index with the given dimension
-- (void)initializeAndTrainIndexWithDimension:(int)d {
-    if (!index) {
-        // Since it's an IndexFlat, no training is required, just initialize
-        // Decide the metric type based on your needs, METRIC_INNER_PRODUCT for inner product,
-        // METRIC_L2 for L2 distance (squared Euclidean)
-        faiss_IndexFlat_new_with(&index, (idx_t)d, METRIC_INNER_PRODUCT);
-        
-        // No training needed for IndexFlat, but if you had a type of index that required training,
-        // you would call faiss_Index_train here.
-    }
-}
-
-// Remember to deallocate the index when it's no longer needed
-- (void)dealloc {
-    if (index) {
-        faiss_IndexFlat_free(index);
-        index = NULL;
-    }
+    return resultDict;
 }
 
 // Method to get the file path for the FAISS index within the app's document directory

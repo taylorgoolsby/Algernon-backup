@@ -56,4 +56,15 @@ class DatabaseModule: NSObject {
         print("formattedQuery: \(formattedQuery)")
         return formattedQuery
     }
+  
+    @objc func fetchAnnotations(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        let query = "SELECT * FROM Annotation ORDER BY annotationId ASC;"
+        let (isSuccessful, results, _, errorMessage) = DatabaseManager.shared.executeQuery(query)
+        
+        if isSuccessful {
+            resolve(results)
+        } else {
+            reject("SQL_ERROR", errorMessage ?? "Failed to fetch annotations", nil)
+        }
+    }
 }

@@ -51,7 +51,6 @@
 		8CACCE5E2BA2BC50004643C2 /* Gemma.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE5B2BA2BC50004643C2 /* Gemma.swift */; };
 		8CACCE5F2BA2BC50004643C2 /* Starcoder2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE5C2BA2BC50004643C2 /* Starcoder2.swift */; };
 		8CACCE602BA2BC50004643C2 /* Qwen2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE5D2BA2BC50004643C2 /* Qwen2.swift */; };
-		8CB23D802C5AFFCD0007AEB0 /* GMM.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CB23D7F2C5AFFCD0007AEB0 /* GMM.m */; };
 		8CB23D822C5D6A6F0007AEB0 /* ClusteringAndEllipsoids.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CB23D812C5D6A6F0007AEB0 /* ClusteringAndEllipsoids.m */; };
 		8CB23D852C5E1ECC0007AEB0 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CB23D842C5E1ECC0007AEB0 /* Accelerate.framework */; };
 		8CC3082D2BB378F900D70C69 /* Nunito-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CC308292BB378F800D70C69 /* Nunito-VariableFont_wght.ttf */; };
@@ -61,6 +60,7 @@
 		8CEC98BC2C53627A00E4045F /* DatabaseModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CEC98BB2C53627A00E4045F /* DatabaseModule.m */; };
 		8CF8599A2C62FC0200845B81 /* iris_dataset.csv in Resources */ = {isa = PBXBuildFile; fileRef = 8CF859992C62FC0200845B81 /* iris_dataset.csv */; };
 		8CF8599D2C63153600845B81 /* SGESVDExample.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF8599C2C63153600845B81 /* SGESVDExample.m */; };
+		8CF8599F2C646B7B00845B81 /* PlotView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF8599E2C646B7B00845B81 /* PlotView.m */; };
 		8CFA35FD2BA18D80009546C7 /* FaissBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CFA35FC2BA18D80009546C7 /* FaissBridge.m */; };
 		8CFA36002BA1A408009546C7 /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA35FF2BA1A408009546C7 /* MLX */; };
 		8CFA36022BA1A408009546C7 /* MLXFFT in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA36012BA1A408009546C7 /* MLXFFT */; };
@@ -140,8 +140,6 @@
 		8CACCE5C2BA2BC50004643C2 /* Starcoder2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Starcoder2.swift; sourceTree = "<group>"; };
 		8CACCE5D2BA2BC50004643C2 /* Qwen2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Qwen2.swift; sourceTree = "<group>"; };
 		8CACCE612BA2C3EF004643C2 /* CobaltMobileRNDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = CobaltMobileRNDebug.entitlements; path = CobaltMobileRN/CobaltMobileRNDebug.entitlements; sourceTree = "<group>"; };
-		8CB23D7E2C5AFFC00007AEB0 /* GMM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GMM.h; sourceTree = "<group>"; };
-		8CB23D7F2C5AFFCD0007AEB0 /* GMM.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GMM.m; sourceTree = "<group>"; };
 		8CB23D812C5D6A6F0007AEB0 /* ClusteringAndEllipsoids.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ClusteringAndEllipsoids.m; sourceTree = "<group>"; };
 		8CB23D832C5D6AB70007AEB0 /* ClusteringAndEllipsoids.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ClusteringAndEllipsoids.h; sourceTree = "<group>"; };
 		8CB23D842C5E1ECC0007AEB0 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
@@ -153,6 +151,8 @@
 		8CF859992C62FC0200845B81 /* iris_dataset.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = iris_dataset.csv; path = ../python/iris_dataset.csv; sourceTree = "<group>"; };
 		8CF8599B2C63152800845B81 /* SGESVDExample.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SGESVDExample.h; sourceTree = "<group>"; };
 		8CF8599C2C63153600845B81 /* SGESVDExample.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SGESVDExample.m; sourceTree = "<group>"; };
+		8CF8599E2C646B7B00845B81 /* PlotView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PlotView.m; sourceTree = "<group>"; };
+		8CF859A02C646B9200845B81 /* PlotView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlotView.h; sourceTree = "<group>"; };
 		8CFA35FB2BA18D80009546C7 /* FaissBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FaissBridge.h; sourceTree = "<group>"; };
 		8CFA35FC2BA18D80009546C7 /* FaissBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FaissBridge.m; sourceTree = "<group>"; };
 		8CFA36172BA286B2009546C7 /* CobaltMobileRN-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CobaltMobileRN-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -249,12 +249,12 @@
 				8CEC98B72C53623800E4045F /* DatabaseManager.swift */,
 				8CEC98B92C53625B00E4045F /* DatabaseModule.swift */,
 				8CEC98BB2C53627A00E4045F /* DatabaseModule.m */,
-				8CB23D7E2C5AFFC00007AEB0 /* GMM.h */,
-				8CB23D7F2C5AFFCD0007AEB0 /* GMM.m */,
 				8CB23D812C5D6A6F0007AEB0 /* ClusteringAndEllipsoids.m */,
 				8CB23D832C5D6AB70007AEB0 /* ClusteringAndEllipsoids.h */,
 				8CF8599B2C63152800845B81 /* SGESVDExample.h */,
 				8CF8599C2C63153600845B81 /* SGESVDExample.m */,
+				8CF8599E2C646B7B00845B81 /* PlotView.m */,
+				8CF859A02C646B9200845B81 /* PlotView.h */,
 			);
 			name = CobaltMobileRN;
 			sourceTree = "<group>";
@@ -677,11 +677,11 @@
 				8CACCE5F2BA2BC50004643C2 /* Starcoder2.swift in Sources */,
 				8CF8599D2C63153600845B81 /* SGESVDExample.m in Sources */,
 				8C097E582BB0EC9C0078CE31 /* CodeGenTokenizer.swift in Sources */,
-				8CB23D802C5AFFCD0007AEB0 /* GMM.m in Sources */,
 				8CACCE522BA29DD2004643C2 /* Tokenizer.swift in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				8C33BC3E2BA43DEC0023A2D9 /* BertTokenizer.swift in Sources */,
 				8CACCE5A2BA2BC32004643C2 /* Llama.swift in Sources */,
+				8CF8599F2C646B7B00845B81 /* PlotView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
