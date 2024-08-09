@@ -218,7 +218,8 @@ RCT_EXPORT_MODULE()
     
     // Setup projection matrix
 //    float aspectRatio = self.bounds.size.width / self.bounds.size.height;
-    self.projectionMatrix = GLKMatrix4MakeOrtho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+    float size = 1.5f;
+    self.projectionMatrix = GLKMatrix4MakeOrtho(-size, size, -size, size, -size, size);
 }
 
 - (void)setupShaders {
@@ -229,6 +230,7 @@ RCT_EXPORT_MODULE()
                                        "uniform mat4 uModelViewProjectionMatrix;\n"
                                        "void main() {\n"
                                        "   gl_Position = uModelViewProjectionMatrix * vec4(aPos, 1.0);\n"
+                                       "   gl_PointSize = 10.0;\n" // Set the point size here
                                        "   vertexColor = aColor;\n"
                                        "}\n";
 
@@ -276,8 +278,10 @@ RCT_EXPORT_MODULE()
     glUniformMatrix4fv(mvpMatrixLocation, 1, GL_FALSE, modelViewProjectionMatrix.m);
 
     // Draw the crosshair and reduced data
-    [self drawCrosshair];
+    
     [self drawReducedData];
+    [self drawCrosshair];
+//    [self drawPointAtPositionX:0.5f y:0.5f z:0.5f withColorR:1.0f g:0.0f b:0.0f];
 }
 
 - (void)drawCrosshair {
@@ -316,12 +320,51 @@ RCT_EXPORT_MODULE()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Draw the 3D crosshair
-    glDrawArrays(GL_LINES, 0, self.vertexCount * 2);
+    glDrawArrays(GL_LINES, 0, self.vertexCount);
 
     // Cleanup
     glBindVertexArray(0);
     glDeleteVertexArrays(1, &_vertexArray);
     glDeleteBuffers(1, &_vertexBuffer);
+}
+
+// Add this function to draw a single point with a specified size
+- (void)drawPointAtPositionX:(GLfloat)x y:(GLfloat)y z:(GLfloat)z withColorR:(GLfloat)r g:(GLfloat)g b:(GLfloat)b {
+    GLfloat pointVertices[] = {
+        x, y, z,  // Position
+    };
+
+    GLfloat pointColors[] = {
+        r, g, b,  // Color
+    };
+
+    GLuint pointVAO, pointVBO, colorVBO;
+    glGenVertexArrays(1, &pointVAO);
+    glGenBuffers(1, &pointVBO);
+    glGenBuffers(1, &colorVBO);
+
+    glBindVertexArray(pointVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, pointVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(pointVertices), pointVertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid *)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(pointColors), pointColors, GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid *)0);
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // Draw the point
+    glDrawArrays(GL_POINTS, 0, 1);
+
+    // Cleanup
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &pointVAO);
+    glDeleteBuffers(1, &pointVBO);
+    glDeleteBuffers(1, &colorVBO);
 }
 
 - (void)drawReducedData {
@@ -340,8 +383,8 @@ RCT_EXPORT_MODULE()
 
     for (int i = 0; i < rowsCount; i++) {
         vertices[i * 3 + 0] = reducedData[i * 3 + 0];
-        vertices[i * 3 + 1] = reducedData[i * 3 + 1];
-        vertices[i * 3 + 2] = reducedData[i * 3 + 2];
+        vertices[i * 3 + 1] = reducedData[i * 3 + 2];
+        vertices[i * 3 + 2] = -reducedData[i * 3 + 1];
 
         // Print the reduced data values
         NSLog(@"Reduced Data [%d]: x=%f, y=%f, z=%f", i, vertices[i * 3 + 0], vertices[i * 3 + 1], vertices[i * 3 + 2]);
