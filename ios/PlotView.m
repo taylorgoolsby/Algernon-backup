@@ -240,6 +240,14 @@ RCT_EXPORT_MODULE()
     // Use the shader program
     glUseProgram(self.shaderProgram);
 
+    // Draw the crosshair using the new function
+    [self drawCrosshair];
+}
+
+- (void)drawCrosshair {
+    // Push the current rotation matrix
+    GLKMatrix4 savedMatrix = self.rotationMatrix;
+
     // Define the crosshair vertices and colors
     GLfloat vertices[] = {
         // X axis (negative part black, positive part red)
@@ -257,8 +265,7 @@ RCT_EXPORT_MODULE()
 
     // Compute the Model-View-Projection matrix with rotation
     GLKMatrix4 projectionMatrix = GLKMatrix4MakeOrtho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
-    GLKMatrix4 modelViewMatrix = self.rotationMatrix; // Apply the rotation matrix here
-    GLKMatrix4 modelViewProjectionMatrix = GLKMatrix4Multiply(projectionMatrix, modelViewMatrix);
+    GLKMatrix4 modelViewProjectionMatrix = GLKMatrix4Multiply(projectionMatrix, self.rotationMatrix);
 
     GLuint mvpMatrixLocation = glGetUniformLocation(self.shaderProgram, "uModelViewProjectionMatrix");
     glUniformMatrix4fv(mvpMatrixLocation, 1, GL_FALSE, modelViewProjectionMatrix.m);
@@ -290,8 +297,10 @@ RCT_EXPORT_MODULE()
     glDeleteVertexArrays(1, &_vertexArray);
     glDeleteBuffers(1, &_vertexBuffer);
 
-    NSLog(@"Rendered 3D crosshair with rotation and colored positive axes in PlotView");
+    // Pop the rotation matrix by restoring the saved matrix
+    self.rotationMatrix = savedMatrix;
 }
+
 
 - (void)dealloc {
     ClusteringAndEllipsoids *clustering = [[ClusteringAndEllipsoids alloc] init];
