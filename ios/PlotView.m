@@ -30,7 +30,7 @@ RCT_EXPORT_MODULE()
     self = [super init];
     if (self) {
         [self setupGL];
-        [self loadClusteringData];
+        [self loadClusteringDataInBackground];
     }
     return self;
 }
@@ -51,7 +51,15 @@ RCT_EXPORT_MODULE()
     glEnable(GL_DEPTH_TEST);
 }
 
+- (void)loadClusteringDataInBackground {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [self loadClusteringData];
+    });
+}
+
 - (void)loadClusteringData {
+  NSLog(@"Loading PlotView data");
+  
     FaissBridge *faissBridge = [FaissBridge sharedInstance];
     NSDictionary *faissData = [faissBridge getVectors];
     
@@ -59,13 +67,25 @@ RCT_EXPORT_MODULE()
         int ntotal = [faissData[@"ntotal"] intValue];
         int dimension = [faissData[@"dimension"] intValue];
         float *database = [faissData[@"database"] pointerValue];
+      
+        NSLog(@"ntotal: %d, dimension: %d", ntotal, dimension);
 
-        ClusteringAndEllipsoids *clustering = [[ClusteringAndEllipsoids alloc] init];
-        self.clusteringResults = [clustering performClusteringAndEllipsoids:database rows:ntotal cols:dimension];
+        // Print vectors
+        for (int i = 0; i < ntotal; i++) {
+            NSMutableString *vectorString = [NSMutableString stringWithString:@"Vector: "];
+            for (int j = 0; j < dimension; j++) {
+                [vectorString appendFormat:@"%f ", database[i * dimension + j]];
+            }
+            NSLog(@"%@", vectorString);
+        }
+
+//        ClusteringAndEllipsoids *clustering = [[ClusteringAndEllipsoids alloc] init];
+//        self.clusteringResults = [clustering performClusteringAndEllipsoids:database rows:ntotal cols:dimension];
 
         free(database);
-        
-        [self loadAnnotations];
+
+        // Load annotations after clustering
+//        [self loadAnnotations];
     } else {
         NSLog(@"Failed to load data from FAISS");
     }
@@ -75,7 +95,16 @@ RCT_EXPORT_MODULE()
     DatabaseModule *databaseModule = [DatabaseModule new];
     [databaseModule fetchAnnotations:^(NSArray *results) {
         self.annotations = results;
-        [self setNeedsDisplay];
+
+        // Print annotations
+        for (NSDictionary *annotation in results) {
+            NSLog(@"Annotation: %@", annotation);
+        }
+
+        // Perform rendering on the main thread
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self setNeedsDisplay];
+        });
     } reject:^(NSString *code, NSString *message, NSError *error) {
         NSLog(@"Error loading annotations: %@", message);
     }];
@@ -85,48 +114,10 @@ RCT_EXPORT_MODULE()
     glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Render the clustering results here
-    if (self.clusteringResults && self.annotations) {
-        // Render points and ellipsoids using the results
-        [self renderClusteringResults:self.clusteringResults];
-        // Optionally use self.annotations for additional rendering
-    }
-}
-
-- (void)renderClusteringResults:(NSDictionary *)results {
-    // Render centroids as points
-    float *centroids = [(NSValue *)results[@"bestCentroids"] pointerValue];
-    int bestK = [results[@"bestK"] intValue];
-    int *bestLabels = [(NSValue *)results[@"bestLabels"] pointerValue];
-
-    glEnableVertexAttribArray(GLKVertexAttribPosition);
-    for (int i = 0; i < bestK; i++) {
-        float x = centroids[i * 3];
-        float y = centroids[i * 3 + 1];
-        float z = centroids[i * 3 + 2];
-        GLKVector3 point = GLKVector3Make(x, y, z);
-        glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, 0, &point);
-        [self.effect prepareToDraw];
-        glDrawArrays(GL_POINTS, 0, 1);
-    }
-    glDisableVertexAttribArray(GLKVertexAttribPosition);
-
-    // Render ellipsoids
-    NSMutableArray *ellipsoids = results[@"bestEllipsoids"];
-    for (NSDictionary *ellipsoid in ellipsoids) {
-        // Code to render ellipsoid using the mean and eigenvalues/eigenvectors
-        [self renderEllipsoid:ellipsoid];
-    }
-}
-
-- (void)renderEllipsoid:(NSDictionary *)ellipsoid {
-    // Extract mean and eigenvalues/eigenvectors from ellipsoid dictionary
-    NSArray *mean = ellipsoid[@"mean"];
-    NSArray *eigenvalues = ellipsoid[@"eigenvalues"];
-    NSArray *eigenvectors = ellipsoid[@"eigenvectors"];
-
-    // Code to render the ellipsoid using OpenGL
-    // You need to create a shader to handle Gaussian splatting
+    // For now, we are not rendering clustering results or annotations
+    // This is just to ensure we have a simple blank screen rendered initially
+    // Future rendering logic will be added here once the data is loaded
+    // and non-blocking behavior is confirmed
 }
 
 @end

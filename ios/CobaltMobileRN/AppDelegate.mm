@@ -17,7 +17,7 @@
   [UIApplication sharedApplication].statusBarHidden = YES;
   
   // Load and test IRIS dataset
-//  [self loadAndTestIRISDataset];
+  [self loadAndTestIRISDataset];
 //  [SGESVDExample runExample];
   
   [FaissBridge sharedInstance];  // This will call init and initialize FAISS

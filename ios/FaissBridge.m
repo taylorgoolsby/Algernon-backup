@@ -79,6 +79,8 @@ RCT_EXPORT_METHOD(deleteAndReinitialize:(RCTPromiseResolveBlock)resolve
     // Reinitialize the index
     [sharedInstance initializeIndex];
     [sharedInstance writeIndexToFile];
+  
+    NSLog(@"Pointer value of index after reinitialization: %p", sharedInstance->index);
     
     // If everything is successful, resolve the promise
     resolve(@(YES));
@@ -220,6 +222,9 @@ RCT_EXPORT_METHOD(searchVectors:(NSArray<NSNumber *> *)queryVector
 
 // Method to retrieve vectors from the FAISS index without exposing to JS
 - (NSDictionary *)getVectors {
+    // Print the pointer value of the index
+    NSLog(@"Pointer value of index at the beginning of getVectors: %p", index);
+  
     if (!index) {
         return nil;
     }

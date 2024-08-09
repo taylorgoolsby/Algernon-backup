@@ -43,19 +43,23 @@ export default class LongTermAnnotation {
         console.log("annotations", annotations);
 
         for (const annotationText of annotations) {
-          const embedding: Array<number> = await TextFeatureExtractor.extractFeatures(annotationText)
-          const annotationId = await LongTermAnnotation.insert(embedding)
-          await AnnotationInterface.insert(
-            annotationId,
-            message.messageId,
-            annotationText,
-            embedding,
-          )
+          await LongTermAnnotation.embedAndInsert(message, annotationText)
         }
       } catch (err) {
         console.error(err)
       }
     })
+  }
+
+  static async embedAndInsert(message: MessageSQL, annotationText: string): Promise<void> {
+    const embedding: Array<number> = await TextFeatureExtractor.extractFeatures(annotationText)
+    const annotationId = await LongTermAnnotation.insert(embedding)
+    await AnnotationInterface.insert(
+      annotationId,
+      message.messageId,
+      annotationText,
+      embedding,
+    )
   }
 
   static async getAnnotations(
@@ -223,7 +227,8 @@ Explanation: Similar to the previous example, this input is an acknowledgement w
     //   }
     // }
 
-    const label = FaissBridge.addVector(vector)
+    const label = await FaissBridge.addVector(vector)
+    console.log("label", label);
     return label
   }
 

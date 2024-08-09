@@ -5,11 +5,24 @@
 @implementation ClusteringAndEllipsoids
 
 - (NSDictionary *)performClusteringAndEllipsoids:(float *)data rows:(int)rows cols:(int)cols {
-    int maxK = 10; // Maximum number of clusters to test
+    // Determine the range of k to test
+    int minK;
+    if (rows < 300) {
+        minK = 2;
+    } else {
+        minK = MAX(2, (int)sqrt(rows / 2));
+    }
+    int maxK = MIN(rows - 1, (int)sqrt(rows));
+    
+    // Ensure maxK is at least 2
+    maxK = MAX(2, maxK);
+  
+    NSLog(@"Testing range of k: minK = %d, maxK = %d", minK, maxK);
+
     int maxIterations = 1000;
 
     // Perform k-means clustering with silhouette scoring to find the best number of clusters
-    NSDictionary *bestKMeansResult = [self performKMeansWithSilhouetteScoring:data rows:rows cols:cols maxK:maxK maxIterations:maxIterations];
+  NSDictionary *bestKMeansResult = [self performKMeansWithSilhouetteScoring:data rows:rows cols:cols minK:minK maxK:maxK maxIterations:maxIterations];
 
     int bestK = [bestKMeansResult[@"bestK"] intValue];
     float bestScore = [bestKMeansResult[@"bestScore"] floatValue];
@@ -48,9 +61,60 @@
     return resultDict;
 }
 
-- (NSDictionary *)performKMeansWithSilhouetteScoring:(float *)data rows:(int)rows cols:(int)cols maxK:(int)maxK maxIterations:(int)maxIterations {
+- (NSDictionary *)performKMeansWithSilhouetteScoring:(float *)data rows:(int)rows cols:(int)cols minK:(int)minK maxK:(int)maxK maxIterations:(int)maxIterations {
+    // Handle case where rows <= 4: return a single cluster without silhouette scoring
+    if (rows <= 4) {
+        int bestK = 1;
+        float *bestCentroids = malloc(cols * sizeof(float));
+        int *bestLabels = malloc(rows * sizeof(int));
+        int *bestClusterCounts = malloc(sizeof(int));
+        bestClusterCounts[0] = rows; // Corrected to set the first element
+
+        // Calculate the mean of the data points to use as the centroid
+        for (int j = 0; j < cols; ++j) {
+            float sum = 0.0;
+            for (int i = 0; i < rows; ++i) {
+                sum += data[i * cols + j];
+            }
+            bestCentroids[j] = sum / rows;
+        }
+
+        // All points belong to the single cluster
+        for (int i = 0; i < rows; ++i) {
+            bestLabels[i] = 0; // All points in cluster 0
+        }
+
+        // Create silhouette scores as an array of arrays
+        NSMutableArray *silhouetteScoresArray = [NSMutableArray array];
+        NSMutableArray *singleClusterScores = [NSMutableArray array];
+        for (int i = 0; i < rows; ++i) {
+            [singleClusterScores addObject:@(1.0)]; // All silhouette scores are set to 1.0
+        }
+        [silhouetteScoresArray addObject:singleClusterScores];
+
+        // Create the result arrays for k=1
+        NSMutableArray *labelsArray = [NSMutableArray arrayWithObject:[NSValue valueWithPointer:bestLabels]];
+        NSMutableArray *centroidsArray = [NSMutableArray arrayWithObject:[NSValue valueWithPointer:bestCentroids]];
+        NSMutableArray *clusterSilhouetteScoresArray = [NSMutableArray arrayWithObject:@[@(1.0)]];
+        NSMutableArray *clusterCountsArray = [NSMutableArray arrayWithObject:[NSValue valueWithPointer:bestClusterCounts]];
+
+        // Create the result dictionary with a single cluster
+        return @{
+            @"bestK": @(bestK),
+            @"bestScore": @(1.0), // Arbitrarily setting silhouette score to 1.0
+            @"bestLabels": [NSValue valueWithPointer:bestLabels],
+            @"bestCentroids": [NSValue valueWithPointer:bestCentroids],
+            @"bestClusterCounts": [NSValue valueWithPointer:bestClusterCounts],
+            @"allLabels": labelsArray,
+            @"allCentroids": centroidsArray,
+            @"allClusterSilhouetteScores": clusterSilhouetteScoresArray,
+            @"allSilhouetteScores": silhouetteScoresArray,
+            @"allClusterCounts": clusterCountsArray
+        };
+    }
+
     float bestScore = -FLT_MAX; // Initialize to minimum value to find maximum silhouette score
-    int bestK = 2;
+    int bestK = minK;
     int *bestLabels = NULL;
     float *bestCentroids = NULL;
     int *bestClusterCounts = NULL;
@@ -61,7 +125,7 @@
     NSMutableArray *allSilhouetteScores = [NSMutableArray array];
     NSMutableArray *allClusterCounts = [NSMutableArray array];
 
-    for (int k = 2; k <= maxK; ++k) {
+    for (int k = minK; k <= maxK; ++k) {
         int *labels = malloc(rows * sizeof(int));
         float *centroids = malloc(k * cols * sizeof(float));
         [self performKMeansClustering:data rows:rows cols:cols k:k maxIterations:maxIterations labels:labels centroids:centroids];
@@ -102,7 +166,6 @@
         @"allClusterCounts": allClusterCounts
     };
 }
-
 
 - (NSDictionary *)calculateSilhouetteScore:(float *)data labels:(int *)labels rows:(int)rows cols:(int)cols k:(int)k {
     float *a = malloc(rows * sizeof(float));
