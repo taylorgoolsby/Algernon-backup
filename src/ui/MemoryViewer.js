@@ -1,13 +1,15 @@
 // @flow
 
 import React from 'react'
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Dimensions } from "react-native";
 import { observer } from "mobx-react";
 import Colors, { darkMode } from "../Colors";
 import { rightMargin } from "./components/ChatMessage";
 import CustomHeader from "./components/CustomHeader";
 import { useNavigation } from "@react-navigation/native";
 import PlotView from "./components/PlotView";
+
+const screenWidth = Dimensions.get('window').width
 
 // This is a page for vieweing the memory of the AI, which is a data visualization of a vector database.
 // The viewer is a 2d plot of the vectors, reduced by PCA.
@@ -25,7 +27,10 @@ const MemoryViewer: any = observer((props: any) => {
           navigation.goBack()
         }}
       />
-      <PlotView/>
+      <PlotView style={{
+        width: screenWidth,
+        height: screenWidth
+      }} />
     </View>
   )
 })
