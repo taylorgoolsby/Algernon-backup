@@ -79,8 +79,32 @@ RCT_EXPORT_MODULE()
             NSLog(@"%@", vectorString);
         }
 
-//        ClusteringAndEllipsoids *clustering = [[ClusteringAndEllipsoids alloc] init];
-//        self.clusteringResults = [clustering performClusteringAndEllipsoids:database rows:ntotal cols:dimension];
+        ClusteringAndEllipsoids *clustering = [[ClusteringAndEllipsoids alloc] init];
+        self.clusteringResults = [clustering performClusteringAndEllipsoids:database rows:ntotal cols:dimension];
+      
+        // Print clustering results labels
+        int *bestLabels = [(NSValue *)self.clusteringResults[@"bestLabels"] pointerValue];
+        for (int i = 0; i < ntotal; i++) {
+            NSLog(@"Label[%d]: %d", i, bestLabels[i]);
+        }
+
+        // Print reduced data
+        float *reducedData = [(NSValue *)self.clusteringResults[@"reducedData"] pointerValue];
+        int reducedDim = 3; // Assuming the reduced dimension is 3
+        for (int i = 0; i < ntotal; i++) {
+            NSMutableString *reducedDataString = [NSMutableString stringWithString:@"Reduced Data: "];
+            for (int j = 0; j < reducedDim; j++) {
+                [reducedDataString appendFormat:@"%f ", reducedData[i * reducedDim + j]];
+            }
+            NSLog(@"%@", reducedDataString);
+        }
+      
+        NSMutableArray *ellipsoids = self.clusteringResults[@"bestEllipsoids"];
+        for (NSDictionary *ellipsoid in ellipsoids) {
+            NSLog(@"Mean: %@", ellipsoid[@"mean"]);
+            NSLog(@"Eigenvalues: %@", ellipsoid[@"eigenvalues"]);
+            NSLog(@"Eigenvectors: %@", ellipsoid[@"eigenvectors"]);
+        }
 
         free(database);
 
@@ -118,6 +142,11 @@ RCT_EXPORT_MODULE()
     // This is just to ensure we have a simple blank screen rendered initially
     // Future rendering logic will be added here once the data is loaded
     // and non-blocking behavior is confirmed
+}
+
+- (void)dealloc {
+  ClusteringAndEllipsoids *clustering = [[ClusteringAndEllipsoids alloc] init];
+  [clustering freeClusteringData:self.clusteringResults];
 }
 
 @end
