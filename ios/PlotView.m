@@ -32,6 +32,7 @@ RCT_EXPORT_MODULE()
 @property (nonatomic, assign) GLuint vertexBuffer;  // Declare vertexBuffer
 @property (nonatomic, assign) CGPoint lastTouchLocation;
 @property (nonatomic, assign) GLKMatrix4 rotationMatrix;
+@property (nonatomic, assign) GLKMatrix4 projectionMatrix;
 
 @end
 
@@ -49,8 +50,76 @@ RCT_EXPORT_MODULE()
 
 - (void)loadClusteringDataInBackground {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [self loadClusteringData];
+//        [self loadClusteringData];
+        [self loadTestData];
     });
+}
+
+- (void)loadTestData {
+    @try {
+        NSString *path = [[NSBundle mainBundle] pathForResource:@"iris_dataset" ofType:@"csv"];
+        NSError *error = nil;
+        NSString *content = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&error];
+
+        if (error) {
+            NSLog(@"Failed to read file: %@", error.localizedDescription);
+            return;
+        }
+
+        NSArray *rows = [content componentsSeparatedByString:@"\n"];
+        if (rows.count <= 1) {
+            NSLog(@"CSV file doesn't contain enough rows.");
+            return;
+        }
+
+        int rowsCount = (int)rows.count - 2; // Exclude header row and last row
+        int colsCount = 4; // we have 4 features
+
+        float *data = (float *)malloc(rowsCount * colsCount * sizeof(float));
+        if (data == NULL) {
+            NSLog(@"Failed to allocate memory for data array.");
+            return;
+        }
+
+        int index = 0;
+
+        for (int i = 1; i < rows.count - 1; i++) { // start from 1 to skip header and stop before the last row
+            NSString *row = rows[i];
+            NSArray *cols = [row componentsSeparatedByString:@","];
+
+            if (cols.count < 5) {
+                NSLog(@"Row %d doesn't contain enough columns or is invalid.", i);
+                continue;
+            }
+
+            for (int j = 0; j < colsCount; j++) {
+                data[index++] = [cols[j] floatValue];
+            }
+        }
+
+        NSLog(@"IRIS Data:");
+        for (int i = 0; i < rowsCount; ++i) {
+            NSMutableString *dataString = [NSMutableString string];
+            for (int j = 0; j < colsCount; ++j) {
+                [dataString appendFormat:@"%f ", data[i * colsCount + j]];
+            }
+            NSLog(@"%@", dataString);
+        }
+
+        ClusteringAndEllipsoids *clusteringAndEllipsoids = [[ClusteringAndEllipsoids alloc] init];
+        self.clusteringResults = [clusteringAndEllipsoids performClusteringAndEllipsoids:data rows:rowsCount cols:colsCount];
+      
+        // Trigger a redraw to render the ellipsoid
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self setNeedsDisplay];
+        });
+
+        // Free allocated memory
+        free(data);
+    }
+    @catch (NSException *exception) {
+        NSLog(@"An error occurred: %@\nStack trace: %@", exception.reason, exception.callStackSymbols);
+    }
 }
 
 - (void)loadClusteringData {
@@ -102,8 +171,6 @@ RCT_EXPORT_MODULE()
             NSLog(@"Eigenvectors: %@", ellipsoid[@"eigenvectors"]);
         }
       
-        [self setupVertexDataForEllipsoids:self.clusteringResults[@"bestEllipsoids"]];
-      
         // Trigger a redraw to render the ellipsoid
         dispatch_async(dispatch_get_main_queue(), ^{
             [self setNeedsDisplay];
@@ -148,6 +215,10 @@ RCT_EXPORT_MODULE()
     // Initialize shaders and program
     [self setupShaders];
     glEnable(GL_DEPTH_TEST);
+    
+    // Setup projection matrix
+//    float aspectRatio = self.bounds.size.width / self.bounds.size.height;
+    self.projectionMatrix = GLKMatrix4MakeOrtho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
 }
 
 - (void)setupShaders {
@@ -189,47 +260,6 @@ RCT_EXPORT_MODULE()
     glDeleteShader(fragmentShader);
 }
 
-- (void)setupVertexDataForEllipsoids:(NSMutableArray *)ellipsoids {
-    NSLog(@"setupVertexDataForEllipsoids");
-
-    NSMutableArray *verticesArray = [NSMutableArray array];
-
-    for (NSDictionary *ellipsoid in ellipsoids) {
-        NSArray *mean = ellipsoid[@"mean"];
-        NSArray *eigenvalues = ellipsoid[@"eigenvalues"];
-        NSArray *eigenvectors = ellipsoid[@"eigenvectors"];
-        
-        for (int i = 0; i < 3; i++) {
-            float eigenvalue = sqrtf([eigenvalues[i] floatValue]);
-            NSArray *eigenvector = eigenvectors[i];
-
-            float start[3], end[3];
-            for (int j = 0; j < 3; j++) {
-                start[j] = [mean[j] floatValue] - eigenvalue * [eigenvector[j] floatValue];
-                end[j] = [mean[j] floatValue] + eigenvalue * [eigenvector[j] floatValue];
-            }
-
-            // Add start and end points to vertices array
-            [verticesArray addObject:@(start[0])];
-            [verticesArray addObject:@(start[1])];
-            [verticesArray addObject:@(start[2])];
-            [verticesArray addObject:@(end[0])];
-            [verticesArray addObject:@(end[1])];
-            [verticesArray addObject:@(end[2])];
-        }
-    }
-
-    // Convert the NSMutableArray to a C array
-    self.vertexCount = (GLsizei)(verticesArray.count / 3);
-    GLfloat *vertices = (GLfloat *)malloc(verticesArray.count * sizeof(GLfloat));
-    for (int i = 0; i < verticesArray.count; i++) {
-        vertices[i] = [verticesArray[i] floatValue];
-    }
-
-    // Store the vertices in a global variable
-    self.vertices = vertices;
-}
-
 - (void)drawRect:(CGRect)rect {
     CGFloat scale = [UIScreen mainScreen].scale;
     glViewport(0, 0, self.bounds.size.width * scale, self.bounds.size.height * scale);
@@ -240,14 +270,17 @@ RCT_EXPORT_MODULE()
     // Use the shader program
     glUseProgram(self.shaderProgram);
 
-    // Draw the crosshair using the new function
+    // Apply the projection matrix and rotation matrix
+    GLKMatrix4 modelViewProjectionMatrix = GLKMatrix4Multiply(self.projectionMatrix, self.rotationMatrix);
+    GLuint mvpMatrixLocation = glGetUniformLocation(self.shaderProgram, "uModelViewProjectionMatrix");
+    glUniformMatrix4fv(mvpMatrixLocation, 1, GL_FALSE, modelViewProjectionMatrix.m);
+
+    // Draw the crosshair and reduced data
     [self drawCrosshair];
+    [self drawReducedData];
 }
 
 - (void)drawCrosshair {
-    // Push the current rotation matrix
-    GLKMatrix4 savedMatrix = self.rotationMatrix;
-
     // Define the crosshair vertices and colors
     GLfloat vertices[] = {
         // X axis (negative part black, positive part red)
@@ -262,13 +295,6 @@ RCT_EXPORT_MODULE()
     };
 
     self.vertexCount = 6; // 6 lines with 2 vertices each
-
-    // Compute the Model-View-Projection matrix with rotation
-    GLKMatrix4 projectionMatrix = GLKMatrix4MakeOrtho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
-    GLKMatrix4 modelViewProjectionMatrix = GLKMatrix4Multiply(projectionMatrix, self.rotationMatrix);
-
-    GLuint mvpMatrixLocation = glGetUniformLocation(self.shaderProgram, "uModelViewProjectionMatrix");
-    glUniformMatrix4fv(mvpMatrixLocation, 1, GL_FALSE, modelViewProjectionMatrix.m);
 
     // Set up vertex array and buffer
     glGenVertexArrays(1, &_vertexArray);
@@ -296,11 +322,87 @@ RCT_EXPORT_MODULE()
     glBindVertexArray(0);
     glDeleteVertexArrays(1, &_vertexArray);
     glDeleteBuffers(1, &_vertexBuffer);
-
-    // Pop the rotation matrix by restoring the saved matrix
-    self.rotationMatrix = savedMatrix;
 }
 
+- (void)drawReducedData {
+    if (!self.clusteringResults) {
+        return; // Exit early if clustering results are not available
+    }
+
+    // Retrieve reduced data and labels
+    float *reducedData = [(NSValue *)self.clusteringResults[@"reducedData"] pointerValue];
+    int *labels = [(NSValue *)self.clusteringResults[@"bestLabels"] pointerValue];
+    int rowsCount = [(NSNumber *)self.clusteringResults[@"rows"] intValue];
+
+    // Generate vertex data and colors based on labels
+    GLfloat *vertices = (GLfloat *)malloc(rowsCount * 3 * sizeof(GLfloat));
+    GLfloat *colors = (GLfloat *)malloc(rowsCount * 3 * sizeof(GLfloat));
+
+    for (int i = 0; i < rowsCount; i++) {
+        vertices[i * 3 + 0] = reducedData[i * 3 + 0];
+        vertices[i * 3 + 1] = reducedData[i * 3 + 1];
+        vertices[i * 3 + 2] = reducedData[i * 3 + 2];
+
+        // Print the reduced data values
+        NSLog(@"Reduced Data [%d]: x=%f, y=%f, z=%f", i, vertices[i * 3 + 0], vertices[i * 3 + 1], vertices[i * 3 + 2]);
+
+        // Assign colors based on labels (for simplicity, map labels 0, 1, 2 to red, green, blue)
+        switch (labels[i]) {
+            case 0:
+                colors[i * 3 + 0] = 1.0f; // Red
+                colors[i * 3 + 1] = 0.0f;
+                colors[i * 3 + 2] = 0.0f;
+                break;
+            case 1:
+                colors[i * 3 + 0] = 0.0f;
+                colors[i * 3 + 1] = 1.0f; // Green
+                colors[i * 3 + 2] = 0.0f;
+                break;
+            case 2:
+                colors[i * 3 + 0] = 0.0f;
+                colors[i * 3 + 1] = 0.0f;
+                colors[i * 3 + 2] = 1.0f; // Blue
+                break;
+            default:
+                colors[i * 3 + 0] = 0.0f;
+                colors[i * 3 + 1] = 0.0f;
+                colors[i * 3 + 2] = 0.0f; // Black for other labels
+                break;
+        }
+    }
+
+    // Set up vertex array and buffer for reduced data
+    GLuint dataVAO, dataVBO, colorVBO;
+    glGenVertexArrays(1, &dataVAO);
+    glGenBuffers(1, &dataVBO);
+    glGenBuffers(1, &colorVBO);
+
+    glBindVertexArray(dataVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, dataVBO);
+    glBufferData(GL_ARRAY_BUFFER, rowsCount * 3 * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid *)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
+    glBufferData(GL_ARRAY_BUFFER, rowsCount * 3 * sizeof(GLfloat), colors, GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid *)0);
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // Draw the reduced data points
+    glDrawArrays(GL_POINTS, 0, rowsCount);
+
+    // Cleanup
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &dataVAO);
+    glDeleteBuffers(1, &dataVBO);
+    glDeleteBuffers(1, &colorVBO);
+
+    free(vertices);
+    free(colors);
+}
 
 - (void)dealloc {
     ClusteringAndEllipsoids *clustering = [[ClusteringAndEllipsoids alloc] init];

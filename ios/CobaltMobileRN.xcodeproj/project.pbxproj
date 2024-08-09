@@ -140,7 +140,7 @@
 		8CACCE5C2BA2BC50004643C2 /* Starcoder2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Starcoder2.swift; sourceTree = "<group>"; };
 		8CACCE5D2BA2BC50004643C2 /* Qwen2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Qwen2.swift; sourceTree = "<group>"; };
 		8CACCE612BA2C3EF004643C2 /* CobaltMobileRNDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = CobaltMobileRNDebug.entitlements; path = CobaltMobileRN/CobaltMobileRNDebug.entitlements; sourceTree = "<group>"; };
-		8CB23D812C5D6A6F0007AEB0 /* ClusteringAndEllipsoids.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ClusteringAndEllipsoids.m; sourceTree = "<group>"; };
+		8CB23D812C5D6A6F0007AEB0 /* ClusteringAndEllipsoids.m */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = ClusteringAndEllipsoids.m; sourceTree = "<group>"; tabWidth = 4; };
 		8CB23D832C5D6AB70007AEB0 /* ClusteringAndEllipsoids.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ClusteringAndEllipsoids.h; sourceTree = "<group>"; };
 		8CB23D842C5E1ECC0007AEB0 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		8CC308292BB378F800D70C69 /* Nunito-VariableFont_wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Nunito-VariableFont_wght.ttf"; path = "../../assets/fonts/Nunito-VariableFont_wght.ttf"; sourceTree = "<group>"; };
@@ -151,7 +151,7 @@
 		8CF859992C62FC0200845B81 /* iris_dataset.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = iris_dataset.csv; path = ../python/iris_dataset.csv; sourceTree = "<group>"; };
 		8CF8599B2C63152800845B81 /* SGESVDExample.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SGESVDExample.h; sourceTree = "<group>"; };
 		8CF8599C2C63153600845B81 /* SGESVDExample.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SGESVDExample.m; sourceTree = "<group>"; };
-		8CF8599E2C646B7B00845B81 /* PlotView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PlotView.m; sourceTree = "<group>"; };
+		8CF8599E2C646B7B00845B81 /* PlotView.m */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = PlotView.m; sourceTree = "<group>"; tabWidth = 4; };
 		8CF859A02C646B9200845B81 /* PlotView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlotView.h; sourceTree = "<group>"; };
 		8CFA35FB2BA18D80009546C7 /* FaissBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FaissBridge.h; sourceTree = "<group>"; };
 		8CFA35FC2BA18D80009546C7 /* FaissBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FaissBridge.m; sourceTree = "<group>"; };

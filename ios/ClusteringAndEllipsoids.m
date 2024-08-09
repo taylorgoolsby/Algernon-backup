@@ -43,7 +43,12 @@
     // Fit 3D Gaussian and obtain ellipsoids
     NSMutableArray *ellipsoids = [self fit3DGaussianAndGetEllipsoid:reducedData rows:rows labels:bestLabels numClusters:bestK reducedDim:reducedDim clusterCounts:bestClusterCounts];
     
+    // Note that centroids are not PCA reduced, and that PCA reduced data is normalized to [-1, 1]
+    // The means of the ellipsoids, however, are equivalent to the PCA reduced and normalized centroids.
+    
     NSDictionary *resultDict = @{
+        @"rows": @(rows),
+        @"cols": @(cols),
         @"bestK": @(bestK),
         @"bestScore": @(bestScore),
         @"bestCentroids": [NSValue valueWithPointer:bestCentroids],
@@ -457,10 +462,10 @@
 //    }
 
     // Print S vector
-//    NSLog(@"S Vector:");
-//    for (int i = 0; i < MIN(rows, cols); ++i) {
-//        NSLog(@"%f", S[i]);
-//    }
+    NSLog(@"S Vector:");
+    for (int i = 0; i < MIN(rows, cols); ++i) {
+        NSLog(@"%f", S[i]);
+    }
   
     // Print VT matrix (V is the transpose of VT)
 //    NSLog(@"VT Matrix:");
@@ -471,13 +476,45 @@
 //        }
 //        NSLog(@"%@", rowString);
 //    }
+    
+    float *outputColumnMajor = malloc(rows * outputDim * sizeof(float));
+    float *outputColumnMajorNormalized = malloc(rows * outputDim * sizeof(float));
+    
+//    for (__LAPACK_int i = 0; i < rows; ++i) {
+//        for (__LAPACK_int j = 0; j < outputDim; ++j) {
+//            output[i * outputDim + j] = U[j * rows + i];
+//        }
+//    }
 
-    // Reduce dimensions by selecting the first outputDim columns of U
+    // Reduce dimensions by selecting the first outputDim columns of U (stored in column-major order)
     for (__LAPACK_int i = 0; i < rows; ++i) {
         for (__LAPACK_int j = 0; j < outputDim; ++j) {
-            output[i * outputDim + j] = U[j * rows + i];
+            outputColumnMajor[j * rows + i] = U[j * rows + i];
         }
     }
+
+    for (int j = 0; j < outputDim; ++j) {
+        // Find min and max for each dimension
+        float minVal, maxVal;
+        vDSP_minv(&outputColumnMajor[j * rows], 1, &minVal, rows);
+        vDSP_maxv(&outputColumnMajor[j * rows], 1, &maxVal, rows);
+        
+        // Calculate range
+        float range = maxVal - minVal;
+        if (range > 0) {
+            // Normalize each dimension to [-1, 1]
+            float scale = 2.0f / range;
+            float offset = -(minVal + maxVal) / range;
+            vDSP_vsmsa(&outputColumnMajor[j * rows], 1, &scale, &offset, &outputColumnMajorNormalized[j * rows], 1, rows);
+        } else {
+            // If range is 0 (all values are the same), set the values to 0 (center of the range [-1, 1])
+            float zero = 0.0f;
+            vDSP_vfill(&zero, &outputColumnMajorNormalized[j * rows], 1, rows);
+        }
+    }
+
+    // Transpose the normalized output data back to row-major order
+    vDSP_mtrans(outputColumnMajorNormalized, 1, output, 1, rows, outputDim);
   
     free(mean);
     free(U);
