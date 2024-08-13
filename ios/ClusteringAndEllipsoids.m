@@ -618,6 +618,9 @@
     free(centeredData);
     free(centeredDataTransposed);
     
+    float covarianceCopy[3][3];
+        memcpy(covarianceCopy, covariance, sizeof(float) * 9);
+    
     // Decompose the covariance matrix to get the axes of the ellipsoid
     float eigenvalues[3];
     float U[3][3];
@@ -628,12 +631,12 @@
     float wkopt;
     
     // Query for optimal workspace size
-    sgesvd_("A", "A", &n_, &n_, (float *)covariance, &n_, eigenvalues, (float *)U, &n_, (float *)VT, &n_, &wkopt, &lwork, &info);
+    sgesvd_("A", "A", &n_, &n_, (float *)covarianceCopy, &n_, eigenvalues, (float *)U, &n_, (float *)VT, &n_, &wkopt, &lwork, &info);
     lwork = (__LAPACK_int)wkopt;
     float *work = malloc(lwork * sizeof(float));
     
     // Actual SVD computation
-    sgesvd_("A", "A", &n_, &n_, (float *)covariance, &n_, eigenvalues, (float *)U, &n_, (float *)VT, &n_, work, &lwork, &info);
+    sgesvd_("A", "A", &n_, &n_, (float *)covarianceCopy, &n_, eigenvalues, (float *)U, &n_, (float *)VT, &n_, work, &lwork, &info);
     
     free(work);
     
@@ -668,6 +671,11 @@
 //        NSLog(@"%@", rowString);
 //    }
     
+    float determinant = covariance[0][0] * (covariance[1][1] * covariance[2][2] - covariance[1][2] * covariance[2][1]) -
+                        covariance[0][1] * (covariance[1][0] * covariance[2][2] - covariance[1][2] * covariance[2][0]) +
+                        covariance[0][2] * (covariance[1][0] * covariance[2][1] - covariance[1][1] * covariance[2][0]);
+
+    
     // The eigenvalues are the lengths of the axes of the ellipsoid
     // The eigenvectors are the directions of the axes
     NSDictionary *ellipsoid = @{
@@ -677,10 +685,128 @@
             @[@(U[0][0]), @(U[1][0]), @(U[2][0])],
             @[@(U[0][1]), @(U[1][1]), @(U[2][1])],
             @[@(U[0][2]), @(U[1][2]), @(U[2][2])]
-        ]
+        ],
+        @"covariance": @[
+            @[@(covariance[0][0]), @(covariance[0][1]), @(covariance[0][2])],
+            @[@(covariance[1][0]), @(covariance[1][1]), @(covariance[1][2])],
+            @[@(covariance[2][0]), @(covariance[2][1]), @(covariance[2][2])]
+        ],
+        @"determinant": @(determinant)
     };
     
     return ellipsoid;
+}
+
++ (NSDictionary *)decompose2x2:(float[2][2])covarianceMatrix {
+    // Copy the covariance matrix because sgesvd_ will mutate it
+    float covarianceCopy[2][2];
+    memcpy(covarianceCopy, covarianceMatrix, sizeof(float) * 4);
+
+    // Allocate space for the results
+    float eigenvalues[2];
+    float U[2][2];
+    float VT[2][2];
+    __LAPACK_int n_ = 2;
+    __LAPACK_int info;
+    __LAPACK_int lwork = -1;
+    float wkopt;
+
+    // Query for optimal workspace size
+    sgesvd_("A", "A", &n_, &n_, (float *)covarianceCopy, &n_, eigenvalues, (float *)U, &n_, (float *)VT, &n_, &wkopt, &lwork, &info);
+    lwork = (__LAPACK_int)wkopt;
+    float *work = malloc(lwork * sizeof(float));
+
+    // Perform SVD
+    sgesvd_("A", "A", &n_, &n_, (float *)covarianceCopy, &n_, eigenvalues, (float *)U, &n_, (float *)VT, &n_, work, &lwork, &info);
+
+    // Free workspace
+    free(work);
+
+    // Check if the SVD converged
+    if (info > 0) {
+        NSLog(@"The algorithm computing SVD failed to converge.");
+        return @{};
+    }
+
+    // Calculate the determinant of the original 2x2 covariance matrix
+    float determinant = covarianceMatrix[0][0] * covarianceMatrix[1][1] - covarianceMatrix[0][1] * covarianceMatrix[1][0];
+    
+    // Return the eigenvalues and eigenvectors
+    NSDictionary *result = @{
+        @"eigenvalues": @[@(eigenvalues[0]), @(eigenvalues[1])],
+        @"eigenvectors": @[
+            @[@(U[0][0]), @(U[1][0])],
+            @[@(U[0][1]), @(U[1][1])]
+        ],
+        @"determinant": @(determinant)
+    };
+    
+    return result;
+}
+
++ (NSDictionary *)decompose3x3:(float[3][3])covarianceMatrix {
+    // Copy the covariance matrix because sgesvd_ will mutate it
+    float covarianceCopy[3][3];
+    memcpy(covarianceCopy, covarianceMatrix, sizeof(float) * 9);
+
+    // Allocate space for the results
+    float eigenvalues[3];
+    float U[3][3];
+    float VT[3][3];
+    __LAPACK_int n_ = 3;
+    __LAPACK_int info;
+    __LAPACK_int lwork = -1;
+    float wkopt;
+
+    // Query for optimal workspace size
+    sgesvd_("A", "A", &n_, &n_, (float *)covarianceCopy, &n_, eigenvalues, (float *)U, &n_, (float *)VT, &n_, &wkopt, &lwork, &info);
+    lwork = (__LAPACK_int)wkopt;
+    float *work = malloc(lwork * sizeof(float));
+
+    // Perform SVD
+    sgesvd_("A", "A", &n_, &n_, (float *)covarianceCopy, &n_, eigenvalues, (float *)U, &n_, (float *)VT, &n_, work, &lwork, &info);
+
+    // Free workspace
+    free(work);
+
+    // Check if the SVD converged
+    if (info > 0) {
+        NSLog(@"The algorithm computing SVD failed to converge.");
+        return @{};
+    }
+
+    // Calculate the determinant of the original 3x3 covariance matrix
+    float determinant = covarianceMatrix[0][0] * (covarianceMatrix[1][1] * covarianceMatrix[2][2] - covarianceMatrix[1][2] * covarianceMatrix[2][1])
+                      - covarianceMatrix[0][1] * (covarianceMatrix[1][0] * covarianceMatrix[2][2] - covarianceMatrix[1][2] * covarianceMatrix[2][0])
+                      + covarianceMatrix[0][2] * (covarianceMatrix[1][0] * covarianceMatrix[2][1] - covarianceMatrix[1][1] * covarianceMatrix[2][0]);
+
+    // Return the eigenvalues and eigenvectors
+    NSDictionary *result = @{
+        @"eigenvalues": @[@(eigenvalues[0]), @(eigenvalues[1]), @(eigenvalues[2])],
+        @"eigenvectors": @[
+            @[@(U[0][0]), @(U[1][0]), @(U[2][0])],
+            @[@(U[0][1]), @(U[1][1]), @(U[2][1])],
+            @[@(U[0][2]), @(U[1][2]), @(U[2][2])]
+        ],
+        @"determinant": @(determinant)
+    };
+
+    return result;
+}
+
++ (float)getVarianceAlongDirection:(float[3])direction covarianceMatrix:(float[3][3])covarianceMatrix {
+    // Calculate the variance in the direction of the given unit vector
+    // Variance is computed as v^T * covarianceMatrix * v
+    float variance = 0.0f;
+    for (int i = 0; i < 3; i++) {
+        float rowDotProduct = 0.0f;
+        for (int j = 0; j < 3; j++) {
+            rowDotProduct += covarianceMatrix[i][j] * direction[j];
+        }
+        variance += direction[i] * rowDotProduct;
+    }
+
+    return variance;
 }
 
 @end

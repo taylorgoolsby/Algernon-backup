@@ -138,6 +138,11 @@
       NSLog(@"Eigenvalues: %@", ellipsoid[@"eigenvalues"]);
       NSLog(@"Eigenvectors: %@", ellipsoid[@"eigenvectors"]);
     }
+    
+    NSLog(@"Covariances:");
+    for (NSDictionary *ellipsoid in result[@"bestEllipsoids"]) {
+      NSLog(@"Covariance: %@", ellipsoid[@"covariance"]);
+    }
 
     // Free allocated memory
     free(data);

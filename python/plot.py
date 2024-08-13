@@ -242,7 +242,67 @@ def parse_ellipsoids(ellipsoids_str):
 
 ellipsoids = parse_ellipsoids(ellipsoids_str)
 
-print("\nEllipsoids: \n", ellipsoids)
+def check_orthogonality_and_unit_length(eigenvectors):
+    orthogonal = True
+    unit_length = True
+
+    for i in range(3):
+        # Check if the eigenvector is unit length
+        norm = np.linalg.norm(eigenvectors[:, i])
+        print(f"Norm of eigenvector {i+1}: {norm:.6f}")
+        if not np.isclose(norm, 1, atol=1e-6):
+            unit_length = False
+
+        # Check orthogonality with other eigenvectors
+        for j in range(i + 1, 3):
+            dot_product = np.dot(eigenvectors[:, i], eigenvectors[:, j])
+            print(f"Dot product of eigenvector {i+1} and eigenvector {j+1}: {dot_product:.6f}")
+            if not np.isclose(dot_product, 0, atol=1e-6):
+                orthogonal = False
+
+    return orthogonal, unit_length
+
+def construct_covariance_matrix(eigvals, eigvecs):
+    # Construct the diagonal matrix from the eigenvalues
+    Lambda = np.diag(eigvals)
+    # Construct the covariance matrix
+    covariance_matrix = eigvecs @ Lambda @ eigvecs.T
+    return covariance_matrix
+
+def compute_covariance_from_data(points):
+    # Center the data by subtracting the mean
+    mean = np.mean(points, axis=0)
+    centered_data = points - mean
+
+    # Compute the covariance matrix as data * dataTranspose
+    covariance_matrix = (centered_data.T @ centered_data) / (centered_data.shape[0] - 1)
+#     covariance_matrix = (centered_data.T @ centered_data)
+
+    return covariance_matrix
+
+for i, ellipsoid in enumerate(ellipsoids):
+    print(f"\nEllipsoid {i+1}:")
+    orthogonal, unit_length = check_orthogonality_and_unit_length(ellipsoid["eigenvectors"])
+    if orthogonal:
+        print("Axes are orthogonal.")
+    else:
+        print("Axes are not orthogonal.")
+
+    if unit_length:
+        print("Eigenvectors are of unit length.")
+    else:
+        print("Eigenvectors are not of unit length.")
+
+    # Construct and print the covariance matrix
+    covariance_matrix = construct_covariance_matrix(ellipsoid["eigenvalues"], ellipsoid["eigenvectors"])
+    print(f"Covariance Matrix:\n{covariance_matrix}\n")
+
+    # Filter data points belonging to the current ellipsoid's label
+    ellipsoid_data = data[labels == i]
+
+    # Compute and print the covariance matrix from the data points
+    data_covariance_matrix = compute_covariance_from_data(ellipsoid_data)
+    print(f"Covariance Matrix (from data points):\n{data_covariance_matrix}\n")
 
 # Plotting the reduced data with labels and ellipsoids
 fig = plt.figure(figsize=(8, 6))
