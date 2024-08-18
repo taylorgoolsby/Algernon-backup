@@ -113,7 +113,7 @@ const MarkdownText = (props: any): any => {
           )
         }
 
-        if (children.type === Code) {
+        if (children?.type === Code) {
           return <Code {...props} children={children.props.children} />
         }
 

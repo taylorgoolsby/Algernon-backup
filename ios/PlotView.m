@@ -36,6 +36,28 @@ RCT_EXPORT_MODULE()
 @property (nonatomic, assign) GLuint shaderProgram1;
 @property (nonatomic, assign) GLuint shaderProgram2;
 
+@property (nonatomic, strong) CADisplayLink *displayLink;
+
+@property (nonatomic, assign) BOOL isCleaned;
+@property (nonatomic, assign) BOOL isTouchActive;
+@property (nonatomic, assign) BOOL isPIDRunning;
+
+// PID coefficients
+@property (nonatomic, assign) float kpPitch, kiPitch, kdPitch;
+@property (nonatomic, assign) float kpYaw, kiYaw, kdYaw;
+@property (nonatomic, assign) float kpRoll, kiRoll, kdRoll;
+
+// PID state variables
+@property (nonatomic, assign) float pitchIntegral, yawIntegral, rollIntegral;
+@property (nonatomic, assign) float pitchDerivative, yawDerivative, rollDerivative;
+@property (nonatomic, assign) float previousPitchError, previousYawError, previousRollError;
+
+// Rotation velocities
+@property (nonatomic, assign) float rotationPitchVelocity, rotationYawVelocity, rotationRollVelocity;
+
+// Time tracking
+@property (nonatomic, assign) CFTimeInterval previousTime;
+
 @end
 
 @implementation PlotView
@@ -46,8 +68,49 @@ RCT_EXPORT_MODULE()
         [self setupGL];
         [self loadClusteringDataInBackground];
         self.rotationMatrix = GLKMatrix4Identity; // Initialize rotation matrix
+        
+        // Initialize PID coefficients
+        float scale = 1.0f;
+        self.kpPitch = 0.0f * scale;
+        self.kiPitch = 0.1f * scale;
+        self.kdPitch = 0.001f * scale;
+        self.kpYaw = 0.0f * scale;
+        self.kiYaw = 0.1f * scale;
+        self.kdYaw = 0.001f * scale;
+        self.kpRoll = 0.0f * scale;
+        self.kiRoll = 0.1f * scale;
+        self.kdRoll = 0.001f * scale;
+        
+        // Initialize PID state variables
+        [self resetPIDVariables];
+
+        // Initialize rotation velocities
+        self.rotationPitchVelocity = 0.0f;
+        self.rotationYawVelocity = 0.0f;
+        self.rotationRollVelocity = 0.0f;
+        
+        self.isCleaned = NO;
+        self.isTouchActive = NO; // Touch is not active initially
+        self.isPIDRunning = NO;  // PID loop is not running initially
+        self.previousTime = CACurrentMediaTime(); // Initialize time tracking
+        
+        self.displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(handleDisplayLink:)];
+        [self.displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
     }
     return self;
+}
+
+- (void)resetPIDVariables {
+    self.pitchIntegral = 0.0f; self.yawIntegral = 0.0f; self.rollIntegral = 0.0f;
+    self.pitchDerivative = 0.0f; self.yawDerivative = 0.0f; self.rollDerivative = 0.0f;
+    self.previousPitchError = 0.0f; self.previousYawError = 0.0f; self.previousRollError = 0.0f;
+}
+
+- (void)handleDisplayLink:(CADisplayLink *)displayLink {
+    if (self.isPIDRunning) {
+//        [self updateRotationMatrix];
+        [self setNeedsDisplay]; // Request a redraw
+    }
 }
 
 - (void)loadClusteringDataInBackground {
@@ -284,7 +347,7 @@ RCT_EXPORT_MODULE()
     "uniform mat4 uModelViewProjectionMatrix;\n"
     "void main() {\n"
     "   gl_Position = uModelViewProjectionMatrix * vec4(aPos, 1.0);\n"
-    "   gl_PointSize = 10.0;\n" // Set the point size here
+    "   gl_PointSize = 2.0;\n" // Set the point size here
     "   vertexColor = aColor;\n"
     "}\n";
     
@@ -317,10 +380,12 @@ RCT_EXPORT_MODULE()
 }
 
 - (void)drawRect:(CGRect)rect {
+    [self updateRotationMatrix];
+    
     CGFloat scale = [UIScreen mainScreen].scale;
     glViewport(0, 0, self.bounds.size.width * scale, self.bounds.size.height * scale);
     
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);  // Set the clear color to white
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);  // Set the clear color to white
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -486,13 +551,13 @@ RCT_EXPORT_MODULE()
                 break;
             case 1:
                 colors[i * 3 + 0] = 0.0f;
-                colors[i * 3 + 1] = 1.0f; // Green
-                colors[i * 3 + 2] = 0.0f;
+                colors[i * 3 + 1] = 0.0f; // Green
+                colors[i * 3 + 2] = 1.0f;
                 break;
             case 2:
                 colors[i * 3 + 0] = 0.0f;
-                colors[i * 3 + 1] = 0.0f;
-                colors[i * 3 + 2] = 1.0f; // Blue
+                colors[i * 3 + 1] = 1.0f;
+                colors[i * 3 + 2] = 0.0f; // Blue
                 break;
             default:
                 colors[i * 3 + 0] = 0.0f;
@@ -764,6 +829,10 @@ RCT_EXPORT_MODULE()
         float greatestVariance = fmax(fmax([eigenvalues[0] floatValue], [eigenvalues[1] floatValue]), [eigenvalues[2] floatValue]);
         float currentZVariance = [ClusteringAndEllipsoids getVarianceAlongDirection:cameraForwardFloat covarianceMatrix:covariance3x3];
         float ratio = sqrtf(currentZVariance) / sqrtf(greatestVariance);
+        float determinant3x3 = [ellipsoid[@"determinant"] floatValue];
+        // Volume, in n-dimensions, scales with the sqrt(det(cov)).
+        float area = sqrtf(determinant3x3);
+        ratio = ratio * area;
         ratio = 0.7f * ratio + 0.3f;
         
 //        NSLog(@"greatestVariance: %f", sqrtf(greatestVariance));
@@ -905,11 +974,11 @@ RCT_EXPORT_MODULE()
         // Calculate the angle between the semimajor and semiminor axes
         float angle = atan2f(semiminorAxis.y, semiminorAxis.x) - atan2f(semimajorAxis.y, semimajorAxis.x);
         
-        float sigmaMajor = length1;
-        float sigmaMinor = length2;
-        
-        float cosTheta = cosf(angle);
-        float sinTheta = sinf(angle);
+//        float sigmaMajor = length1;
+//        float sigmaMinor = length2;
+//        
+//        float cosTheta = cosf(angle);
+//        float sinTheta = sinf(angle);
         
         float covarianceMatrix[4] = {
             sigmaXX,
@@ -930,12 +999,12 @@ RCT_EXPORT_MODULE()
         };
         
         // Set up the amplitude of the Gaussian (this controls the peak value at the center)
-        GLfloat amplitude = sqrtf([ellipsoid[@"determinant"] floatValue] / [decomposition2x2[@"determinant"] floatValue]); // You can adjust this value based on your needs
+//        GLfloat amplitude = sqrtf([ellipsoid[@"determinant"] floatValue] / [decomposition2x2[@"determinant"] floatValue]); // You can adjust this value based on your needs
 //        NSLog(@"amplitude: %f", amplitude);
         
         
-        GLuint amplitudeLocation = glGetUniformLocation(self.shaderProgram1, "u_amplitude");
-        glUniform1f(amplitudeLocation, amplitude);
+//        GLuint amplitudeLocation = glGetUniformLocation(self.shaderProgram1, "u_amplitude");
+//        glUniform1f(amplitudeLocation, amplitude);
         
         // Set up the color of the Gaussian (this controls the color of the splat)
         GLfloat color[3] = {0, 0, 0};
@@ -946,12 +1015,12 @@ RCT_EXPORT_MODULE()
         }
         
         // Pass the Gaussian mean to the shader
-        GLuint meanLocation = glGetUniformLocation(self.shaderProgram1, "u_center");
-        glUniform2f(meanLocation, billboardCenter.x, billboardCenter.y);
+//        GLuint meanLocation = glGetUniformLocation(self.shaderProgram1, "u_center");
+//        glUniform2f(meanLocation, billboardCenter.x, billboardCenter.y);
         
         // Pass the inverse covariance matrix to the shader
-        GLuint covInvLocation = glGetUniformLocation(self.shaderProgram1, "u_covInv");
-        glUniformMatrix2fv(covInvLocation, 1, GL_FALSE, inverseCovarianceMatrix);
+//        GLuint covInvLocation = glGetUniformLocation(self.shaderProgram1, "u_covInv");
+//        glUniformMatrix2fv(covInvLocation, 1, GL_FALSE, inverseCovarianceMatrix);
         
         GLfloat billboardTriangleVertices[] = {
             // First triangle
@@ -1076,24 +1145,6 @@ RCT_EXPORT_MODULE()
     glDeleteBuffers(1, &axesVBO);
 }
 
-- (void)dealloc {
-    ClusteringAndEllipsoids *clustering = [[ClusteringAndEllipsoids alloc] init];
-    [clustering freeClusteringData:self.clusteringResults];
-
-    if (_vertexArray) {
-        glDeleteVertexArrays(1, &_vertexArray);
-    }
-    if (_vertexBuffer) {
-        glDeleteBuffers(1, &_vertexBuffer);
-    }
-    if (self.shaderProgram1) {
-        glDeleteProgram(self.shaderProgram1);
-    }
-    if (self.shaderProgram2) {
-        glDeleteProgram(self.shaderProgram2);
-    }
-}
-
 - (void)checkShaderCompilation:(GLuint)shader {
     GLint success;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
@@ -1117,6 +1168,15 @@ RCT_EXPORT_MODULE()
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
     self.lastTouchLocation = [touch locationInView:self];
+    self.isTouchActive = YES; // Disable PID loops
+    self.isPIDRunning = NO;   // Stop the PID loop
+    
+    // Reset all variables
+    self.rotationPitchVelocity = 0.0f;
+    self.rotationYawVelocity = 0.0f;
+    self.rotationRollVelocity = 0.0f;
+    [self resetPIDVariables];
+    self.previousTime = CACurrentMediaTime(); // Reset time tracking
 }
 
 - (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
@@ -1130,10 +1190,18 @@ RCT_EXPORT_MODULE()
     // Swap the roles of X and Y for the rotation
     float angleX = GLKMathDegreesToRadians(dx / 2.0f);
     float angleY = GLKMathDegreesToRadians(dy / 2.0f);
+    
+    // Convert touch deltas to rotation velocities
+    self.rotationPitchVelocity = angleY; // Y axis movement affects X rotation
+    self.rotationYawVelocity = angleX;   // X axis movement affects Y rotation
+    self.rotationRollVelocity = 0.0f; // Assuming no roll control with touch
 
     // Create the rotation matrices for the Y and X axes
-    GLKMatrix4 rotationX = GLKMatrix4MakeRotation(angleY, 1.0f, 0.0f, 0.0f); // Y axis movement affects X rotation
-    GLKMatrix4 rotationY = GLKMatrix4MakeRotation(angleX, 0.0f, 1.0f, 0.0f); // X axis movement affects Y rotation
+    GLKMatrix4 rotationX = GLKMatrix4MakeRotation(self.rotationPitchVelocity, 1.0f, 0.0f, 0.0f);
+    GLKMatrix4 rotationY = GLKMatrix4MakeRotation(self.rotationYawVelocity, 0.0f, 1.0f, 0.0f);
+    GLKMatrix4 rotationZ = GLKMatrix4MakeRotation(self.rotationRollVelocity, 0.0f, 0.0f, 1.0f);
+//    GLKMatrix4 rotationX = GLKMatrix4MakeRotation(angleY, 1.0f, 0.0f, 0.0f); // Y axis movement affects X rotation
+//    GLKMatrix4 rotationY = GLKMatrix4MakeRotation(angleX, 0.0f, 1.0f, 0.0f); // X axis movement affects Y rotation
 
     // To maintain Y-up, apply the rotationY first, followed by rotationX
     self.rotationMatrix = GLKMatrix4Multiply(GLKMatrix4Multiply(rotationX, self.rotationMatrix), rotationY);
@@ -1147,6 +1215,158 @@ RCT_EXPORT_MODULE()
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     self.lastTouchLocation = CGPointZero;
+    [self resetPIDVariables];
+    self.isPIDRunning = YES;
+    self.previousTime = CACurrentMediaTime(); // Reset time tracking
+    self.isTouchActive = NO;
+}
+
+- (void)updateRotationMatrix {
+    NSLog(@"updateRotationMatrix");
+    
+    CFTimeInterval currentTime = CACurrentMediaTime();
+    float deltaTime = (float)(currentTime - self.previousTime);
+    self.previousTime = currentTime;
+    
+    if (deltaTime < 0.5f / 60.0f) {
+        return;
+    }
+
+    if (self.isTouchActive) {
+        float currentPitch, currentYaw, currentRoll;
+        GLKVector3 rotationAngles = [self extractEulerAnglesFromMatrix:self.rotationMatrix];
+        currentPitch = rotationAngles.x;
+        currentYaw = rotationAngles.y;
+        currentRoll = rotationAngles.z;
+//        NSLog(@"currentPitch %f", currentPitch);
+//        NSLog(@"currentYaw %f", currentYaw);
+        return;
+    }
+    
+    if (self.isPIDRunning) {
+        // Assuming you have target rotation angles (e.g., desiredPitch, desiredYaw, desiredRoll) you want to maintain
+        float desiredPitch = 0;
+        float desiredYaw = 0;
+        float desiredRoll = 0.0f;
+
+        // Extract current Euler angles from the rotation matrix
+        float currentPitch, currentYaw, currentRoll;
+        GLKVector3 rotationAngles = [self extractEulerAnglesFromMatrix:self.rotationMatrix];
+        currentPitch = rotationAngles.x;
+        currentYaw = rotationAngles.y;
+        currentRoll = rotationAngles.z;
+
+        // Calculate the error in rotational position
+        float pitchError = -(desiredPitch - currentPitch);
+        float yawError = -(desiredYaw - currentYaw);
+        float rollError = desiredRoll - currentRoll;
+        
+        NSLog(@"currentPitch %f", currentPitch);
+        NSLog(@"currentYaw %f", currentYaw);
+//        NSLog(@"pitchError %f", pitchError);
+//        NSLog(@"yawError %f", yawError);
+//        NSLog(@"previousPitchError %f", _previousPitchError);
+//        NSLog(@"_pitchIntegral %f", _pitchIntegral);
+//        NSLog(@"_pitchDerivative %f", _pitchDerivative);
+        NSLog(@"deltaTime %f", deltaTime);
+        
+
+        // Use the PID controller to calculate the adjustments needed
+        float pitchAdjustment = [self calculatePIDForAxisWithKp:self.kpPitch Ki:self.kiPitch Kd:self.kdPitch integral:&_pitchIntegral derivative:&_pitchDerivative previousError:&_previousPitchError error:pitchError deltaTime:deltaTime];
+        float yawAdjustment = [self calculatePIDForAxisWithKp:self.kpYaw Ki:self.kiYaw Kd:self.kdYaw integral:&_yawIntegral derivative:&_yawDerivative previousError:&_previousYawError error:yawError deltaTime:deltaTime];
+//        float rollAdjustment = [self calculatePIDForAxisWithKp:self.kpRoll Ki:self.kiRoll Kd:self.kdRoll integral:&_rollIntegral derivative:&_rollDerivative previousError:&_previousRollError error:rollError deltaTime:deltaTime];
+        
+        
+//        NSLog(@"pitchAdjustment %f", pitchAdjustment);
+        
+        // Apply the PID adjustments to the rotation matrix
+        GLKMatrix4 rotationX = GLKMatrix4MakeRotation(pitchAdjustment, 1.0f, 0.0f, 0.0f);
+        GLKMatrix4 rotationY = GLKMatrix4MakeRotation(yawAdjustment, 0.0f, 1.0f, 0.0f);
+//        GLKMatrix4 rotationZ = GLKMatrix4MakeRotation(rollAdjustment, 0.0f, 0.0f, 1.0f);
+        self.rotationMatrix = GLKMatrix4Multiply(GLKMatrix4Multiply(rotationX, self.rotationMatrix), rotationY);
+    }
+
+    // Apply the rotation velocities to the rotation matrix
+    GLKMatrix4 rotationX = GLKMatrix4MakeRotation(self.rotationPitchVelocity, 1.0f, 0.0f, 0.0f);
+    GLKMatrix4 rotationY = GLKMatrix4MakeRotation(self.rotationYawVelocity, 0.0f, 1.0f, 0.0f);
+    GLKMatrix4 rotationZ = GLKMatrix4MakeRotation(self.rotationRollVelocity, 0.0f, 0.0f, 1.0f);
+    self.rotationMatrix = GLKMatrix4Multiply(GLKMatrix4Multiply(rotationX, self.rotationMatrix), rotationY);
+    
+    // Decay the rotation velocities
+    self.rotationPitchVelocity *= 0.95f;
+    self.rotationYawVelocity *= 0.95f;
+    self.rotationRollVelocity *= 0.95f;
+}
+
+- (GLKVector3)extractEulerAnglesFromMatrix:(GLKMatrix4)matrix {
+    float pitch, yaw, roll;
+
+    // Calculate yaw (rotation around Y-axis)
+    yaw = atan2f(matrix.m02, matrix.m22);
+
+    // Calculate pitch (rotation around X-axis)
+    pitch = atan2f(-matrix.m12, sqrtf(matrix.m02 * matrix.m02 + matrix.m22 * matrix.m22));
+
+    // Calculate roll (rotation around Z-axis)
+    roll = atan2f(matrix.m10, matrix.m11);
+
+    // Return the Euler angles
+    return GLKVector3Make(pitch, yaw, roll);
+}
+
+- (float)calculatePIDForAxisWithKp:(float)kp Ki:(float)ki Kd:(float)kd integral:(float *)integral derivative:(float *)derivative previousError:(float *)previousError error:(float)error deltaTime:(float)deltaTime {;
+    *integral += error * deltaTime;
+    *derivative = (error - *previousError) / deltaTime;
+//    NSLog(@"kp %f", kp);
+//    NSLog(@"error %f", error);
+//    NSLog(@"ki %f", ki);
+//    NSLog(@"integral %f", *integral);
+//    NSLog(@"kd %f", kd);
+//    NSLog(@"derivative %f", *derivative);
+    float output = kp * error + ki * (*integral) + kd * (*derivative);
+    *previousError = error;
+    return output;
+}
+
+- (void)cleanup {
+    if (!self.isCleaned) {
+        self.isCleaned = YES;
+        
+        ClusteringAndEllipsoids *clustering = [[ClusteringAndEllipsoids alloc] init];
+        [clustering freeClusteringData:self.clusteringResults];
+
+        if (_vertexArray) {
+            glDeleteVertexArrays(1, &_vertexArray);
+        }
+        if (_vertexBuffer) {
+            glDeleteBuffers(1, &_vertexBuffer);
+        }
+        if (self.shaderProgram1) {
+            glDeleteProgram(self.shaderProgram1);
+        }
+        if (self.shaderProgram2) {
+            glDeleteProgram(self.shaderProgram2);
+        }
+        
+        [self.displayLink invalidate];
+        self.displayLink = nil;
+        
+        self.isPIDRunning = NO; // Stop the PID loop
+        self.rotationPitchVelocity = 0.0f;
+        self.rotationYawVelocity = 0.0f;
+        self.rotationRollVelocity = 0.0f;
+        [self resetPIDVariables];
+        self.previousTime = CACurrentMediaTime(); // Reset time tracking
+    }
+}
+
+- (void)dealloc {
+    [self cleanup];
+}
+
+- (void)removeFromSuperview {
+    [self cleanup];
+    [super removeFromSuperview];
 }
 
 @end
