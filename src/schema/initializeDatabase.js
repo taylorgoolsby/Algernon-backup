@@ -50,6 +50,7 @@ async function initData() {
     chatStore.windowId,
     MessageRole.ASSISTANT,
     'Hey there! Share your thoughts, and I’ll help you uncover the hidden patterns within.',
+    null,
     true,
   )
 

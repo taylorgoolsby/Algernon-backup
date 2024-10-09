@@ -10,6 +10,7 @@ import CompletionInterface from "../schema/Completion/CompletionInterface.js";
 import { CompletionType } from "../schema/Completion/CompletionSchema.mjs";
 import { NativeModules } from 'react-native';
 import normalizeModelName from "../utils/normalizeModelName.js";
+import { syncTextResponse } from "./generateTextResponse";
 
 const { NativeTokenizer } = NativeModules;
 
@@ -173,7 +174,7 @@ Output 2: "Planning a trip to Japan, visiting Tokyo and Kyoto. Unique activities
       },
     ]
 
-    const response = await InferenceRest.chatCompletion(model, context)
+    const response = await syncTextResponse(model, context)
     const nextSummary = response.choices[0]?.message?.content ?? ''
 
     await CompletionInterface.insert(CompletionType.SHORT_TERM_MEMORY, model, context, {role: 'assistant', content: nextSummary})

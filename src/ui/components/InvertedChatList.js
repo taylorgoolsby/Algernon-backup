@@ -419,7 +419,7 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
     if (messageIds.length === 1) {
       async function onSuggestionChoose(item: any) {
         try {
-          const userMessage = await MessageInterface.insert(chatStore.windowId, MessageRole.USER, item.userMessage, true);
+          const userMessage = await MessageInterface.insert(chatStore.windowId, MessageRole.USER, item.userMessage, null, true);
           console.log("userMessage", userMessage);
           chatStore.appendMessage({
             windowId: chatStore.windowId,
@@ -429,6 +429,7 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
             chatStore.windowId,
             MessageRole.ASSISTANT,
             item.assistantMessage,
+            userMessage.messageId,
             true
           )
           const emptyMessage = {...aiMessage}

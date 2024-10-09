@@ -46,26 +46,11 @@ import LongTermAnnotation from '../agent/LongTermAnnotation.js'
 import {useDebounce} from 'use-debounce'
 import MessageOptions from './components/MessageOptions.js'
 import InvertedChatList from './components/InvertedChatList.js'
-// import RNFS from 'react-native-fs';
 import { NativeModules } from 'react-native';
 import SpokeSpinner from "./components/SpokeSpinner";
 import CustomHeader from "./components/CustomHeader";
 
 const { AudioTranscription } = NativeModules;
-
-// const listFolderContents = async (folderPath) => {
-//   console.log("folderPath", folderPath);
-//   try {
-//     const files = await RNFS.readDir(folderPath); // Get the contents of the directory
-//     files.forEach(file => {
-//       console.log(file.name, file.isFile() ? 'File' : 'Directory');
-//     });
-//   } catch (err) {
-//     console.error(err.message);
-//   }
-// }
-// const folderPath = `${RNFS.MainBundlePath}`
-// listFolderContents(folderPath)
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon)
 
@@ -128,12 +113,6 @@ const ChatScreen: any = observer(({navigation}) => {
       ? !!chatStore.messages[displayedMessageIds[0]].completed
       : true)
 
-  // useEffect(() => {
-  //   chatStore.onRenderDone()
-  // }, [chatStore.dirty])
-
-  // const [micReady, setMicReady] = useState(false)
-  // const [speechReady, setSpeechReady] = useState(false)
   async function checkAndRequestAudio(): Promise<boolean> {
     let micCheck = await check(PERMISSIONS.IOS.MICROPHONE)
     console.log('micCheck', micCheck)
@@ -141,11 +120,6 @@ const ChatScreen: any = observer(({navigation}) => {
       micCheck = await request(PERMISSIONS.IOS.MICROPHONE)
       console.log('micCheck', micCheck)
     }
-
-    // let speechCheck = await check(PERMISSIONS.IOS.SPEECH_RECOGNITION)
-    // if (speechCheck !== RESULTS.GRANTED) {
-    //   speechCheck = await request(PERMISSIONS.IOS.SPEECH_RECOGNITION)
-    // }
 
     if (micCheck === RESULTS.BLOCKED) {
       modalStore.cta(
@@ -176,18 +150,6 @@ const ChatScreen: any = observer(({navigation}) => {
   }, [])
 
   const startSpeechToText = async () => {
-    // This function is called whenever the user presses the mic button,
-    // which is always displayed when input is empty.
-
-    // If permissions have not been granted, then this function will request
-    // them and start recording once they have been accepted.
-
-    // It will always ask for permissions, even if they have been rejected in
-    // the past.
-
-    // If the user rejects these permissions, then this function will exit
-    // early so no recording is started.
-
     const permissionsGranted = await checkAndRequestAudio()
 
     if (permissionsGranted && voiceReady) {
@@ -195,7 +157,6 @@ const ChatScreen: any = observer(({navigation}) => {
       AudioTranscription.onData((transcription) => {
         setIsTranscribing(false)
 
-        // Remove instances of [BLANK_AUDIO]
         const cleanTranscription = transcription.replace(/\[BLANK_AUDIO\]/g, '');
         setInput(cleanTranscription)
       })
@@ -230,39 +191,24 @@ const ChatScreen: any = observer(({navigation}) => {
       )
     } else {
       if (!canPost) return
-      ChatIteration.iterate(
-        chatStore.windowId,
-        preferencesStore.selectedModel,
-        input.trim(),
-        output => {
-          chatStore.appendMessage(output)
-        },
-        output => {
-          chatStore.updateMessage(output)
-        },
-        error => {
-          console.error(error)
-        },
-      )
+      chatStore.submitMessage(input)
       setInput('')
     }
 
     inputRef.current?.blur()
   }
 
-  // Ref for the TextInput to call focus
   const inputRef = useRef(null)
   const setInputRef = (ref: any) => {
     inputRef.current = ref
     chatStore.inputRef = ref
   }
   const focusInput = () => {
-    // $FlowFixMe
     inputRef.current.focus()
   }
 
   const [_headerHeight, setHeaderHeight] = useState(0)
-  const [headerHeight] = useDebounce(_headerHeight, 0) // for some reason layout on safe area changes over time on initial mount.
+  const [headerHeight] = useDebounce(_headerHeight, 0)
   const onLayoutHeader = (event: any) => {
     const {height} = event.nativeEvent.layout
     setHeaderHeight(height)
@@ -288,37 +234,42 @@ const ChatScreen: any = observer(({navigation}) => {
 
   const clearColor = useRef(new Animated.Value(0)).current
   useEffect(() => {
-    if (searchMode || !!input) {
-      Animated.timing(clearColor, {
-        toValue: 1,
-        duration: 120,
-        useNativeDriver: false,
-      }).start()
-    } else {
-      Animated.timing(clearColor, {
-        toValue: 0,
-        duration: 120,
-        useNativeDriver: false,
-      }).start()
-    }
+    Animated.timing(clearColor, {
+      toValue: searchMode || !!input ? 1 : 0,
+      duration: 120,
+      useNativeDriver: false,
+    }).start()
   }, [searchMode, input])
 
   const submitColor = useRef(new Animated.Value(0)).current
   useEffect(() => {
-    if (canPost || isRecording || (searchMode && searchInputFocused)) {
-      Animated.timing(submitColor, {
-        toValue: 1,
-        duration: 120,
-        useNativeDriver: false,
-      }).start()
-    } else {
-      Animated.timing(submitColor, {
-        toValue: 0,
-        duration: 120,
-        useNativeDriver: false,
-      }).start()
-    }
+    Animated.timing(submitColor, {
+      toValue: canPost || isRecording || (searchMode && searchInputFocused) ? 1 : 0,
+      duration: 120,
+      useNativeDriver: false,
+    }).start()
   }, [canPost, isRecording, searchMode, searchInputFocused])
+
+  const getClearIconName = () => {
+    if (!!input && !searchMode) return 'close-circle';
+    return 'search-circle';
+  };
+
+  const getClearIconSize = () => {
+    if (!!input && !searchMode) return 28;
+    return 30;
+  };
+
+  const getSubmitIconName = () => {
+    if ((input.trim() && !isRecording) || searchMode) return 'arrow-up-circle';
+    if (isRecording) return 'stop-circle';
+    return 'mic';
+  };
+
+  const getSubmitIconSize = () => {
+    if (!(input.trim() && !isRecording) && !isRecording) return 24;
+    return 28;
+  };
 
   return (
     <View style={styles.container}>
@@ -336,20 +287,6 @@ const ChatScreen: any = observer(({navigation}) => {
           safeAreaFooterHeight={safeAreaFooterHeight}
         />
       ) : null}
-      {/*{displayedMessageIds.length > 0 && headerHeight && footerHeight ? (*/}
-      {/*  <ListSlider*/}
-      {/*    searchMode={searchMode}*/}
-      {/*    messageIds={displayedMessageIds}*/}
-      {/*    searchResults={searchResults}*/}
-      {/*    headerHeight={headerHeight}*/}
-      {/*    footerHeight={footerHeight}*/}
-      {/*    safeAreaFooterHeight={safeAreaFooterHeight}*/}
-      {/*    onEmptyAreaPress={() => {*/}
-      {/*      chatStore.closeAllOptions()*/}
-      {/*      inputRef.current?.blur()*/}
-      {/*    }}*/}
-      {/*  />*/}
-      {/*) : null}*/}
 
       <TouchableWithoutFeedback
         onPress={() => {
@@ -384,7 +321,6 @@ const ChatScreen: any = observer(({navigation}) => {
         <SafeAreaView>
           <TouchableOpacity
             style={{
-              // paddingLeft: 22,
               paddingLeft: leftMargin + 17,
               paddingBottom: 12,
               paddingRight: 30,
@@ -392,7 +328,7 @@ const ChatScreen: any = observer(({navigation}) => {
             onPress={() => {
               navigation.navigate('Settings')
               inputRef.current?.blur()
-            }} //
+            }}
           >
             <View
               style={{
@@ -408,7 +344,6 @@ const ChatScreen: any = observer(({navigation}) => {
       <Modal
         animationType="fade"
         transparent={true}
-        // presentationStyle={"formSheet"}
         visible={isExpanded}
         onRequestClose={() => {
           setIsExpanded(false)
@@ -446,7 +381,7 @@ const ChatScreen: any = observer(({navigation}) => {
         <KeyboardAvoidingView
           style={[styles.footer, shadow]}
           behavior={Platform.OS === 'ios' ? 'position' : null}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} //
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
           <BlurView
             style={styles.footerBlur}
@@ -457,10 +392,7 @@ const ChatScreen: any = observer(({navigation}) => {
               <TouchableWithoutFeedback onPress={focusInput}>
                 <View style={styles.inputBar} onLayout={onLayoutFooter}>
                   <TouchableOpacity
-                    style={[
-                      styles.clearInputButton,
-
-                    ]}
+                    style={styles.clearInputButton}
                     onPress={() => {
                       if (searchMode) {
                         exitSearchMode()
@@ -471,12 +403,8 @@ const ChatScreen: any = observer(({navigation}) => {
                       }
                     }}>
                     <AnimatedIcon
-                      name={
-                        !!input && !searchMode
-                          ? 'close-circle'
-                          : 'search-circle'
-                      }
-                      size={!!input && !searchMode ? 28 : 30}
+                      name={getClearIconName()}
+                      size={getClearIconSize()}
                       style={{
                         marginLeft: !!input && !searchMode ? 0 : -1,
                         marginRight: !!input && !searchMode ? 0 : -1
@@ -490,7 +418,6 @@ const ChatScreen: any = observer(({navigation}) => {
                       })}
                     />
                   </TouchableOpacity>
-                  {/*$FlowFixMe*/}
                   <TextInput
                     ref={setInputRef}
                     style={styles.input}
@@ -510,25 +437,15 @@ const ChatScreen: any = observer(({navigation}) => {
                       (input.trim() && !isRecording) || searchMode
                         ? submit
                         : isRecording
-                        ? stopSpeechToText
-                        : startSpeechToText
+                          ? stopSpeechToText
+                          : startSpeechToText
                     }
                     disabled={!!input.trim() && !isRecording && !canPost}>
                     {isTranscribing ? <SpokeSpinner/> : (
                       <AnimatedIcon
                         style={{marginRight: !(input.trim() && !isRecording) && !isRecording ? 2 : 0}}
-                        name={
-                          (input.trim() && !isRecording) || searchMode
-                            ? 'arrow-up-circle'
-                            : isRecording
-                              ? 'stop-circle'
-                              : 'mic'
-                        }
-                        size={
-                          !(input.trim() && !isRecording) && !isRecording
-                            ? 24
-                            : 28
-                        }
+                        name={getSubmitIconName()}
+                        size={getSubmitIconSize()}
                         color={submitColor.interpolate({
                           inputRange: [0, 1],
                           outputRange: [footerInactive, footerActive],
@@ -536,20 +453,6 @@ const ChatScreen: any = observer(({navigation}) => {
                       />
                     )}
                   </TouchableOpacity>
-                  {/*{isRecording ? (*/}
-                  {/*  <TouchableOpacity*/}
-                  {/*    style={styles.recordingContainer}*/}
-                  {/*    onPress={stopSpeechToText}>*/}
-                  {/*    <Icon*/}
-                  {/*      name={'stop-circle-outline'}*/}
-                  {/*      size={28}*/}
-                  {/*      color={'white'}*/}
-                  {/*    />*/}
-                  {/*    <Text style={styles.recordingText}>*/}
-                  {/*      {' Tap to stop recording.'}*/}
-                  {/*    </Text>*/}
-                  {/*  </TouchableOpacity>*/}
-                  {/*) : null}*/}
                 </View>
               </TouchableWithoutFeedback>
             </SafeAreaView>
@@ -609,30 +512,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: -1,
-    // backgroundColor: '#0105AA',
     backgroundColor: darkMode ? 'black' : Colors.chatBg,
-  },
-  backgroundOrb: {
-    position: 'absolute',
-    top: 100,
-    bottom: 0,
-    left: 100,
-    right: 0,
-    height: 200,
-    width: 200,
-    borderRadius: 100,
-    // backgroundColor: '#010599',
-    backgroundColor: '#009',
-  },
-  backgroundBlurView: {
-    flex: 1,
-  },
-  header: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 500,
   },
   footer: {
     position: 'absolute',
@@ -645,37 +525,8 @@ const styles = StyleSheet.create({
     flex: 1,
     opacity: 1,
   },
-  safeArea: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
   inputSafeArea: {
     flexDirection: 'column',
-  },
-  settingsButton: {},
-  settingsButtonText: {
-    fontSize: 16,
-    color: Colors.settingsButtonText,
-  },
-  settingsModal: {
-    position: 'absolute',
-    top: 50 + 10, // Adjust based on your layout
-    left: 0,
-    right: 0,
-  },
-  settingsContainer: {
-    // margin: 50 + 10,
-    marginLeft: 10,
-    marginRight: 10,
-    borderRadius: 24,
-  },
-  settingsList: {
-    maxHeight: 300,
-  },
-  chatContainer: {
-    // flex: 1,
-    // paddingLeft: 20,
-    // paddingRight: 20,
   },
   inputBar: {
     flexDirection: 'row',
@@ -717,16 +568,6 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  recordingContainer: {
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.blue,
-    flexDirection: 'row',
-  },
-  recordingText: {
-    color: 'white', // Adjust as needed
   },
 })
 

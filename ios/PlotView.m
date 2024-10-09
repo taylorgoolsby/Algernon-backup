@@ -347,7 +347,7 @@ RCT_EXPORT_MODULE()
     "uniform mat4 uModelViewProjectionMatrix;\n"
     "void main() {\n"
     "   gl_Position = uModelViewProjectionMatrix * vec4(aPos, 1.0);\n"
-    "   gl_PointSize = 2.0;\n" // Set the point size here
+    "   gl_PointSize = 7.0;\n" // Set the point size here
     "   vertexColor = aColor;\n"
     "}\n";
     

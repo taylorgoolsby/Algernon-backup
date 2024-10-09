@@ -6,6 +6,7 @@ import InferenceRest from '../rest/InferenceRest.js'
 import type {ModelConfig} from "../types/ModelConfig.js";
 import { NativeModules } from 'react-native';
 import MessageInterface from "../schema/Message/MessageInterface.js";
+import { syncTextResponse } from "./generateTextResponse";
 
 const { TextFeatureExtractor, FaissBridge } = NativeModules;
 
@@ -190,7 +191,7 @@ Explanation: Similar to the previous example, this input is an acknowledgement w
     let annotations: Array<string> = []
     for (let i = 0; i < 3; i++) {
       // todo: Use prompt formatting to encourage JSON output.
-      const res = await InferenceRest.chatCompletion(model, context)
+      const res = await syncTextResponse(model, context)
       const rawJSON = res.choices[0]?.message?.content ?? ''
       try {
         annotations = JSON.parse(rawJSON)
@@ -337,7 +338,7 @@ This summary should serve as a reflective, insightful, and concise synthesis of 
     // Make a completion call to get the long term summary:
     let summary = ''
     for (let i = 0; i < 3; i++) {
-      const res = await InferenceRest.chatCompletion(model, context)
+      const res = await syncTextResponse(model, context)
       summary = res.choices[0]?.message?.content ?? ''
       if (summary) {
         break

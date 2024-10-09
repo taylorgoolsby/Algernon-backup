@@ -28,9 +28,37 @@
 		8C33BC332BA418EC0023A2D9 /* TextFeatureExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C33BC322BA418EC0023A2D9 /* TextFeatureExtractor.swift */; };
 		8C33BC352BA419EA0023A2D9 /* TextFeatureExtractor.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C33BC342BA419EA0023A2D9 /* TextFeatureExtractor.m */; };
 		8C33BC392BA42DD40023A2D9 /* MiniLM-vocab.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8C33BC382BA42DD40023A2D9 /* MiniLM-vocab.txt */; };
-		8C33BC3C2BA430B60023A2D9 /* Transformers in Frameworks */ = {isa = PBXBuildFile; productRef = 8C33BC3B2BA430B60023A2D9 /* Transformers */; };
 		8C33BC3E2BA43DEC0023A2D9 /* BertTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C33BC3D2BA43DEC0023A2D9 /* BertTokenizer.swift */; };
 		8C33BC402BA563BE0023A2D9 /* all-MiniLM-L6-v2-coreml-float32.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 8C33BC3F2BA563BE0023A2D9 /* all-MiniLM-L6-v2-coreml-float32.mlpackage */; };
+		8C56F0292CB61C27005943EE /* Tokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F0252CB61C27005943EE /* Tokenizer.swift */; };
+		8C56F02A2CB61C27005943EE /* Cohere.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F0112CB61C27005943EE /* Cohere.swift */; };
+		8C56F02B2CB61C27005943EE /* Phi3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F0212CB61C27005943EE /* Phi3.swift */; };
+		8C56F02C2CB61C27005943EE /* Gemma.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F0142CB61C27005943EE /* Gemma.swift */; };
+		8C56F02D2CB61C27005943EE /* KVCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F0172CB61C27005943EE /* KVCache.swift */; };
+		8C56F02E2CB61C27005943EE /* Starcoder2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F0232CB61C27005943EE /* Starcoder2.swift */; };
+		8C56F02F2CB61C27005943EE /* LLMModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F01A2CB61C27005943EE /* LLMModel.swift */; };
+		8C56F0302CB61C27005943EE /* Lora.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F01C2CB61C27005943EE /* Lora.swift */; };
+		8C56F0312CB61C27005943EE /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F0122CB61C27005943EE /* Configuration.swift */; };
+		8C56F0322CB61C27005943EE /* Gemma2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F0152CB61C27005943EE /* Gemma2.swift */; };
+		8C56F0332CB61C27005943EE /* Llama.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F0182CB61C27005943EE /* Llama.swift */; };
+		8C56F0342CB61C27005943EE /* Phi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F0202CB61C27005943EE /* Phi.swift */; };
+		8C56F0352CB61C27005943EE /* Internlm2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F0162CB61C27005943EE /* Internlm2.swift */; };
+		8C56F0362CB61C27005943EE /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F01E2CB61C27005943EE /* Models.swift */; };
+		8C56F0372CB61C27005943EE /* Lora+Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F01D2CB61C27005943EE /* Lora+Data.swift */; };
+		8C56F0382CB61C27005943EE /* Load.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F01B2CB61C27005943EE /* Load.swift */; };
+		8C56F0392CB61C27005943EE /* SuScaledRotaryEmbedding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F0242CB61C27005943EE /* SuScaledRotaryEmbedding.swift */; };
+		8C56F03A2CB61C27005943EE /* Evaluate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F0132CB61C27005943EE /* Evaluate.swift */; };
+		8C56F03B2CB61C27005943EE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F0272CB61C27005943EE /* ContentView.swift */; };
+		8C56F03C2CB61C27005943EE /* Qwen2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F0222CB61C27005943EE /* Qwen2.swift */; };
+		8C56F03D2CB61C27005943EE /* OpenELM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C56F01F2CB61C27005943EE /* OpenELM.swift */; };
+		8C56F0402CB61E5A005943EE /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = 8C56F03F2CB61E5A005943EE /* MLX */; };
+		8C56F0422CB61E5A005943EE /* MLXFFT in Frameworks */ = {isa = PBXBuildFile; productRef = 8C56F0412CB61E5A005943EE /* MLXFFT */; };
+		8C56F0442CB61E5B005943EE /* MLXFast in Frameworks */ = {isa = PBXBuildFile; productRef = 8C56F0432CB61E5A005943EE /* MLXFast */; };
+		8C56F0462CB61E5B005943EE /* MLXLinalg in Frameworks */ = {isa = PBXBuildFile; productRef = 8C56F0452CB61E5B005943EE /* MLXLinalg */; };
+		8C56F0482CB61E5B005943EE /* MLXNN in Frameworks */ = {isa = PBXBuildFile; productRef = 8C56F0472CB61E5B005943EE /* MLXNN */; };
+		8C56F04A2CB61E5B005943EE /* MLXOptimizers in Frameworks */ = {isa = PBXBuildFile; productRef = 8C56F0492CB61E5B005943EE /* MLXOptimizers */; };
+		8C56F04C2CB61E5B005943EE /* MLXRandom in Frameworks */ = {isa = PBXBuildFile; productRef = 8C56F04B2CB61E5B005943EE /* MLXRandom */; };
+		8C65B7362CB640F6009B6C9B /* Transformers in Frameworks */ = {isa = PBXBuildFile; productRef = 8C65B7352CB640F6009B6C9B /* Transformers */; };
 		8C99CED92BACA4E600400086 /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8C99CED82BACA4E600400086 /* Ionicons.ttf */; };
 		8C9AAF892BAB279300FF60EF /* Tiktoken in Frameworks */ = {isa = PBXBuildFile; productRef = 8C9AAF882BAB279300FF60EF /* Tiktoken */; };
 		8C9AAF8D2BAB2B4100FF60EF /* NativeTokenizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C9AAF8C2BAB2B4100FF60EF /* NativeTokenizer.m */; };
@@ -40,34 +68,17 @@
 		8CA26A1A2BCFA3EA009563A5 /* Poppins-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CA26A182BCFA3EA009563A5 /* Poppins-Black.ttf */; };
 		8CA26A1B2BCFA3EA009563A5 /* Poppins-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CA26A192BCFA3EA009563A5 /* Poppins-Bold.ttf */; };
 		8CA26A1D2BCFA4BC009563A5 /* Poppins-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CA26A1C2BCFA4BC009563A5 /* Poppins-ExtraBold.ttf */; };
-		8CACCE4F2BA29DD2004643C2 /* Evaluate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE472BA29DD2004643C2 /* Evaluate.swift */; };
-		8CACCE502BA29DD2004643C2 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE482BA29DD2004643C2 /* Configuration.swift */; };
-		8CACCE512BA29DD2004643C2 /* Load.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE4A2BA29DD2004643C2 /* Load.swift */; };
-		8CACCE522BA29DD2004643C2 /* Tokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE4B2BA29DD2004643C2 /* Tokenizer.swift */; };
-		8CACCE532BA29DD2004643C2 /* LLMModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE4C2BA29DD2004643C2 /* LLMModel.swift */; };
-		8CACCE542BA29DD2004643C2 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE4D2BA29DD2004643C2 /* Models.swift */; };
-		8CACCE552BA29DD2004643C2 /* Phi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE4E2BA29DD2004643C2 /* Phi.swift */; };
-		8CACCE5A2BA2BC32004643C2 /* Llama.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE592BA2BC32004643C2 /* Llama.swift */; };
-		8CACCE5E2BA2BC50004643C2 /* Gemma.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE5B2BA2BC50004643C2 /* Gemma.swift */; };
-		8CACCE5F2BA2BC50004643C2 /* Starcoder2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE5C2BA2BC50004643C2 /* Starcoder2.swift */; };
-		8CACCE602BA2BC50004643C2 /* Qwen2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CACCE5D2BA2BC50004643C2 /* Qwen2.swift */; };
 		8CB23D822C5D6A6F0007AEB0 /* ClusteringAndEllipsoids.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CB23D812C5D6A6F0007AEB0 /* ClusteringAndEllipsoids.m */; };
 		8CB23D852C5E1ECC0007AEB0 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CB23D842C5E1ECC0007AEB0 /* Accelerate.framework */; };
 		8CC3082D2BB378F900D70C69 /* Nunito-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CC308292BB378F800D70C69 /* Nunito-VariableFont_wght.ttf */; };
-		8CEC98B62C53621200E4045F /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 8CEC98B52C53621200E4045F /* GRDB */; };
 		8CEC98B82C53623800E4045F /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEC98B72C53623800E4045F /* DatabaseManager.swift */; };
 		8CEC98BA2C53625B00E4045F /* DatabaseModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEC98B92C53625B00E4045F /* DatabaseModule.swift */; };
 		8CEC98BC2C53627A00E4045F /* DatabaseModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CEC98BB2C53627A00E4045F /* DatabaseModule.m */; };
 		8CF8599A2C62FC0200845B81 /* iris_dataset.csv in Resources */ = {isa = PBXBuildFile; fileRef = 8CF859992C62FC0200845B81 /* iris_dataset.csv */; };
 		8CF8599D2C63153600845B81 /* SGESVDExample.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF8599C2C63153600845B81 /* SGESVDExample.m */; };
 		8CF8599F2C646B7B00845B81 /* PlotView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF8599E2C646B7B00845B81 /* PlotView.m */; };
+		8CF9AEAC2CB5FC000009B193 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 8CF9AEAB2CB5FC000009B193 /* GRDB */; };
 		8CFA35FD2BA18D80009546C7 /* FaissBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CFA35FC2BA18D80009546C7 /* FaissBridge.m */; };
-		8CFA36002BA1A408009546C7 /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA35FF2BA1A408009546C7 /* MLX */; };
-		8CFA36022BA1A408009546C7 /* MLXFFT in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA36012BA1A408009546C7 /* MLXFFT */; };
-		8CFA36042BA1A408009546C7 /* MLXLinalg in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA36032BA1A408009546C7 /* MLXLinalg */; };
-		8CFA36062BA1A408009546C7 /* MLXNN in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA36052BA1A408009546C7 /* MLXNN */; };
-		8CFA36082BA1A408009546C7 /* MLXOptimizers in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA36072BA1A408009546C7 /* MLXOptimizers */; settings = {ATTRIBUTES = (Required, ); }; };
-		8CFA360A2BA1A408009546C7 /* MLXRandom in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA36092BA1A408009546C7 /* MLXRandom */; };
 		8CFA36232BA291D4009546C7 /* LLMNativeModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CFA36222BA291D4009546C7 /* LLMNativeModule.swift */; };
 		8CFA36252BA29209009546C7 /* LLMNativeModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CFA36242BA29209009546C7 /* LLMNativeModule.m */; };
 		8CFA36282BA299C9009546C7 /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFA36272BA299C9009546C7 /* AsyncAlgorithms */; };
@@ -120,6 +131,28 @@
 		8C33BC382BA42DD40023A2D9 /* MiniLM-vocab.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "MiniLM-vocab.txt"; sourceTree = "<group>"; };
 		8C33BC3D2BA43DEC0023A2D9 /* BertTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BertTokenizer.swift; sourceTree = "<group>"; };
 		8C33BC3F2BA563BE0023A2D9 /* all-MiniLM-L6-v2-coreml-float32.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = "all-MiniLM-L6-v2-coreml-float32.mlpackage"; sourceTree = "<group>"; };
+		8C56F0112CB61C27005943EE /* Cohere.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cohere.swift; sourceTree = "<group>"; };
+		8C56F0122CB61C27005943EE /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
+		8C56F0132CB61C27005943EE /* Evaluate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Evaluate.swift; sourceTree = "<group>"; };
+		8C56F0142CB61C27005943EE /* Gemma.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gemma.swift; sourceTree = "<group>"; };
+		8C56F0152CB61C27005943EE /* Gemma2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gemma2.swift; sourceTree = "<group>"; };
+		8C56F0162CB61C27005943EE /* Internlm2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Internlm2.swift; sourceTree = "<group>"; };
+		8C56F0172CB61C27005943EE /* KVCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KVCache.swift; sourceTree = "<group>"; };
+		8C56F0182CB61C27005943EE /* Llama.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Llama.swift; sourceTree = "<group>"; };
+		8C56F0192CB61C27005943EE /* LLM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LLM.h; sourceTree = "<group>"; };
+		8C56F01A2CB61C27005943EE /* LLMModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMModel.swift; sourceTree = "<group>"; };
+		8C56F01B2CB61C27005943EE /* Load.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Load.swift; sourceTree = "<group>"; };
+		8C56F01C2CB61C27005943EE /* Lora.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lora.swift; sourceTree = "<group>"; };
+		8C56F01D2CB61C27005943EE /* Lora+Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lora+Data.swift"; sourceTree = "<group>"; };
+		8C56F01E2CB61C27005943EE /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		8C56F01F2CB61C27005943EE /* OpenELM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenELM.swift; sourceTree = "<group>"; };
+		8C56F0202CB61C27005943EE /* Phi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Phi.swift; sourceTree = "<group>"; };
+		8C56F0212CB61C27005943EE /* Phi3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Phi3.swift; sourceTree = "<group>"; };
+		8C56F0222CB61C27005943EE /* Qwen2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Qwen2.swift; sourceTree = "<group>"; };
+		8C56F0232CB61C27005943EE /* Starcoder2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Starcoder2.swift; sourceTree = "<group>"; };
+		8C56F0242CB61C27005943EE /* SuScaledRotaryEmbedding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuScaledRotaryEmbedding.swift; sourceTree = "<group>"; };
+		8C56F0252CB61C27005943EE /* Tokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tokenizer.swift; sourceTree = "<group>"; };
+		8C56F0272CB61C27005943EE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		8C99CED82BACA4E600400086 /* Ionicons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Ionicons.ttf; path = "../../node_modules/react-native-vector-icons/Fonts/Ionicons.ttf"; sourceTree = "<group>"; };
 		8C9AAF8C2BAB2B4100FF60EF /* NativeTokenizer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NativeTokenizer.m; sourceTree = "<group>"; };
 		8C9AAF8E2BAB2C7300FF60EF /* NativeTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeTokenizer.swift; sourceTree = "<group>"; };
@@ -128,17 +161,6 @@
 		8CA26A182BCFA3EA009563A5 /* Poppins-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Poppins-Black.ttf"; path = "../../assets/fonts/Poppins-Black.ttf"; sourceTree = "<group>"; };
 		8CA26A192BCFA3EA009563A5 /* Poppins-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Poppins-Bold.ttf"; path = "../../assets/fonts/Poppins-Bold.ttf"; sourceTree = "<group>"; };
 		8CA26A1C2BCFA4BC009563A5 /* Poppins-ExtraBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Poppins-ExtraBold.ttf"; path = "../../assets/fonts/Poppins-ExtraBold.ttf"; sourceTree = "<group>"; };
-		8CACCE472BA29DD2004643C2 /* Evaluate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Evaluate.swift; sourceTree = "<group>"; };
-		8CACCE482BA29DD2004643C2 /* Configuration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
-		8CACCE4A2BA29DD2004643C2 /* Load.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Load.swift; sourceTree = "<group>"; };
-		8CACCE4B2BA29DD2004643C2 /* Tokenizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tokenizer.swift; sourceTree = "<group>"; };
-		8CACCE4C2BA29DD2004643C2 /* LLMModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LLMModel.swift; sourceTree = "<group>"; };
-		8CACCE4D2BA29DD2004643C2 /* Models.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
-		8CACCE4E2BA29DD2004643C2 /* Phi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Phi.swift; sourceTree = "<group>"; };
-		8CACCE592BA2BC32004643C2 /* Llama.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Llama.swift; sourceTree = "<group>"; };
-		8CACCE5B2BA2BC50004643C2 /* Gemma.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Gemma.swift; sourceTree = "<group>"; };
-		8CACCE5C2BA2BC50004643C2 /* Starcoder2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Starcoder2.swift; sourceTree = "<group>"; };
-		8CACCE5D2BA2BC50004643C2 /* Qwen2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Qwen2.swift; sourceTree = "<group>"; };
 		8CACCE612BA2C3EF004643C2 /* CobaltMobileRNDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = CobaltMobileRNDebug.entitlements; path = CobaltMobileRN/CobaltMobileRNDebug.entitlements; sourceTree = "<group>"; };
 		8CB23D812C5D6A6F0007AEB0 /* ClusteringAndEllipsoids.m */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = ClusteringAndEllipsoids.m; sourceTree = "<group>"; tabWidth = 4; };
 		8CB23D832C5D6AB70007AEB0 /* ClusteringAndEllipsoids.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ClusteringAndEllipsoids.h; sourceTree = "<group>"; };
@@ -178,23 +200,24 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8C56F0422CB61E5A005943EE /* MLXFFT in Frameworks */,
+				8C56F0402CB61E5A005943EE /* MLX in Frameworks */,
+				8C56F0482CB61E5B005943EE /* MLXNN in Frameworks */,
 				8CB23D852C5E1ECC0007AEB0 /* Accelerate.framework in Frameworks */,
 				8CFD0A222BA3E6340080EBE1 /* FAISS in Frameworks */,
+				8C56F0442CB61E5B005943EE /* MLXFast in Frameworks */,
+				8C65B7362CB640F6009B6C9B /* Transformers in Frameworks */,
+				8CF9AEAC2CB5FC000009B193 /* GRDB in Frameworks */,
+				8C56F04C2CB61E5B005943EE /* MLXRandom in Frameworks */,
 				8C022CDE2BB5CEE500CBB95A /* StoreKit.framework in Frameworks */,
 				8C11860B2C4879C6004A652D /* SwiftWhisper in Frameworks */,
-				8CEC98B62C53621200E4045F /* GRDB in Frameworks */,
-				8CFA36082BA1A408009546C7 /* MLXOptimizers in Frameworks */,
+				8C56F04A2CB61E5B005943EE /* MLXOptimizers in Frameworks */,
 				8CFD0A1D2BA3E32C0080EBE1 /* OpenMP in Frameworks */,
 				8CFD0A242BA3E6340080EBE1 /* FAISS_C in Frameworks */,
+				8C56F0462CB61E5B005943EE /* MLXLinalg in Frameworks */,
 				8CFA36282BA299C9009546C7 /* AsyncAlgorithms in Frameworks */,
-				8CFA36002BA1A408009546C7 /* MLX in Frameworks */,
-				8C33BC3C2BA430B60023A2D9 /* Transformers in Frameworks */,
 				8C9AAF892BAB279300FF60EF /* Tiktoken in Frameworks */,
-				8CFA36042BA1A408009546C7 /* MLXLinalg in Frameworks */,
 				0C80B921A6F3F58F76C31292 /* libPods-CobaltMobileRN.a in Frameworks */,
-				8CFA36062BA1A408009546C7 /* MLXNN in Frameworks */,
-				8CFA36022BA1A408009546C7 /* MLXFFT in Frameworks */,
-				8CFA360A2BA1A408009546C7 /* MLXRandom in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -221,12 +244,12 @@
 		13B07FAE1A68108700A75B9A /* CobaltMobileRN */ = {
 			isa = PBXGroup;
 			children = (
+				8C56F0282CB61C27005943EE /* LLMEval */,
 				8CF859992C62FC0200845B81 /* iris_dataset.csv */,
 				8C174FB12BACA2510085DF07 /* Fonts */,
 				8CFD0A252BA3EDF40080EBE1 /* Models */,
 				8CDF7ACA2BA3C1E700C5F5FE /* CobaltMobileRNRelease.entitlements */,
 				8CACCE612BA2C3EF004643C2 /* CobaltMobileRNDebug.entitlements */,
-				8CFA36452BA29D57009546C7 /* LLM */,
 				8CFA36172BA286B2009546C7 /* CobaltMobileRN-Bridging-Header.h */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
@@ -316,25 +339,45 @@
 				8CFAFD0E2BC86BB800AF4869 /* Figtree-VariableFont_wght.ttf */,
 				8C99CED82BACA4E600400086 /* Ionicons.ttf */,
 			);
-			path = Fonts;
-			sourceTree = "<group>";
+			name = Fonts;
+			path = /Users/taylrun/dev/Algernon/assets/fonts;
+			sourceTree = "<absolute>";
 		};
-		8CFA36452BA29D57009546C7 /* LLM */ = {
+		8C56F0262CB61C27005943EE /* LLM */ = {
 			isa = PBXGroup;
 			children = (
-				8CACCE482BA29DD2004643C2 /* Configuration.swift */,
-				8CACCE472BA29DD2004643C2 /* Evaluate.swift */,
-				8CACCE592BA2BC32004643C2 /* Llama.swift */,
-				8CACCE4C2BA29DD2004643C2 /* LLMModel.swift */,
-				8CACCE5B2BA2BC50004643C2 /* Gemma.swift */,
-				8CACCE5D2BA2BC50004643C2 /* Qwen2.swift */,
-				8CACCE5C2BA2BC50004643C2 /* Starcoder2.swift */,
-				8CACCE4A2BA29DD2004643C2 /* Load.swift */,
-				8CACCE4D2BA29DD2004643C2 /* Models.swift */,
-				8CACCE4E2BA29DD2004643C2 /* Phi.swift */,
-				8CACCE4B2BA29DD2004643C2 /* Tokenizer.swift */,
+				8C56F0112CB61C27005943EE /* Cohere.swift */,
+				8C56F0122CB61C27005943EE /* Configuration.swift */,
+				8C56F0132CB61C27005943EE /* Evaluate.swift */,
+				8C56F0142CB61C27005943EE /* Gemma.swift */,
+				8C56F0152CB61C27005943EE /* Gemma2.swift */,
+				8C56F0162CB61C27005943EE /* Internlm2.swift */,
+				8C56F0172CB61C27005943EE /* KVCache.swift */,
+				8C56F0182CB61C27005943EE /* Llama.swift */,
+				8C56F0192CB61C27005943EE /* LLM.h */,
+				8C56F01A2CB61C27005943EE /* LLMModel.swift */,
+				8C56F01B2CB61C27005943EE /* Load.swift */,
+				8C56F01C2CB61C27005943EE /* Lora.swift */,
+				8C56F01D2CB61C27005943EE /* Lora+Data.swift */,
+				8C56F01E2CB61C27005943EE /* Models.swift */,
+				8C56F01F2CB61C27005943EE /* OpenELM.swift */,
+				8C56F0202CB61C27005943EE /* Phi.swift */,
+				8C56F0212CB61C27005943EE /* Phi3.swift */,
+				8C56F0222CB61C27005943EE /* Qwen2.swift */,
+				8C56F0232CB61C27005943EE /* Starcoder2.swift */,
+				8C56F0242CB61C27005943EE /* SuScaledRotaryEmbedding.swift */,
+				8C56F0252CB61C27005943EE /* Tokenizer.swift */,
 			);
-			name = LLM;
+			path = LLM;
+			sourceTree = "<group>";
+		};
+		8C56F0282CB61C27005943EE /* LLMEval */ = {
+			isa = PBXGroup;
+			children = (
+				8C56F0262CB61C27005943EE /* LLM */,
+				8C56F0272CB61C27005943EE /* ContentView.swift */,
+			);
+			path = LLMEval;
 			sourceTree = "<group>";
 		};
 		8CFD0A252BA3EDF40080EBE1 /* Models */ = {
@@ -405,20 +448,21 @@
 			);
 			name = CobaltMobileRN;
 			packageProductDependencies = (
-				8CFA35FF2BA1A408009546C7 /* MLX */,
-				8CFA36012BA1A408009546C7 /* MLXFFT */,
-				8CFA36032BA1A408009546C7 /* MLXLinalg */,
-				8CFA36052BA1A408009546C7 /* MLXNN */,
-				8CFA36072BA1A408009546C7 /* MLXOptimizers */,
-				8CFA36092BA1A408009546C7 /* MLXRandom */,
 				8CFA36272BA299C9009546C7 /* AsyncAlgorithms */,
 				8CFD0A1C2BA3E32C0080EBE1 /* OpenMP */,
 				8CFD0A212BA3E6340080EBE1 /* FAISS */,
 				8CFD0A232BA3E6340080EBE1 /* FAISS_C */,
-				8C33BC3B2BA430B60023A2D9 /* Transformers */,
 				8C9AAF882BAB279300FF60EF /* Tiktoken */,
 				8C11860A2C4879C6004A652D /* SwiftWhisper */,
-				8CEC98B52C53621200E4045F /* GRDB */,
+				8CF9AEAB2CB5FC000009B193 /* GRDB */,
+				8C56F03F2CB61E5A005943EE /* MLX */,
+				8C56F0412CB61E5A005943EE /* MLXFFT */,
+				8C56F0432CB61E5A005943EE /* MLXFast */,
+				8C56F0452CB61E5B005943EE /* MLXLinalg */,
+				8C56F0472CB61E5B005943EE /* MLXNN */,
+				8C56F0492CB61E5B005943EE /* MLXOptimizers */,
+				8C56F04B2CB61E5B005943EE /* MLXRandom */,
+				8C65B7352CB640F6009B6C9B /* Transformers */,
 			);
 			productName = CobaltMobileRN;
 			productReference = 13B07F961A680F5B00A75B9A /* CobaltMobileRN.app */;
@@ -451,14 +495,14 @@
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			packageReferences = (
-				8CFA35FE2BA1A408009546C7 /* XCRemoteSwiftPackageReference "mlx-swift" */,
 				8CFA36262BA299C9009546C7 /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
 				8CFD0A1B2BA3E32C0080EBE1 /* XCRemoteSwiftPackageReference "openmp-mobile" */,
 				8CFD0A202BA3E6340080EBE1 /* XCRemoteSwiftPackageReference "faiss-mobile" */,
-				8C33BC3A2BA430B60023A2D9 /* XCRemoteSwiftPackageReference "swift-transformers" */,
 				8C9AAF872BAB279300FF60EF /* XCRemoteSwiftPackageReference "Tiktoken" */,
 				8C1186092C4879C6004A652D /* XCRemoteSwiftPackageReference "SwiftWhisper" */,
-				8CEC98B42C53621200E4045F /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+				8CF9AEAA2CB5FC000009B193 /* XCRemoteSwiftPackageReference "GRDB" */,
+				8C56F03E2CB61E5A005943EE /* XCRemoteSwiftPackageReference "mlx-swift" */,
+				8C65B7342CB640F6009B6C9B /* XCRemoteSwiftPackageReference "swift-transformers" */,
 			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
@@ -651,36 +695,46 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8CACCE542BA29DD2004643C2 /* Models.swift in Sources */,
 				8CFA36232BA291D4009546C7 /* LLMNativeModule.swift in Sources */,
 				8CEC98B82C53623800E4045F /* DatabaseManager.swift in Sources */,
 				8CB23D822C5D6A6F0007AEB0 /* ClusteringAndEllipsoids.m in Sources */,
-				8CACCE532BA29DD2004643C2 /* LLMModel.swift in Sources */,
 				8C33BC402BA563BE0023A2D9 /* all-MiniLM-L6-v2-coreml-float32.mlpackage in Sources */,
-				8CACCE602BA2BC50004643C2 /* Qwen2.swift in Sources */,
 				8C1186062C486982004A652D /* AudioTranscription.swift in Sources */,
-				8CACCE5E2BA2BC50004643C2 /* Gemma.swift in Sources */,
 				8CFA35FD2BA18D80009546C7 /* FaissBridge.m in Sources */,
 				8CEC98BA2C53625B00E4045F /* DatabaseModule.swift in Sources */,
 				8CEC98BC2C53627A00E4045F /* DatabaseModule.m in Sources */,
-				8CACCE502BA29DD2004643C2 /* Configuration.swift in Sources */,
-				8CACCE4F2BA29DD2004643C2 /* Evaluate.swift in Sources */,
 				8CFA36252BA29209009546C7 /* LLMNativeModule.m in Sources */,
 				8C1186082C4869A4004A652D /* AudioTranscriptionBridge.m in Sources */,
 				8C9AAF8F2BAB2C7300FF60EF /* NativeTokenizer.swift in Sources */,
 				8C33BC332BA418EC0023A2D9 /* TextFeatureExtractor.swift in Sources */,
-				8CACCE512BA29DD2004643C2 /* Load.swift in Sources */,
 				8C33BC352BA419EA0023A2D9 /* TextFeatureExtractor.m in Sources */,
 				8C9AAF8D2BAB2B4100FF60EF /* NativeTokenizer.m in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
-				8CACCE552BA29DD2004643C2 /* Phi.swift in Sources */,
-				8CACCE5F2BA2BC50004643C2 /* Starcoder2.swift in Sources */,
 				8CF8599D2C63153600845B81 /* SGESVDExample.m in Sources */,
 				8C097E582BB0EC9C0078CE31 /* CodeGenTokenizer.swift in Sources */,
-				8CACCE522BA29DD2004643C2 /* Tokenizer.swift in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				8C33BC3E2BA43DEC0023A2D9 /* BertTokenizer.swift in Sources */,
-				8CACCE5A2BA2BC32004643C2 /* Llama.swift in Sources */,
+				8C56F0292CB61C27005943EE /* Tokenizer.swift in Sources */,
+				8C56F02A2CB61C27005943EE /* Cohere.swift in Sources */,
+				8C56F02B2CB61C27005943EE /* Phi3.swift in Sources */,
+				8C56F02C2CB61C27005943EE /* Gemma.swift in Sources */,
+				8C56F02D2CB61C27005943EE /* KVCache.swift in Sources */,
+				8C56F02E2CB61C27005943EE /* Starcoder2.swift in Sources */,
+				8C56F02F2CB61C27005943EE /* LLMModel.swift in Sources */,
+				8C56F0302CB61C27005943EE /* Lora.swift in Sources */,
+				8C56F0312CB61C27005943EE /* Configuration.swift in Sources */,
+				8C56F0322CB61C27005943EE /* Gemma2.swift in Sources */,
+				8C56F0332CB61C27005943EE /* Llama.swift in Sources */,
+				8C56F0342CB61C27005943EE /* Phi.swift in Sources */,
+				8C56F0352CB61C27005943EE /* Internlm2.swift in Sources */,
+				8C56F0362CB61C27005943EE /* Models.swift in Sources */,
+				8C56F0372CB61C27005943EE /* Lora+Data.swift in Sources */,
+				8C56F0382CB61C27005943EE /* Load.swift in Sources */,
+				8C56F0392CB61C27005943EE /* SuScaledRotaryEmbedding.swift in Sources */,
+				8C56F03A2CB61C27005943EE /* Evaluate.swift in Sources */,
+				8C56F03B2CB61C27005943EE /* ContentView.swift in Sources */,
+				8C56F03C2CB61C27005943EE /* Qwen2.swift in Sources */,
+				8C56F03D2CB61C27005943EE /* OpenELM.swift in Sources */,
 				8CF8599F2C646B7B00845B81 /* PlotView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1028,12 +1082,20 @@
 				version = 1.2.0;
 			};
 		};
-		8C33BC3A2BA430B60023A2D9 /* XCRemoteSwiftPackageReference "swift-transformers" */ = {
+		8C56F03E2CB61E5A005943EE /* XCRemoteSwiftPackageReference "mlx-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/huggingface/swift-transformers";
+			repositoryURL = "https://github.com/ml-explore/mlx-swift";
 			requirement = {
-				kind = exactVersion;
-				version = 0.1.2;
+				kind = revision;
+				revision = 9a0d25688b5835c54413475c09c537d6338360e3;
+			};
+		};
+		8C65B7342CB640F6009B6C9B /* XCRemoteSwiftPackageReference "swift-transformers" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@github.com:huggingface/swift-transformers.git";
+			requirement = {
+				kind = revision;
+				revision = a7a61a221c8485a0482b28d8994658a17fbe2438;
 			};
 		};
 		8C9AAF872BAB279300FF60EF /* XCRemoteSwiftPackageReference "Tiktoken" */ = {
@@ -1044,20 +1106,12 @@
 				revision = 4ad6460448278f7a28f1e4ee2723500369f20acb;
 			};
 		};
-		8CEC98B42C53621200E4045F /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+		8CF9AEAA2CB5FC000009B193 /* XCRemoteSwiftPackageReference "GRDB" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift";
 			requirement = {
 				kind = revision;
-				revision = 04543755d8deeaacf122e2856e4fc056dc304277;
-			};
-		};
-		8CFA35FE2BA1A408009546C7 /* XCRemoteSwiftPackageReference "mlx-swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ml-explore/mlx-swift";
-			requirement = {
-				kind = revision;
-				revision = 948000ceaa27c343f4dd5ce40f727f221bf45c6e;
+				revision = bccf312af65b59e67b40d63afd89e46e0d3fae61;
 			};
 		};
 		8CFA36262BA299C9009546C7 /* XCRemoteSwiftPackageReference "swift-async-algorithms" */ = {
@@ -1092,9 +1146,44 @@
 			package = 8C1186092C4879C6004A652D /* XCRemoteSwiftPackageReference "SwiftWhisper" */;
 			productName = SwiftWhisper;
 		};
-		8C33BC3B2BA430B60023A2D9 /* Transformers */ = {
+		8C56F03F2CB61E5A005943EE /* MLX */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 8C33BC3A2BA430B60023A2D9 /* XCRemoteSwiftPackageReference "swift-transformers" */;
+			package = 8C56F03E2CB61E5A005943EE /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLX;
+		};
+		8C56F0412CB61E5A005943EE /* MLXFFT */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8C56F03E2CB61E5A005943EE /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXFFT;
+		};
+		8C56F0432CB61E5A005943EE /* MLXFast */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8C56F03E2CB61E5A005943EE /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXFast;
+		};
+		8C56F0452CB61E5B005943EE /* MLXLinalg */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8C56F03E2CB61E5A005943EE /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXLinalg;
+		};
+		8C56F0472CB61E5B005943EE /* MLXNN */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8C56F03E2CB61E5A005943EE /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXNN;
+		};
+		8C56F0492CB61E5B005943EE /* MLXOptimizers */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8C56F03E2CB61E5A005943EE /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXOptimizers;
+		};
+		8C56F04B2CB61E5B005943EE /* MLXRandom */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8C56F03E2CB61E5A005943EE /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXRandom;
+		};
+		8C65B7352CB640F6009B6C9B /* Transformers */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8C65B7342CB640F6009B6C9B /* XCRemoteSwiftPackageReference "swift-transformers" */;
 			productName = Transformers;
 		};
 		8C9AAF882BAB279300FF60EF /* Tiktoken */ = {
@@ -1102,40 +1191,10 @@
 			package = 8C9AAF872BAB279300FF60EF /* XCRemoteSwiftPackageReference "Tiktoken" */;
 			productName = Tiktoken;
 		};
-		8CEC98B52C53621200E4045F /* GRDB */ = {
+		8CF9AEAB2CB5FC000009B193 /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 8CEC98B42C53621200E4045F /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			package = 8CF9AEAA2CB5FC000009B193 /* XCRemoteSwiftPackageReference "GRDB" */;
 			productName = GRDB;
-		};
-		8CFA35FF2BA1A408009546C7 /* MLX */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8CFA35FE2BA1A408009546C7 /* XCRemoteSwiftPackageReference "mlx-swift" */;
-			productName = MLX;
-		};
-		8CFA36012BA1A408009546C7 /* MLXFFT */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8CFA35FE2BA1A408009546C7 /* XCRemoteSwiftPackageReference "mlx-swift" */;
-			productName = MLXFFT;
-		};
-		8CFA36032BA1A408009546C7 /* MLXLinalg */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8CFA35FE2BA1A408009546C7 /* XCRemoteSwiftPackageReference "mlx-swift" */;
-			productName = MLXLinalg;
-		};
-		8CFA36052BA1A408009546C7 /* MLXNN */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8CFA35FE2BA1A408009546C7 /* XCRemoteSwiftPackageReference "mlx-swift" */;
-			productName = MLXNN;
-		};
-		8CFA36072BA1A408009546C7 /* MLXOptimizers */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8CFA35FE2BA1A408009546C7 /* XCRemoteSwiftPackageReference "mlx-swift" */;
-			productName = MLXOptimizers;
-		};
-		8CFA36092BA1A408009546C7 /* MLXRandom */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8CFA35FE2BA1A408009546C7 /* XCRemoteSwiftPackageReference "mlx-swift" */;
-			productName = MLXRandom;
 		};
 		8CFA36272BA299C9009546C7 /* AsyncAlgorithms */ = {
 			isa = XCSwiftPackageProductDependency;

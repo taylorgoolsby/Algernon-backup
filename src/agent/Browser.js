@@ -6,6 +6,7 @@ import InferenceRest from "../rest/InferenceRest";
 import BingSearch from "../rest/BingSearch";
 import axios from "axios";
 import parseAxiosError from "../utils/parseAxiosError";
+import { syncTextResponse } from "./generateTextResponse";
 const sanitizeHtml = require('sanitize-html');
 
 type WebPage = {
@@ -119,7 +120,7 @@ Response: {"isSearchNeeded": true, "searchFor": "latest tech trends 2024"}`,
     let determination = null
     for (let i = 0; i < 3; i++) {
       // todo: Use prompt formatting to encourage JSON output.
-      const res = await InferenceRest.chatCompletion(model, context)
+      const res = await syncTextResponse(model, context)
       const rawJSON = res.choices[0]?.message?.content ?? ''
       try {
         determination = JSON.parse(rawJSON)
@@ -214,7 +215,7 @@ Web Pages Array: ${JSON.stringify(webPages, null, '  ')}`,
     let results = null
     for (let i = 0; i < 3; i++) {
       // todo: Use prompt formatting to encourage JSON output.
-      const res = await InferenceRest.chatCompletion(model, context)
+      const res = await syncTextResponse(model, context)
       const rawJSON = res.choices[0]?.message?.content ?? ''
       try {
         console.log("rawJSON", rawJSON);
@@ -381,7 +382,7 @@ HTML Content: ${html}`,
     let results = null
     for (let i = 0; i < 3; i++) {
       // todo: Use prompt formatting to encourage JSON output.
-      const res = await InferenceRest.chatCompletion(model, context)
+      const res = await syncTextResponse(model, context)
       console.log("res", res);
       const rawJSON = res.choices[0]?.message?.content ?? ''
       try {

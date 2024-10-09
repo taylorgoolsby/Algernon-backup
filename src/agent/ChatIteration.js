@@ -21,7 +21,7 @@ export default class ChatIteration {
   ) {
     Promise.resolve().then(async () => {
       try {
-        const userMessage = await MessageInterface.insert(windowId, MessageRole.USER, userPrompt, true);
+        const userMessage = await MessageInterface.insert(windowId, MessageRole.USER, userPrompt, null, true);
 
         onAppendMessage({
           windowId,
@@ -37,6 +37,7 @@ export default class ChatIteration {
           windowId,
           MessageRole.ASSISTANT,
           '',
+          userMessage.messageId,
           false
         )
         const output: AppendMessageOutput = {
@@ -45,22 +46,24 @@ export default class ChatIteration {
         }
         onAppendMessage(output)
 
-        const searchSummary: string = (await Browser.checkAndSearch(model, lastUserMessage)) ?? ''
+        // const searchSummary: string = (await Browser.checkAndSearch(model, lastUserMessage)) ?? ''
+        const searchSummary: string = ''
 
-        // const shortTermSummary = ''
-        const shortTermSummary = await ShortTermSummarization.performCompletion(
-          windowId,
-          model,
-          allMessages,
-        )
+        const shortTermSummary = ''
+        // const shortTermSummary = await ShortTermSummarization.performCompletion(
+        //   windowId,
+        //   model,
+        //   allMessages,
+        // )
 
-        LongTermAnnotation.backgroundAnnotate(model, lastUserMessage)
+        // LongTermAnnotation.backgroundAnnotate(model, lastUserMessage)
         // const longTermSummary = ''
-        const longTermSummary = await LongTermAnnotation.searchAndSummarize(
-          model,
-          shortTermSummary,
-          lastUserMessage,
-        )
+        // const longTermSummary = await LongTermAnnotation.searchAndSummarize(
+        //   model,
+        //   shortTermSummary,
+        //   lastUserMessage,
+        // )
+        const longTermSummary = ''
 
         const finalResponse = await GeneralResponse.beginStreaming(
           windowId,
@@ -75,7 +78,7 @@ export default class ChatIteration {
           onUpdateMessage,
         );
 
-        LongTermAnnotation.backgroundAnnotate(model, finalResponse)
+        // LongTermAnnotation.backgroundAnnotate(model, finalResponse)
       } catch (err) {
         console.error(err);
         onError(err);

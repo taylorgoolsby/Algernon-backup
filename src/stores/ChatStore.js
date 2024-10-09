@@ -8,6 +8,14 @@ import MessageInterface from "../schema/Message/MessageInterface.js";
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import debounce from 'lodash.debounce'
 import Colors from "../Colors.js";
+import LongTermAnnotation from "../agent/LongTermAnnotation";
+import ChatIteration from "../agent/ChatIteration";
+import preferencesStore from "./PreferencesStore";
+import { NativeEventEmitter, NativeModules } from 'react-native';
+
+const { LLMNativeModule } = NativeModules;
+const eventEmitter = new NativeEventEmitter(LLMNativeModule);
+
 
 const INITIAL_LIMIT = 12
 let limit = INITIAL_LIMIT
@@ -40,6 +48,8 @@ Only backwards pagination needs to be handled.
 * */
 
 export class ChatStore {
+  static isModelLoaded: boolean = false
+
   loaded: boolean = false
   windowId: number = 0
   offset: number = 0
@@ -98,7 +108,26 @@ export class ChatStore {
     this.hapticFeedback = debounce(this.hapticFeedback, 42, {leading: true, trailing: false, maxWait: 42}).bind(this)
   }
 
+  // Function to load the model asynchronously
+  static async loadModel() {
+    if (ChatStore.isModelLoaded) {
+      return
+    } else {
+      ChatStore.isModelLoaded = true
+    }
+
+    try {
+      // Load the model and wait for the promise to resolve
+      await LLMNativeModule.loadModel();
+      console.warn('Model loaded successfully!');
+    } catch (error) {
+      console.error('Error loading model:', error);
+    }
+  };
+
   async load() {
+    await ChatStore.loadModel();
+
     limit = INITIAL_LIMIT
     const lastMessage = await MessageInterface.getLast(this.windowId)
     if (!lastMessage) return
@@ -123,6 +152,23 @@ export class ChatStore {
     this.loaded = true
 
     console.log("this.displayedMessageIds", this.displayedMessageIds);
+  }
+
+  submitMessage: (string) => void = async (input: string) => {
+    ChatIteration.iterate(
+      chatStore.windowId,
+      preferencesStore.selectedModel,
+      input.trim(),
+      output => {
+        chatStore.appendMessage(output)
+      },
+      output => {
+        chatStore.updateMessage(output)
+      },
+      error => {
+        console.error(error)
+      },
+    )
   }
 
   appendMessage: (AppendMessageOutput) => void = (output: AppendMessageOutput) => {

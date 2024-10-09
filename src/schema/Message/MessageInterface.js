@@ -91,6 +91,7 @@ export default class MessageInterface {
     windowId: number,
     role: MessageRoleType,
     text: string,
+    promptedByMessageId: ?number,
     completed: boolean
   ): Promise<MessageSQL> {
     if (!completed && (role === MessageRole.SYSTEM || role === MessageRole.USER)) {
@@ -100,11 +101,13 @@ export default class MessageInterface {
     const query = sqltag`
       INSERT INTO Message (
         windowId,
+        promptedByMessageId,
         role,
         text,
         completed
       ) VALUES (
         ${windowId},
+        ${promptedByMessageId},
         ${role},
         ${text},
         ${completed}
@@ -118,6 +121,7 @@ export default class MessageInterface {
     const messageTemplate: MessageSQL = {
       messageId,
       windowId,
+      promptedByMessageId,
       role,
       text,
       completed,

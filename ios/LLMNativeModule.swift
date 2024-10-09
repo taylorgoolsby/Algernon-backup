@@ -1,148 +1,164 @@
-// LLMNativeModule.swift
-
 import Foundation
 import MLX
 import MLXRandom
+import Tokenizers
+import React
 
 @objc(LLMNativeModule)
-class LLMNativeModule: NSObject, RCTBridgeModule {
+class LLMNativeModule: RCTEventEmitter {
     let tokenizer = CodeGenTokenizer()
-  
+    
     // This is required by the RCTBridgeModule protocol
-    static func moduleName() -> String! {
+    override static func moduleName() -> String! {
         return "LLMNativeModule"
     }
 
     // This optional method allows the module to be initialized without requiring the bridge
-    static func requiresMainQueueSetup() -> Bool {
+    override static func requiresMainQueueSetup() -> Bool {
         return false
     }
-  
-    @objc(generateResponse:resolver:rejecter:)
-    func generateResponse(fromText text: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
-      
-//      let tokens = tokenizer.tokenize(text: text)
-//      print("tokens: \(tokens)")
-//
-//      let tokenIds = tokenizer.encode(text: text)
-//      print("tokenIds: \(tokenIds)")
-//
-//      let str = tokenizer.decode(tokenIds: tokenIds)
-//      print("str: \(str)")
 
-//        // In debug build, immediately resolve with a debug message
-        resolve("MLX is currently not supported")
-        
-        // Use a Task to bridge async/await with the promise-based callback
-//        Task {
-//            do {
-//                let response = try await runModelAsync(fromText: text)
-//                resolve(response)
-//            } catch {
-//                reject("ModelError", "Failed to generate response: \(error.localizedDescription)", error)
-//            }
-//        }
-        
+    // Event emitter setup
+    override func supportedEvents() -> [String]! {
+        return ["onTokenGenerated"]
     }
-  
-    let modelConfiguration = ModelConfiguration.phi4bit
-    let temperature: Float = 0.4
-    let maxTokens = 100
-  
-    @MainActor
-    var running = false
-    var output = ""
-      
-    // Example async function
-    func runModelAsync(fromText prompt: String) async throws -> String {
-        print("runModelAsync")
-        do {
-            let (model, _) = try await loadModel()
 
-            await MainActor.run {
-                running = true
-                self.output = ""
-            }
+    // Method to send the full response so far
+    func sendFullResponseEvent(responseSoFar: String) {
+        self.sendEvent(withName: "onTokenGenerated", body: ["responseSoFar": responseSoFar])
+    }
 
-            // augment the prompt as needed
-            let prompt = modelConfiguration.prepare(prompt: prompt)
-            let promptTokens = MLXArray(tokenizer.encode(text: prompt))
-            print("Prompt: \(prompt)")
-            print(promptTokens)
-
-            // each time you generate you will get something new
-            MLXRandom.seed(UInt64(Date.timeIntervalSinceReferenceDate * 1000))
-
-            var outputTokens = [Int]()
-
-            for token in TokenIterator(prompt: promptTokens, model: model, temp: temperature) {
-                let tokenId = token.item(Int.self)
-
-                if tokenId == tokenizer.unknownTokenId {
-                    print("Break unknown token")
-                    break
-                }
-              
-                if tokenId == tokenizer.eosTokenId {
-                    print("Break eos token")
-                    break
-                }
-
-                outputTokens.append(tokenId)
-                let text = tokenizer.decode(tokenIds: outputTokens)
-              
-                print("Generating \(text)")
-
-                // update the output -- this will make the view show the text as it generates
-                await MainActor.run {
-                    self.output = text
-                }
-
-                if outputTokens.count == maxTokens {
-                    print("Break maxTokens")
-                    break
-                }
-            }
-
-            await MainActor.run {
-                running = false
-            }
-        } catch {
-            await MainActor.run {
-                running = false
-                output = "Failed: \(error)"
+    // Add the generateResponse function to expose it to JavaScript
+    @objc(generateResponse:resolver:rejecter:)
+    func generateResponse(prompt: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        Task {
+            do {
+                // Call the generate function to process the response
+                try await generate(prompt: prompt)
+                // Resolve after generation
+                resolve(nil)
+            } catch {
+                // If there's an error, reject the promise
+                reject("GenerateError", "Failed to generate response: \(error.localizedDescription)", error)
             }
         }
-      return self.output
     }
-  
+
+    @objc(loadModel:rejecter:)
+    func loadModel(resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        Task {
+            do {
+                // Call the existing load function and wait for it to finish
+                _ = try await load()
+                
+                // Resolve the promise after the model is loaded
+                resolve(nil)  // You can also pass any useful data if necessary
+            } catch {
+                // Reject the promise if there was an error loading the model
+                reject("ModelLoadError", "Failed to load model: \(error.localizedDescription)", error)
+            }
+        }
+    }
+
+    let modelConfiguration = ModelConfiguration.llama3_2_1B_4bit  
+    let temperature: Float = 0.4
+    let maxTokens = 100
+    let displayEveryNTokens = 4
+
+    var running = false
+    var output = ""
+    
+    // Load model once and use it for subsequent generations
     enum LoadState {
         case idle
-        case loaded(LLMModel, Tokenizer)
+        case loaded(ModelContainer)
     }
-  
+    
     var loadState = LoadState.idle
-  
-    /// load and return the model -- can be called multiple times, subsequent calls will
-    /// just return the loaded model
-    private func loadModel() async throws -> (LLMModel, Tokenizer) {
-      switch loadState {
+    
+    private func load() async throws -> ModelContainer {
+        switch loadState {
         case .idle:
             // limit the buffer cache
             MLX.GPU.set(cacheLimit: 20 * 1024 * 1024)
 
-            let (model, tokenizer) = try await LLMLoader.load(configuration: modelConfiguration) {
+            let modelContainer = try await loadModelContainer(configuration: modelConfiguration) {
                 [modelConfiguration] progress in
-                DispatchQueue.main.sync {
-                    print("Downloading \(modelConfiguration.id): \(Int(progress.fractionCompleted * 100))%")
+                print("Downloading \(modelConfiguration.id): \(Int(progress.fractionCompleted * 100))%")
+            }
+
+            print("Loaded \(modelConfiguration.id). Weights: \(MLX.GPU.activeMemory / 1024 / 1024)M")
+            loadState = .loaded(modelContainer)
+            return modelContainer
+
+        case .loaded(let modelContainer):
+            return modelContainer
+        }
+    }
+
+    func generate(prompt: String) async throws {
+        guard !running else { throw NSError(domain: "LLMNativeModule", code: 1, userInfo: [NSLocalizedDescriptionKey: "Model is currently running"]) }
+
+        running = true
+        output = ""
+
+        // Define the parameters for generation
+        let generateParameters = GenerateParameters(
+            temperature: 0.6  // Example temperature value
+        )
+
+        do {
+            let modelContainer = try await load()
+
+            // Augment the prompt as needed
+            let preparedPrompt = modelConfiguration.prepare(prompt: prompt)
+
+            // Use modelContainer.perform to get the tokenizer synchronously
+            let promptTokens: [Int] = await modelContainer.perform { model, tokenizer in
+                return tokenizer.encode(text: preparedPrompt)
+            }
+
+            // Seed random generation
+            MLXRandom.seed(UInt64(Date.timeIntervalSinceReferenceDate * 1000))
+          
+            await modelContainer.perform { model, tokenizer in
+                CobaltMobileRN.generate(
+                    promptTokens: promptTokens,
+                    parameters: generateParameters,  // Use the generateParameters defined above
+                    model: modelContainer.model,     // Assuming this is accessible
+                    tokenizer: modelContainer.tokenizer  // Assuming this is accessible
+                ) { tokens in
+                    // Capture the tokens and process them outside the closure
+                    Task {
+                        // Decode tokens asynchronously
+                        let newText = tokenizer.decode(tokens: tokens)
+                        
+                        
+                        // Append the new tokens to the output and send the event
+                        DispatchQueue.main.async { [weak self] in
+    //                        self?.output.append(newText)
+                            
+                            // Send the entire response so far back to JS
+                            self?.sendFullResponseEvent(responseSoFar: newText)
+                        }
+                    }
+                    
+                    // Determine whether to continue or stop based on token count
+                    if tokens.count >= maxTokens {
+                        return .stop
+                    } else {
+                        return .more
+                    }
                 }
             }
-            print("Loaded \(modelConfiguration.id).  Weights: \(MLX.GPU.activeMemory / 1024 / 1024)M")
-            loadState = .loaded(model, tokenizer)
-            return (model, tokenizer)
 
-        case .loaded(let model, let tokenizer):
-            return (model, tokenizer)
+        } catch {
+            DispatchQueue.main.async {
+                self.output = "Failed: \(error)"
+                // Optionally, send an event for the error as well
+            }
         }
+
+        running = false
     }
 }

@@ -7,12 +7,6 @@ import MLXNN
 
 // https://github.com/ml-explore/mlx-examples/blob/main/llms/mlx_lm/models/phi.py
 
-private class LayerNorm: MLXNN.LayerNorm {
-    override func callAsFunction(_ x: MLXArray) -> MLXArray {
-        super.callAsFunction(x.asType(Float.self)).asType(x.dtype)
-    }
-}
-
 private class PhiAttention: Module {
 
     let args: PhiConfiguration
@@ -49,8 +43,8 @@ private class PhiAttention: Module {
     }
 
     public func callAsFunction(
-        _ x: MLXArray, mask: MLXArray? = nil, cache: (MLXArray, MLXArray)? = nil
-    ) -> (MLXArray, (MLXArray, MLXArray)) {
+        _ x: MLXArray, mask: MLXArray? = nil, cache: KVCache?
+    ) -> MLXArray {
         let (B, L) = (x.dim(0), x.dim(1))
 
         var queries = wq(x)
@@ -63,28 +57,25 @@ private class PhiAttention: Module {
         values = values.reshaped(B, L, args.kvHeads, headDim).transposed(0, 2, 1, 3)
 
         // Add RoPE to the queries and keys and combine them with the cache
-        if let (keyCache, valueCache) = cache {
-            queries = rope(queries, offset: keyCache.dim(2))
-            keys = rope(keys, offset: keyCache.dim(2))
-            keys = concatenated([keyCache, keys], axis: 2)
-            values = concatenated([valueCache, values], axis: 2)
+        if let cache {
+            queries = rope(queries, offset: cache.offset)
+            keys = rope(keys, offset: cache.offset)
+            (keys, values) = cache.update(keys: keys, values: values)
         } else {
             queries = rope(queries)
             keys = rope(keys)
         }
 
-        queries = queries.asType(Float.self)
-        keys = keys.asType(Float.self)
-
         // Finally perform the attention computation
         let scale = sqrt(1 / Float(queries.dim(-1)))
         let output = MLXFast.scaledDotProductAttention(
-            queries: queries, keys: keys, values: values, scale: scale, mask: mask
+            queries: queries.asType(.float32), keys: keys, values: values, scale: scale, mask: mask
         )
+        .asType(values.dtype)
         .transposed(0, 2, 1, 3)
         .reshaped(B, L, -1)
 
-        return (dense(output), (keys, values))
+        return dense(output)
     }
 }
 
@@ -119,12 +110,12 @@ private class PhiDecoderLayer: Module {
     }
 
     public func callAsFunction(
-        _ x: MLXArray, mask: MLXArray? = nil, cache: (MLXArray, MLXArray)? = nil
-    ) -> (MLXArray, (MLXArray, MLXArray)) {
+        _ x: MLXArray, mask: MLXArray? = nil, cache: KVCache?
+    ) -> MLXArray {
         let h = inputLayerNorm(x)
-        let (attentionH, cache) = selfAttention(h, mask: mask, cache: cache)
+        let attentionH = selfAttention(h, mask: mask, cache: cache)
         let ffH = mlp(h)
-        return (attentionH + ffH + x, cache)
+        return attentionH + ffH + x
     }
 }
 
@@ -148,27 +139,23 @@ private class PhiModelInner: Module {
     }
 
     public func callAsFunction(
-        _ x: MLXArray, mask: MLXArray? = nil, cache: [(MLXArray, MLXArray)]? = nil
-    ) -> (
-        MLXArray, [(MLXArray, MLXArray)]
-    ) {
+        _ x: MLXArray, mask: MLXArray? = nil, cache: [KVCache]? = nil
+    ) -> MLXArray {
         var x = embedTokens(x)
 
-        var newCache = [(MLXArray, MLXArray)]()
-
         for (i, layer) in layers.enumerated() {
-            var cacheUpdate: (MLXArray, MLXArray)
-            (x, cacheUpdate) = layer(x, mask: mask, cache: cache?[i])
-            newCache.append(cacheUpdate)
+            x = layer(x, mask: mask, cache: cache?[i])
         }
 
-        return (finalLayerNorm(x), newCache)
+        return finalLayerNorm(x)
     }
 }
 
-public class PhiModel: Module, LLMModel {
+public class PhiModel: Module, LLMModel, KVCacheDimensionProvider {
 
     public let vocabularySize: Int
+    public let kvHeads: [Int]
+    public let headDim: IntOrPair
 
     fileprivate let model: PhiModelInner
 
@@ -176,25 +163,21 @@ public class PhiModel: Module, LLMModel {
 
     public init(_ args: PhiConfiguration) {
         self.vocabularySize = args.vocabularySize
+        self.kvHeads = (0 ..< args.hiddenLayers).map { _ in args.kvHeads }
+        self.headDim = .init(args.hiddenSize / args.attentionHeads)
         self.model = PhiModelInner(args)
         self._lmHead.wrappedValue = Linear(args.hiddenSize, args.vocabularySize, bias: true)
     }
 
-    public func callAsFunction(_ x: MLXArray, cache: [(MLXArray, MLXArray)]?) -> (
-        MLXArray, [(MLXArray, MLXArray)]
-    ) {
-        var mask: MLXArray? = nil
-        if x.dim(1) > 1 {
-            mask = MultiHeadAttention.createAdditiveCausalMask(x.dim(1))
-            mask = mask?.asType(x.dtype)
-        }
+    public func callAsFunction(_ x: MLXArray, cache: [KVCache]?) -> MLXArray {
+        let mask: MLXArray? = createAttentionMask(h: x, cache: cache)
 
-        let (y, cache) = model(x, mask: mask, cache: cache)
-        return (lmHead(y), cache)
+        let y = model(x, mask: mask, cache: cache)
+        return lmHead(y)
     }
 }
 
-public struct PhiConfiguration: Codable {
+public struct PhiConfiguration: Codable, Sendable {
     var maxPositionalEmbeddings = 2048
     var vocabularySize = 51200
     var hiddenSize = 2560
@@ -246,5 +229,13 @@ public struct PhiConfiguration: Codable {
             try container.decodeIfPresent(Float.self, forKey: PhiConfiguration.CodingKeys.ropeTheta)
             ?? 10_000
 
+    }
+}
+
+// MARK: - LoRA
+
+extension PhiModel: LoRAModel {
+    public func loraLinearLayers() -> LoRALinearLayers {
+        model.layers.map { ($0.selfAttention, ["q_proj", "v_proj"]) }
     }
 }

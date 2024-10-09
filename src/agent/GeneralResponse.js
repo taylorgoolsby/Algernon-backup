@@ -13,6 +13,7 @@ import CompletionInterface from '../schema/Completion/CompletionInterface.js'
 import {CompletionType} from '../schema/Completion/CompletionSchema.mjs'
 import normalizeModelName from "../utils/normalizeModelName.js";
 import ShortTermSummarization from "./ShortTermSummarization.js";
+import {streamTextResponse} from "./generateTextResponse";
 
 export default class GeneralResponse {
   /*
@@ -181,7 +182,7 @@ Rules
       startTimeout()
 
       // Send a /chat/completions call
-      InferenceRest.relayChatCompletionStream(
+      streamTextResponse(
         model,
         context,
         (res: ChatCompletionsResponse) => {
@@ -222,6 +223,8 @@ Rules
             const text = res?.choices[0]?.delta?.content || "";
 
             buffer += text;
+
+            console.log("buffer", buffer);
 
             // Used for JSON mode:
             // if (buffer.length < intro.length) {
