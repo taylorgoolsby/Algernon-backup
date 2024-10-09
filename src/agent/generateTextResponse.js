@@ -48,7 +48,9 @@ async function streamOnDevice(
     } else if (message.role === 'assistant') {
       return '<|start_header_id|>assistant<|end_header_id|>\n' + message.content + '<|eot_id|>';
     }
-  }).join('\n') + '<|start_header_id|>assistant<|end_header_id|>';
+  }).join('\n') + '<|start_header_id|>assistant<|end_header_id|>\n\n';
+
+  console.log("inputString", inputString);
 
   let finishReason = null; // Variable to track if we've hit a stop condition
 

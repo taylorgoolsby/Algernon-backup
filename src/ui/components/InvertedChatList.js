@@ -1,7 +1,7 @@
 // @flow
 
 import React from 'react'
-import { View, FlatList, Keyboard, Platform, Dimensions, TouchableOpacity } from "react-native";
+import { View, FlatList, Keyboard, Platform, Dimensions, TouchableOpacity, KeyboardAvoidingView } from "react-native";
 import Text from './Text.js'
 import ChatMessage, { leftMargin, margin, rightMargin } from "./ChatMessage";
 import type { MessageSQL } from "../../schema/Message/MessageSchema.mjs";
@@ -413,7 +413,7 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
 
     const paddingHeader = headerHeight
     const paddingFooter = keyboardHeight
-      ? footerHeight + keyboardHeight
+      ? footerHeight //+ keyboardHeight
       : initialSafeAreaFooterHeight
 
     if (messageIds.length === 1) {
@@ -492,33 +492,35 @@ ${poem}`,
     }
 
     return (
-      <FlatList
-        ref={this.handleRef}
-        inverted
-        data={invertedMessageIds}
-        renderItem={this.renderItem}
-        scrollEventThrottle={17}
-        onScroll={this.onScroll}
-        automaticallyAdjustContentInsets={false}
-        automaticallyAdjustKeyboardInsets={false}
-        automaticallyAdjustsScrollIndicatorInsets={false}
-        scrollsToTop={false}
-        onScrollBeginDrag={() => {
-          chatStore.deselectOptionsTarget()
-          chatStore.deselectOptionsColorTarget()
-        }}
-        scrollIndicatorInsets={{
-          top: paddingFooter,
-          bottom: paddingHeader,
-        }}
-        contentContainerStyle={{
-          paddingLeft: leftMargin + 3,
-          paddingRight: rightMargin,
-          paddingTop: paddingFooter,
-          paddingBottom: paddingHeader,
-          // height: this.contentHeight,
-        }}
-      />
+      <KeyboardAvoidingView behavior="height">
+        <FlatList
+          ref={this.handleRef}
+          inverted
+          data={invertedMessageIds}
+          renderItem={this.renderItem}
+          scrollEventThrottle={17}
+          onScroll={this.onScroll}
+          automaticallyAdjustContentInsets={false}
+          automaticallyAdjustKeyboardInsets={true}
+          automaticallyAdjustsScrollIndicatorInsets={false}
+          scrollsToTop={false}
+          onScrollBeginDrag={() => {
+            chatStore.deselectOptionsTarget()
+            chatStore.deselectOptionsColorTarget()
+          }}
+          scrollIndicatorInsets={{
+            top: paddingFooter,
+            bottom: paddingHeader,
+          }}
+          contentContainerStyle={{
+            paddingLeft: leftMargin + 3,
+            paddingRight: rightMargin,
+            paddingTop: paddingFooter,
+            paddingBottom: paddingHeader,
+            // height: this.contentHeight,
+          }}
+        />
+      </KeyboardAvoidingView>
     )
   }
 }

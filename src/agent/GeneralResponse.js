@@ -220,8 +220,6 @@ ${searchSummary ?? ''}
 
             buffer += text;
 
-            console.log("buffer", buffer);
-
             // Used for JSON mode:
             // if (buffer.length < intro.length) {
             //   // The buffer is not long enough to contain the intro.
