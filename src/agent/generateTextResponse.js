@@ -3,6 +3,7 @@
 import { NativeEventEmitter, NativeModules } from 'react-native';
 import type {ChatCompletionsResponse} from "../types/ChatCompletion";
 import type { ModelConfig } from "../types/ModelConfig";
+import type { GPTMessage } from "../types/GPTMessage";
 
 // Get the LLMNativeModule from NativeModules
 const { LLMNativeModule } = NativeModules;
@@ -27,10 +28,27 @@ const setupTokenListener = (callback: (output: string) => void) => {
 
 // Function to stream response from on-device generation
 async function streamOnDevice(
-  input: string,
+  input: Array<GPTMessage>,
   callback: (output: ChatCompletionsResponse) => void,
 ): void {
   console.log("input", input);
+
+  if (input[input.length - 1].role !== 'user') {
+    throw new Error('The last message in the input should be from the user');
+  }
+
+  /*
+  "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\nYou are a helpful assistant<|eot_id|>\n<|start_header_id|>user<|end_header_id|>\n\(prompt)<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>"
+  * */
+  const inputString = '<|begin_of_text|>' + input.map((message) => {
+    if (message.role === 'system') {
+      return '<|start_header_id|>system<|end_header_id|>\n' + message.content + '<|eot_id|>';
+    } else if (message.role === 'user') {
+      return '<|start_header_id|>user<|end_header_id|>\n' + message.content + '<|eot_id|>';
+    } else if (message.role === 'assistant') {
+      return '<|start_header_id|>assistant<|end_header_id|>\n' + message.content + '<|eot_id|>';
+    }
+  }).join('\n') + '<|start_header_id|>assistant<|end_header_id|>';
 
   let finishReason = null; // Variable to track if we've hit a stop condition
 
@@ -60,8 +78,8 @@ async function streamOnDevice(
       model: 'llama-3.2-1b', // You can change this to reflect your on-device model name
       usage: {
         completion_tokens: response.length, // Number of tokens in the response
-        prompt_tokens: input.length, // Number of tokens in the input prompt
-        total_tokens: response.length + input.length, // Total token usage
+        prompt_tokens: inputString.length, // Number of tokens in the input prompt
+        total_tokens: response.length + inputString.length, // Total token usage
       },
     };
 
@@ -69,7 +87,7 @@ async function streamOnDevice(
   });
 
   // await is cleared when generation is done
-  await LLMNativeModule.generateResponse(input);
+  await LLMNativeModule.generateResponse(inputString);
 
   // Clean up listener when the generation is done
   listener.remove();
@@ -88,8 +106,8 @@ async function streamOnDevice(
     model: 'llama-3.2-1b', // You can change this to reflect your on-device model name
     usage: {
       completion_tokens: lastResponse.length, // Number of tokens in the response
-      prompt_tokens: input.length, // Number of tokens in the input prompt
-      total_tokens: lastResponse.length + input.length, // Total token usage
+      prompt_tokens: inputString.length, // Number of tokens in the input prompt
+      total_tokens: lastResponse.length + inputString.length, // Total token usage
     },
   };
 
@@ -144,9 +162,8 @@ export async function syncTextResponse(
 // This function will handle branching between on-device and cloud streaming in the future
 export function streamTextResponse(
   model: ModelConfig,
-  input: string,
+  input: Array<GPTMessage>,
   callback: (output: ChatCompletionsResponse) => void,
 ): void {
-  // For now, this calls the on-device generation function
   return streamOnDevice(input, callback)
 }

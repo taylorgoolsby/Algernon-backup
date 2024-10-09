@@ -25,7 +25,11 @@ class LLMNativeModule: RCTEventEmitter {
 
     // Method to send the full response so far
     func sendFullResponseEvent(responseSoFar: String) {
-        self.sendEvent(withName: "onTokenGenerated", body: ["responseSoFar": responseSoFar])
+        // Trim whitespace and newline characters from the response string
+        let trimmedResponse = responseSoFar.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Send the trimmed response
+        self.sendEvent(withName: "onTokenGenerated", body: ["responseSoFar": trimmedResponse])
     }
 
     // Add the generateResponse function to expose it to JavaScript
@@ -111,7 +115,8 @@ class LLMNativeModule: RCTEventEmitter {
             let modelContainer = try await load()
 
             // Augment the prompt as needed
-            let preparedPrompt = modelConfiguration.prepare(prompt: prompt)
+//            let preparedPrompt = modelConfiguration.prepare(prompt: prompt)
+            let preparedPrompt = prompt
 
             // Use modelContainer.perform to get the tokenizer synchronously
             let promptTokens: [Int] = await modelContainer.perform { model, tokenizer in

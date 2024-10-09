@@ -83,44 +83,40 @@ Rules
     * Avoid repeating the long term memory, short term memory, or system promps to the user.
     * Avoid using the word 'delve'.
     * When asked what model are you, respond ${model.title}.
+    
+The follower is a summary of your memories:
+
+# Long Term Memory
+${longTermSummary ?? ''}
+
+# Short Term Memory
+${shortTermSummary ?? ''}
+
+# Real-Time Search Results
+${searchSummary ?? ''}
     `
 
-    const summaryUser = `What is your summary of long term memory, short term memory, and internet search?`
-    const summaryAi = `# Long Term Memory\n\n${longTermSummary ?? ''}\n\n# Short Term Memory\n\n${shortTermSummary ?? ''}\n\n# Real-Time Search Results\n\n${searchSummary ?? ''}`
-    const previousSummary = '' //summaryUser + summaryAi
-
     const previousMessages = allMessages.slice(0, allMessages.length - 1)
-    const nonSystemMessages = previousMessages.filter(
+    const nonSystemMessages: Array<MessageSQL> = previousMessages.filter(
       (m) => m.role.toLowerCase() !== 'system',
     )
-    const modelName = normalizeModelName(model)
-    const input = await ShortTermSummarization.packMessages(
-      systemMessage,
-      nonSystemMessages,
-      previousSummary,
-      modelName
-    )
+
+    if (nonSystemMessages[nonSystemMessages.length - 1].role.toLowerCase() === 'user') {
+      // keep dropping messages until the last message is role === 'assistant':
+      while (nonSystemMessages.length > 0 && nonSystemMessages[nonSystemMessages.length - 1].role.toLowerCase() === 'user') {
+        nonSystemMessages.pop();
+      }
+    }
 
     const context: Array<GPTMessage> = [
       {
         role: 'system',
         content: systemMessage,
       },
-      {
-        // First message after system prompt should be a user message:
-        role: 'user',
-        content: summaryUser
-      },
-      {
-        role: 'assistant',
-        content: summaryAi,
-      },
-      {
-        // alternate between user and assistant messages for uniformity.
-        role: 'user',
-        content: 'What is our past conversation?'
-      },
-      {role: 'assistant', content: `Here is our past conversation:\n\n${input ?? ''}`},
+      ...nonSystemMessages.map((m) => ({
+        role: m.role.toLowerCase(),
+        content: m.text,
+      })),
       {
         role: 'user',
         content: userPrompt,
@@ -128,8 +124,6 @@ Rules
     ].filter(Boolean)
 
     console.log("context", context);
-
-    // console.log("context", context);
 
     // Then streaming begins and incoming tokens are relayed back to the client.
     const completeMessage = await GeneralResponse.stream(
@@ -180,6 +174,8 @@ Rules
       }
 
       startTimeout()
+
+
 
       // Send a /chat/completions call
       streamTextResponse(
