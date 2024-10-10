@@ -28,8 +28,11 @@ class LLMNativeModule: RCTEventEmitter {
         // Trim whitespace and newline characters from the response string
         let trimmedResponse = responseSoFar.trimmingCharacters(in: .whitespacesAndNewlines)
         
-        // Send the trimmed response
-        self.sendEvent(withName: "onTokenGenerated", body: ["responseSoFar": trimmedResponse])
+        // Replace occurrences of `\\n` with `\n`
+        let formattedResponse = trimmedResponse.replacingOccurrences(of: "\\n", with: "\n")
+        
+        // Send the formatted response
+        self.sendEvent(withName: "onTokenGenerated", body: ["responseSoFar": formattedResponse])
     }
 
     // Add the generateResponse function to expose it to JavaScript
@@ -66,7 +69,7 @@ class LLMNativeModule: RCTEventEmitter {
 
     let modelConfiguration = ModelConfiguration.llama3_2_1B_4bit  
     let temperature: Float = 0.4
-    let maxTokens = 100
+    let maxTokens = 1000
     let displayEveryNTokens = 4
 
     var running = false

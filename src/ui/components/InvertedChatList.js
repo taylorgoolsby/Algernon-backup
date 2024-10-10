@@ -1,7 +1,7 @@
 // @flow
 
 import React from 'react'
-import { View, FlatList, Keyboard, Platform, Dimensions, TouchableOpacity, KeyboardAvoidingView } from "react-native";
+import { View, FlatList, Keyboard, Platform, Dimensions, TouchableOpacity, Animated, Easing, KeyboardAvoidingView } from "react-native";
 import Text from './Text.js'
 import ChatMessage, { leftMargin, margin, rightMargin } from "./ChatMessage";
 import type { MessageSQL } from "../../schema/Message/MessageSchema.mjs";
@@ -84,6 +84,7 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
   keyboardDidShowListener: any
   keyboardDidHideListener: any
   contentHeight: number = 0
+  keyboardHeight = new Animated.Value(0);
 
   constructor(props: InvertedChatListProps) {
     super(props)
@@ -92,14 +93,12 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
 
     this.keyboardDidShowListener = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      e => {
-        this.adjustForKeyboard(e.endCoordinates.height)
-      },
+      this.handleKeyboardShow,
     )
 
     this.keyboardDidHideListener = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      () => this.adjustForKeyboard(0),
+      this.handleKeyboardHide,
     )
 
     this.getMoreMessages = debounce(this.getMoreMessages, 500, {
@@ -108,6 +107,27 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
     })
     this.causeRerender = debounce(this.causeRerender, 100)
   }
+
+  handleKeyboardShow = (event) => {
+    const keyboardHeight = event.endCoordinates.height;
+    this.adjustForKeyboard(keyboardHeight)
+    Animated.timing(this.keyboardHeight, {
+      toValue: keyboardHeight,
+      duration: 300,
+      easing: Easing.ease,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  handleKeyboardHide = () => {
+    this.adjustForKeyboard(0)
+    Animated.timing(this.keyboardHeight, {
+      toValue: 0,
+      duration: 300,
+      easing: Easing.ease,
+      useNativeDriver: true,
+    }).start();
+  };
 
   reset: any = (props: InvertedChatListProps, isInit: boolean) => {
     const initialState = {
@@ -319,6 +339,7 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
       const onboardingItem = item.item
       return (
         <View
+          key={'onboarding'}
           style={{
             paddingTop: margin,
             // paddingBottom: margin,
@@ -360,6 +381,7 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
     } else if (typeof item.item === 'object' && item.item.height) {
       return (
         <View
+          key={'divider'}
           style={{
             height: item.item.height,
           }}
@@ -369,19 +391,22 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
       const messageId = item.item
       const index = item.index
 
+      console.log('rendering', messageId, index);
+
       return (
         <View
+          key={`messageId-${messageId}`}
           style={{
             paddingTop: margin,
             paddingBottom: margin,
           }}
-          onLayout={(event: any) => this.onItemLayout(messageId, event)}
+          // onLayout={(event: any) => this.onItemLayout(messageId, event)}
         >
           <ChatMessage
             key={messageId}
             messageId={messageId}
             isActive={index === 0}
-            onMarkdownLayout={this.onMarkdownLayout}
+            // onMarkdownLayout={this.onMarkdownLayout}
           />
         </View>
       )
@@ -408,6 +433,8 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
       cacheBust,
     } = this.state
     const messageIds = this.state.displayedMessageIds
+
+    console.log("messageIds", messageIds);
 
     const invertedMessageIds = messageIds.slice().reverse()
 
@@ -491,12 +518,23 @@ ${poem}`,
       })
     }
 
+    console.log("invertedMessageIds", invertedMessageIds);
+
     return (
-      <KeyboardAvoidingView behavior="height">
+      <KeyboardAvoidingView behavior={'padding'}>
         <FlatList
           ref={this.handleRef}
           inverted
           data={invertedMessageIds}
+          keyExtractor={(item, index) => {
+            if (typeof item === 'object' && item.buttonLabel) {
+              return `onboarding-${index}`;
+            } else if (typeof item === 'object' && item.height) {
+              return `divider-${index}`;
+            } else {
+              return `message-${item}`;
+            }
+          }}
           renderItem={this.renderItem}
           scrollEventThrottle={17}
           onScroll={this.onScroll}

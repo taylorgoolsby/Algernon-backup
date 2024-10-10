@@ -16,9 +16,6 @@ const setupTokenListener = (callback: (output: string) => void) => {
   // Add a listener for the 'onTokenGenerated' event
   const subscription = eventEmitter.addListener('onTokenGenerated', (event) => {
     const responseSoFar = event.responseSoFar;
-    console.log('Tokens generated:', responseSoFar);
-
-    // Here you can update the UI or pass the token to the callback function
     callback(responseSoFar);
   });
 
@@ -31,8 +28,6 @@ async function streamOnDevice(
   input: Array<GPTMessage>,
   callback: (output: ChatCompletionsResponse) => void,
 ): void {
-  console.log("input", input);
-
   if (input[input.length - 1].role !== 'user') {
     throw new Error('The last message in the input should be from the user');
   }
@@ -49,8 +44,6 @@ async function streamOnDevice(
       return '<|start_header_id|>assistant<|end_header_id|>\n' + message.content + '<|eot_id|>';
     }
   }).join('\n') + '<|start_header_id|>assistant<|end_header_id|>\n\n';
-
-  console.log("inputString", inputString);
 
   let finishReason = null; // Variable to track if we've hit a stop condition
 
@@ -93,6 +86,8 @@ async function streamOnDevice(
 
   // Clean up listener when the generation is done
   listener.remove();
+
+  console.log("lastResponse", lastResponse);
 
   const event = {
     id: 'on-device-response', // Mock ID

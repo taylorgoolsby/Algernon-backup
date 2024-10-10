@@ -62,6 +62,12 @@ const ChatMessage: ChatMessageProps => any = observer(
   }: ChatMessageProps): any => {
     const message = chatStore.messages[messageId]
 
+    useEffect(() => {
+      return () => {
+        console.log('unmounting chat message', messageId)
+      }
+    }, []);
+
     const messageRef = useRef<any>(null)
     const [isConfirming, setIsConfirming] = useState(false)
 
@@ -477,7 +483,6 @@ const ProfileRow: any = ({
       style={[
         styles.profileRow,
         {
-          flexDirection: 'row',
           alignSelf: isUser ? 'flex-end' : 'flex-start',
           flexDirection: isUser ? 'row-reverse' : 'row',
           marginLeft: 9,

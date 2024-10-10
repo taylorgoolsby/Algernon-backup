@@ -271,6 +271,13 @@ const ChatScreen: any = observer(({navigation}) => {
     return 28;
   };
 
+  const handleEmptyAreaPress = () => {
+    chatStore.closeAllOptions()
+    inputRef.current?.blur()
+  }
+
+  console.log("displayedMessageIds.length > 0 && headerHeight && footerHeight", displayedMessageIds.length > 0 && headerHeight && footerHeight);
+
   return (
     <View style={styles.container}>
       <View style={styles.background}></View>
@@ -278,10 +285,7 @@ const ChatScreen: any = observer(({navigation}) => {
       {displayedMessageIds.length > 0 && headerHeight && footerHeight ? (
         <InvertedChatList
           messageIds={chatStore.displayedMessageIds}
-          onEmptyAreaPress={() => {
-            chatStore.closeAllOptions()
-            inputRef.current?.blur()
-          }}
+          onEmptyAreaPress={handleEmptyAreaPress}
           headerHeight={headerHeight}
           footerHeight={footerHeight}
           safeAreaFooterHeight={safeAreaFooterHeight}

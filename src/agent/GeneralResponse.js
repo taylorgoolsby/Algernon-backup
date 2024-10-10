@@ -108,6 +108,11 @@ ${searchSummary ?? ''}
       }
     }
 
+    // only keep the last 100 messages:
+    if (nonSystemMessages.length > 100) {
+      nonSystemMessages.splice(0, nonSystemMessages.length - 100);
+    }
+
     const context: Array<GPTMessage> = [
       {
         role: 'system',
