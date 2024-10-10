@@ -17,10 +17,10 @@ const Spinner = ({style, dieOut, onLayout}: any): any => {
       Animated.sequence([
         Animated.timing(dieOutAnimation, {
           toValue: 1,
-          duration: 2000,
+          duration: 1875,
           easing: t => {
             const d = (Date.now() - startTime.current)
-            const s = 2000
+            const s = 1875
             return Math.min( d * d * d / s / s / s, 1)
           },
           useNativeDriver: false,
@@ -35,7 +35,7 @@ const Spinner = ({style, dieOut, onLayout}: any): any => {
       Animated.sequence([
         Animated.timing(animation, {
           toValue: 1,
-          duration: 2000,
+          duration: 1875,
           easing: t => {
             return Math.sin(t * Math.PI * 2)
           },
@@ -46,7 +46,7 @@ const Spinner = ({style, dieOut, onLayout}: any): any => {
   }, [animation]);
 
   return (
-    <Animated.View onLayout={onLayout} style={[styles.container, style, {transform: [{scale: dieOutAnimation.interpolate({
+    <Animated.View onLayout={onLayout} style={[styles.container, style, {transform: [{translateX: 0.5}, {scale: dieOutAnimation.interpolate({
           inputRange: [0, 1],
           outputRange: [1, 0]
         })}]}]}>

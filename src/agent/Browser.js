@@ -26,6 +26,8 @@ class Browser {
       const text = message.text;
       const determination = await Browser.determine(model, text);
 
+      console.log("determination", determination);
+
       if ((determination?.isSearchNeeded ?? false) && !!determination?.searchFor) {
         const webPages = await Browser.performSearch(determination.searchFor);
         const url = await Browser.choose(model, text, webPages);

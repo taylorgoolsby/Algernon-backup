@@ -24,6 +24,8 @@ const setupTokenListener = (callback: (output: string) => void) => {
 };
 
 // Function to stream response from on-device generation
+let onDeviceStreamingQueue = [];
+let isOnDeviceStreaming = false;
 async function streamOnDevice(
   input: Array<GPTMessage>,
   callback: (output: ChatCompletionsResponse) => void,
@@ -115,45 +117,74 @@ export async function syncTextResponse(
   model: ModelConfig,
   input: string,
 ): Promise<ChatCompletionsResponse> {
-  return new Promise((resolve, reject) => {
-    let buffer = ''; // To store the full response
+  const onDeviceStreamingTask = () => {
+    return new Promise((resolve, reject) => {
+      let buffer = ''; // To store the full response
 
-    streamTextResponse(model, input, (output) => {
-      const { choices } = output;
+      streamTextResponse(model, input, (output) => {
+        const { choices } = output;
 
-      // Accumulate the tokens in buffer
-      buffer += choices[0]?.delta?.content || '';
+        // Accumulate the tokens in buffer
+        buffer += choices[0]?.delta?.content || '';
 
-      // Check if the stream has finished
-      if (choices[0].finish_reason !== null) {
-        // Construct the OpenAI-like API response
-        const apiResponse = {
-          id: output.id,
-          object: 'chat.completion',
-          created: output.created || Date.now(),
-          model: output.model, // Update to match your on-device model
-          choices: [
-            {
-              index: 0,
-              message: {
-                role: 'assistant',
-                content: buffer, // Return the accumulated content
+        // Check if the stream has finished
+        if (choices[0].finish_reason !== null) {
+          // Construct the OpenAI-like API response
+          const apiResponse = {
+            id: output.id,
+            object: 'chat.completion',
+            created: output.created || Date.now(),
+            model: output.model, // Update to match your on-device model
+            choices: [
+              {
+                index: 0,
+                message: {
+                  role: 'assistant',
+                  content: buffer, // Return the accumulated content
+                },
+                finish_reason: choices[0].finish_reason, // Indicate that the generation has finished
               },
-              finish_reason: choices[0].finish_reason, // Indicate that the generation has finished
+            ],
+            usage: {
+              prompt_tokens: input.length,
+              completion_tokens: buffer.length,
+              total_tokens: input.length + buffer.length,
             },
-          ],
-          usage: {
-            prompt_tokens: input.length,
-            completion_tokens: buffer.length,
-            total_tokens: input.length + buffer.length,
-          },
-        };
+          };
 
-        // Resolve with the OpenAI-like response
-        resolve(apiResponse);
-      }
+          // Resolve with the OpenAI-like response
+          resolve(apiResponse);
+          runNextOnDeviceStreamingTask()
+        }
+      });
     });
-  });
+  }
+
+  if (!isOnDeviceStreaming) {
+    isOnDeviceStreaming = true;
+    return await onDeviceStreamingTask()
+  } else {
+    return new Promise((resolve) => {
+      onDeviceStreamingQueue.push(async () => {
+        await onDeviceStreamingTask()
+        resolve()
+      })
+    })
+  }
+}
+
+function runNextOnDeviceStreamingTask() {
+  // Mark the current iteration as done
+  isOnDeviceStreaming = false;
+
+  // If there are more iterations queued, dequeue and run the next one
+  if (onDeviceStreamingQueue.length > 0) {
+    const nextTask = onDeviceStreamingQueue.shift();
+    if (nextTask) {
+      isOnDeviceStreaming = true;
+      nextTask().catch(console.log);
+    }
+  }
 }
 
 // This function will handle branching between on-device and cloud streaming in the future
