@@ -170,6 +170,7 @@ const ChatScreen: any = observer(({navigation}) => {
         .then((message) => console.log(message))
         .catch((error) => {
           setIsTranscribing(false)
+          console.error(error)
         });
     }
   }
