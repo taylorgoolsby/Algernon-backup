@@ -10,6 +10,7 @@ class AudioTranscription: NSObject, WhisperDelegate {
     var audioData: [Float] = []
     var whisper: Whisper?
     var onDataCallback: RCTResponseSenderBlock?
+    var onErrorCallback: RCTResponseSenderBlock? // New error callback
     var hwSampleRate: Double = 0
   
     // React Native requires this to be exposed for initialization checks
@@ -48,6 +49,19 @@ class AudioTranscription: NSObject, WhisperDelegate {
             reject("Error", "Failed to initialize audio engine", nil)
             return
         }
+      
+        // For resuming background music from another app:
+        do {
+            try AVAudioSession.sharedInstance().setCategory(
+                .playAndRecord,
+                options: [.allowBluetoothA2DP, .allowAirPlay, .mixWithOthers, .duckOthers]  // Ducking instead of stopping background music
+            )
+            try AVAudioSession.sharedInstance().setMode(.default)
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            reject("Error", "Failed to activate audio session", error)
+            return
+        }
 
         let inputNode = audioEngine.inputNode
         hwSampleRate = audioEngine.inputNode.outputFormat(forBus: 0).sampleRate
@@ -79,10 +93,21 @@ class AudioTranscription: NSObject, WhisperDelegate {
     func stop(_ resolver: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
         audioEngine?.stop()
         audioEngine = nil
+      
+        // For resuming background music from another app:
+        do {
+            try AVAudioSession.sharedInstance().setActive(false) // Deactivate the session to reset
+            try AVAudioSession.sharedInstance().setCategory(.soloAmbient, options: []) // Ensure background music can resume on Bluetooth
+        } catch {
+            reject("Error", "Failed to deactivate and reset audio session", error)
+            return
+        }
 
         if hwSampleRate > 16000 {
             audioData = Self.downsample(audioData, from: hwSampleRate, to: 16000)
         } else if hwSampleRate < 16000 {
+            onErrorCallback?(["Hardware sample rate must be greater than 16k for downsampling"]) // Invoke the error callback with the error
+            onErrorCallback = nil // Reset the error callback after invoking
             reject("Error", "Hardware sample rate must be greater than 16k for downsampling", nil)
             return
         }
@@ -98,6 +123,8 @@ class AudioTranscription: NSObject, WhisperDelegate {
                     reject("Error", "Whisper failed to transcribe", nil)
                 }
             } catch {
+                onErrorCallback?([error.localizedDescription]) // Invoke the error callback with the error
+                onErrorCallback = nil // Reset the error callback after invoking
                 reject("Error", "Transcription failed", error)
             }
         }
@@ -106,6 +133,11 @@ class AudioTranscription: NSObject, WhisperDelegate {
     @objc
     func onData(_ callback: @escaping RCTResponseSenderBlock) {
         self.onDataCallback = callback
+    }
+  
+    @objc
+    func onError(_ callback: @escaping RCTResponseSenderBlock) {
+        self.onErrorCallback = callback
     }
 
     private func processAudioBuffer(buffer: AVAudioPCMBuffer) {

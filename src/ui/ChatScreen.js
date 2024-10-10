@@ -160,9 +160,17 @@ const ChatScreen: any = observer(({navigation}) => {
         const cleanTranscription = transcription.replace(/\[BLANK_AUDIO\]/g, '');
         setInput(cleanTranscription)
       })
+
+      AudioTranscription.onError((errorMessage) => {
+        setIsTranscribing(false)
+        console.error('Transcription error:', errorMessage);
+      });
+
       AudioTranscription.start()
         .then((message) => console.log(message))
-        .catch((error) => console.error(error));
+        .catch((error) => {
+          setIsTranscribing(false)
+        });
     }
   }
 
