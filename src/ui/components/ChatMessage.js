@@ -62,12 +62,6 @@ const ChatMessage: ChatMessageProps => any = observer(
   }: ChatMessageProps): any => {
     const message = chatStore.messages[messageId]
 
-    useEffect(() => {
-      return () => {
-        console.log('unmounting chat message', messageId)
-      }
-    }, []);
-
     const messageRef = useRef<any>(null)
     const [isConfirming, setIsConfirming] = useState(false)
 
@@ -451,7 +445,7 @@ const MainText: any = ({
           {message.text.trim()}
         </MarkdownText>
       ) : (
-        <Spinner dieOut={message.deleted} />
+        <Spinner dieOut={message.deleted} onLayout={onMarkdownLayout}/>
       )}
     </Animated.View>
   )

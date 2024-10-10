@@ -5,7 +5,7 @@ import { View, Animated, StyleSheet } from 'react-native';
 import Colors from "../../Colors.js";
 
 
-const Spinner = ({style, dieOut}: any): any => {
+const Spinner = ({style, dieOut, onLayout}: any): any => {
   const startTime = useRef(Date.now());
   const dieOutAnimation = useRef(new Animated.Value(0)).current;
 
@@ -46,7 +46,7 @@ const Spinner = ({style, dieOut}: any): any => {
   }, [animation]);
 
   return (
-    <Animated.View style={[styles.container, style, {transform: [{scale: dieOutAnimation.interpolate({
+    <Animated.View onLayout={onLayout} style={[styles.container, style, {transform: [{scale: dieOutAnimation.interpolate({
           inputRange: [0, 1],
           outputRange: [1, 0]
         })}]}]}>

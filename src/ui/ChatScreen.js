@@ -276,8 +276,6 @@ const ChatScreen: any = observer(({navigation}) => {
     inputRef.current?.blur()
   }
 
-  console.log("displayedMessageIds.length > 0 && headerHeight && footerHeight", displayedMessageIds.length > 0 && headerHeight && footerHeight);
-
   return (
     <View style={styles.container}>
       <View style={styles.background}></View>
