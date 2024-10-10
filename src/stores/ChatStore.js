@@ -155,11 +155,12 @@ export class ChatStore {
   }
 
   submitMessage: (string) => void = async (input: string) => {
-    ChatIteration.iterate(
+    await ChatIteration.queueIteration(
       chatStore.windowId,
       preferencesStore.selectedModel,
       input.trim(),
       output => {
+        console.log("output", output);
         chatStore.appendMessage(output)
       },
       output => {

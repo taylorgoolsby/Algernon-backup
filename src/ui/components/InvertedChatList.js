@@ -391,8 +391,6 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
       const messageId = item.item
       const index = item.index
 
-      console.log('rendering', messageId, index);
-
       return (
         <View
           key={`messageId-${messageId}`}
@@ -433,8 +431,6 @@ class InvertedChatList extends React.Component<InvertedChatListProps, ChatListSt
       cacheBust,
     } = this.state
     const messageIds = this.state.displayedMessageIds
-
-    console.log("messageIds", messageIds);
 
     const invertedMessageIds = messageIds.slice().reverse()
 
@@ -517,8 +513,6 @@ ${poem}`,
         height: 3 * margin,
       })
     }
-
-    console.log("invertedMessageIds", invertedMessageIds);
 
     return (
       <KeyboardAvoidingView behavior={'padding'}>
